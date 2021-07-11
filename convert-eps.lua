@@ -3,7 +3,7 @@
 --  - Substrings and array intervals don't share their value with the full string/array
 --  - Access properties are not enforced
 
-local pdfprint -- Set later to have the right mode
+local pdfprint = vf.pdf -- Set later to have the right mode
 
 local l = lpeg
 
@@ -1279,18 +1279,33 @@ lua.get_functions_table()[func] = function()
 end
 ]]
 
-local ps_tokens, saved_pdfprint
+local ps_tokens
 local fid = font.define{
   name = 'dummy virtual font for PS rendering',
   -- type = 'virtual',
   characters = {
     [0] = {
       commands = {
+        {'lua', function(fid)
+          local n = node.new('glyph', 256)
+          n.font = fid
+          n.char = 1
+          local x, y = pdf.getpos()
+          n.xoffset = -x
+          n.yoffset = -y
+          ps_tokens[1], ps_tokens[2] = x/65781.76, y/65781.76
+          n = node.hpack(n)
+          vf.node(node.direct.todirect(n))
+          node.free(n)
+        end}
+      }
+    },
+    [1] = {
+      commands = {
         {'lua', function()
           local tokens = ps_tokens
           ps_tokens = nil
           execute_ps(tokens)
-          pdfprint = saved_pdfprint -- Might help with nesting... Untested
         end}
       }
     },
@@ -1304,22 +1319,19 @@ lua.get_functions_table()[func] = function()
   local mode = token.scan_keyword'direct' and 'page' or 'origin'
   local tokens = parse_ps(token.scan_argument(true))
   if mode == 'origin' then
+    table.insert(tokens, 1, 'translate')
     table.insert(tokens, 1, 'gsave')
     table.insert(tokens, 'grestore')
   else
-    table.move(tokens, 1, #tokens, 4)
-    tokens[3] = 'moveto'
+    table.insert(tokens, 1, 'moveto')
   end
+  table.move(tokens, 1, #tokens, 3)
   local n = node.new('whatsit', 'late_lua')
   function n.data()
-    if mode ~= 'origin' then
-      local x, y = pdf.getpos()
-      tokens[1], tokens[2] = x/65781.76, y/65781.76
-    end
+    local x, y = pdf.getpos()
+    tokens[1], tokens[2] = x/65781.76, y/65781.76
     assert(not ps_tokens)
     ps_tokens = tokens
-    saved_pdfprint = pdfprint
-    function pdfprint(s) vf.pdf(mode, s) end
   end
   local nn = node.new('glyph')
   nn.subtype = 256
