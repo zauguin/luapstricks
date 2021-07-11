@@ -1,7 +1,8 @@
 \directlua{require'convert-eps'}
 \def\pstdriver{LuaLaTeX}%
-\def\pstverb#1{\luaPST{gsave #1 grestore}}%
-\def\pstVerb#1{\luaPST{#1}}%
+\def\pstverb{\luaPST}%
+\def\pstVerb{\luaPST direct}%
+%\let\pstVerb\message
 \def\pstunit{1bp}%
 \def\pstverbscale{}
 \def\pstnodescale{}

@@ -1165,19 +1165,30 @@ end
 local func = luatexbase.new_luafunction'luaPST'
 token.set_lua('luaPST', func, 'protected')
 lua.get_functions_table()[func] = function()
+  local mode = token.scan_keyword'direct' and 'direct' or 'origin'
   local command = token.scan_argument(true)
-  local tokens = parse_ps(command)
-  print('TODO: pstverb', command)
-  assert(#pdf_output == 0)
-  execute_ps(tokens)
-  local result = table.concat(pdf_output, '\n')
-  for i=1, #pdf_output do pdf_output[i] = nil end
-  if #operand_stack ~= 0 then
-    texio.write_nl('term and log', 'Unexpected values on operand stack')
-    -- for i=1, #operand_stack do operand_stack[i] = nil end
+  local n = node.new('whatsit', 'late_lua')
+  function n.data()
+    if mode == 'origin' then
+      command = string.format('gsave %s grestore', command)
+    else
+      local x, y = pdf.getpos()
+      command = string.format('%.5f %.5f moveto %s', x/65781.76, y/65781.76, command)
+    end
+    local tokens = parse_ps(command)
+    assert(#pdf_output == 0)
+    execute_ps(tokens)
+    for i = 1, #pdf_output do
+      pdf.print(mode, pdf_output[i])
+      pdf.print(mode, '\n')
+      pdf_output[i] = nil
+    end
+    -- local result = table.concat(pdf_output, '\n')
+    -- if #operand_stack ~= 0 then
+    --   texio.write_nl('term and log', 'Unexpected values on operand stack')
+    --   -- for i=1, #operand_stack do operand_stack[i] = nil end
+    -- end
   end
-  local n = node.new('whatsit', 'pdf_literal')
-  n.mode, n.data = 0, result
   node.write(n)
 end
 -- luatexbase.add_to_callback('pre_shipout_filter', function(n)
