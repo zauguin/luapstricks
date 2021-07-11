@@ -1052,6 +1052,9 @@ local systemdict systemdict = {kind = 'dict', value = {
     push(math.random(0, 0xFFFFFFFF))
   end,
 
+  exec = function()
+    return execute_tok(pop())
+  end,
   stopped = function()
     local proc = pop()
     local coro = coroutine.wrap(execute_tok)
