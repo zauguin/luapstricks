@@ -145,6 +145,7 @@ local graphics_stack = {{
   linejoin = nil,
   linecap = nil,
   strokeadjust = nil,
+  font = nil,
 }}
 
 local function matrix_transform(x, y, xx, xy, yx, yy, dx, dy)
@@ -1115,38 +1116,100 @@ local systemdict systemdict = {kind = 'dict', value = {
 
   -- TODO: Maybe someday
   stringwidth = function()
-    pop_string()
-    push(0)
-    push(0)
-    texio.write_nl'Font support is not implemented'
+    local str = pop_string().value
+      local state = graphics_stack[#graphics_stack]
+    local psfont = assert(state.font, 'invalidfont').value
+    local fid = psfont.FID
+    local matrix = psfont.FontMatrix
+    if not fid then
+      texio.write_nl'Font support is not implemented'
+      return
+    end
+    local characters = assert(font.getfont(fid)).characters
+    local w = 0
+    for b in string.bytes(str) do
+      local char = characters[b]
+      w = w + (char and char.width or 0)
+    end
+    local x, y = matrix_transform(w/65781.76, 0,
+      matrix[1], matrix[2],
+      matrix[3], matrix[4],
+      0, 0)
+    push(x)
+    push(y)
   end,
   show = function()
-    pop_string()
-    texio.write_nl'Font support is not implemented'
+    local str = pop_string().value
+    local state = graphics_stack[#graphics_stack]
+    local current_point = assert(state.current_point, 'nocurrentpoint')
+    local psfont = assert(state.font, 'invalidfont').value
+    local fid = psfont.FID
+    local matrix = psfont.FontMatrix
+    if not fid then
+      texio.write_nl'Font support is not implemented'
+      return
+    end
+    local characters = assert(font.getfont(fid)).characters
+    local w = 0
+    update_matrix(
+      matrix[1],                    matrix[2],
+      matrix[3],                    matrix[4],
+      matrix[5] + current_point[1], matrix[6] + current_point[2])
+    vf.push()
+    vf.fontid(fid)
+    for b in string.bytes(str) do
+      vf.char(b)
+      local char = characters[b]
+      w = w + (char and char.width or 0)
+    end
+    vf.pop()
+    push(w/65781.76)
+    push(0)
+    systemdict.value.rmoveto()
+    update_matrix(matrix_invert(
+      matrix[1],                    matrix[2],
+      matrix[3],                    matrix[4],
+      matrix[5] + current_point[1], matrix[6] + current_point[2]))
   end,
   definefont = function()
     local fontdict = pop_dict()
     pop_key()
+    fontdict.value.FontMatrix = fontdict.value.FontMatrix or {1, 0, 0, 1, 0, 0}
     push(fontdict)
-    -- texio.write_nl'Font support is not implemented'
+    texio.write_nl'definefont is not implemnted. Pushing dummy font.'
     -- No need to warn yet since every use will trigger the warning
   end,
   scalefont = function()
     local factor = pop_num()
-    -- local fontdict = pop_dict()
-    -- push(fontdict)
-    -- texio.write_nl'Font support is not implemented'
+    local fontdict = pop_dict().value
+    local new_fontdict = {}
+    for k,v in next, fontdict do
+      new_fontdict[k] = v
+    end
+    local old_m = assert(fontdict.FontMatrix, 'invalidfont')
+    new_fontdict.FontMatrix = {factor * old_m[1], factor * old_m[2],
+                               factor * old_m[3], factor * old_m[4],
+                               factor * old_m[5], factor * old_m[6]}
+    push{kind = 'dict', value = new_fontdict}
   end,
   setfont = function()
     local fontdict = pop_dict()
-    texio.write_nl'Font support is not implemented'
+    local state = graphics_stack[#graphics_stack]
+    state.font = fontdict
   end,
   findfont = function()
     local fontname = pop_key()
-    print('Looking for font', fontname)
-    texio.write_nl'Font support is not implemented'
-    push{kind = 'dict', value = {}}
-    -- error[[invalidfont]]
+    local fid = fonts.definers.read(fontname, 65782)
+    if not fid then error'invalidfont' end
+    if not tonumber(fid) then
+      local data = fid
+      fid = font.define(data)
+      fonts.definers.register(data, fid)
+    end
+    return push{kind = 'dict', value = {
+      FID = fid,
+      FontMatrix = {1, 0, 0, 1, 0, 0},
+    }}
   end,
 
   realtime = function()
