@@ -1046,7 +1046,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     color.space = 'Gray'
     for i=2, #color do color[i] = nil end
     color[1] = g
-    -- TODO: PDF instructions
+    pdfprint(string.format('%.3f g %.3f G', g, g))
   end,
   setrgbcolor = function()
     local b = pop_num()
@@ -1056,7 +1056,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     color.space = 'RGB'
     for i=4, #color do color[i] = nil end
     color[1], color[2], color[3] = r, g, b
-    -- TODO: PDF instructions
+    pdfprint(string.format('%.3f %.3f %.3f g %.3f %.3f %.3f G', r, g, b, r, g, b))
   end,
   setcmykcolor = function()
     local k = pop_num()
@@ -1067,7 +1067,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     color.space = 'CMYK'
     for i=5, #color do color[i] = nil end
     color[1], color[2], color[3], color[3] = c, m, y, k
-    -- TODO: PDF instructions
+    pdfprint(string.format('%.3f %.3f %.3f %.3f g %.3f %.3f %.3f %.3f G', c, m, y, k, c, m, y, k))
   end,
   ['.setopacityalpha'] = function()
     error'Unsupported, use .setfillconstantalpha instead'
@@ -1114,7 +1114,6 @@ local systemdict systemdict = {kind = 'dict', value = {
     end
   end,
 
-  -- TODO: Maybe someday
   stringwidth = function()
     local str = pop_string().value
       local state = graphics_stack[#graphics_stack]
@@ -1332,15 +1331,6 @@ lua.get_functions_table()[func] = function()
     end
   end
 end
-
---[[
-local func = luatexbase.new_luafunction'pstVerb'
-token.set_lua('pstVerb', func, 'protected')
-lua.get_functions_table()[func] = function()
-  local command = token.scan_argument(true)
-  -- print('TODO: pstVerb', command)
-end
-]]
 
 local ps_tokens
 local fid = font.define{
