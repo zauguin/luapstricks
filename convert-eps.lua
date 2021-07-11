@@ -1297,6 +1297,7 @@ local fid = font.define{
   },
 }
 
+local modes = tex.getmodevalues()
 local func = luatexbase.new_luafunction'luaPST'
 token.set_lua('luaPST', func, 'protected')
 lua.get_functions_table()[func] = function()
@@ -1324,7 +1325,10 @@ lua.get_functions_table()[func] = function()
   nn.subtype = 256
   nn.font, nn.char = fid, 0
   n.next = nn
-  node.write((node.hpack(n)))
+  if 'horizontal' ~= modes[math.abs(tex.nest.top.mode)] then
+    n = node.hpack(n) -- Glyphs can only appear in hmode
+  end
+  node.write(n) -- might be problematic in math
 end
 -- luatexbase.add_to_callback('pre_shipout_filter', function(n)
 --   print(n)
