@@ -1052,6 +1052,15 @@ local systemdict systemdict = {kind = 'dict', value = {
     push(math.random(0, 0xFFFFFFFF))
   end,
 
+  cvx = function()
+    local a = pop()
+    local ta = type(a)
+    if (ta == 'table' and a.kind == 'executable') or ta == 'string' or ta == 'function' then
+      return push(a)
+    else
+      return push{kind = 'executable', value = a}
+    end
+  end,
   exec = function()
     return execute_tok(pop())
   end,
