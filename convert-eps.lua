@@ -144,6 +144,7 @@ local graphics_stack = {{
   alphaisshape = false,
   linejoin = nil,
   linecap = nil,
+  strokeadjust = nil,
 }}
 
 local function matrix_transform(x, y, xx, xy, yx, yy, dx, dy)
@@ -787,6 +788,11 @@ local systemdict systemdict = {kind = 'dict', value = {
     local linecap = pop_int()
     graphics_stack[#graphics_stack].linecap = linecap
     pdfprint(string.format('%i J', linecap))
+  end,
+  setstrokeadjust = function()
+    local sa = pop_bool()
+    graphics_stack[#graphics_stack].strokeadjust = sa
+    -- TODO: PDF Instructions
   end,
   currentpoint = function()
     local current_point = assert(graphics_stack[#graphics_stack].current_point, 'nocurrentpoint')
