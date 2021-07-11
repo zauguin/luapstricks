@@ -1,3 +1,10 @@
+-- Known incompatibilities:
+--  - Many missing commands
+--  - Substrings and array intervals don't share their value with the full string/array
+--  - Access properties are not enforced
+
+local pdfprint -- Set later to have the right mode
+
 local l = lpeg
 
 local whitespace = (l.S'\0\t\n\r\f ' + '%' * (1-l.P'\n')^0 * (l.P'\n' + -1))^1
@@ -81,7 +88,6 @@ local function parse_ps(s)
 end
 
 local operand_stack = {}
-local pdf_output = {}
 
 local function push(value)
   operand_stack[#operand_stack+1] = value
@@ -140,9 +146,9 @@ local graphics_stack = {{
   linecap = nil,
 }}
 
--- local function matrix_multiply(x, y, xx, xy, yx, yy, dx, dy)
---   return xx * matrix[5] + yx * matrix[6] + dx, xy * matrix[5] + yy * matrix[6] + dy
--- end
+local function matrix_transform(x, y, xx, xy, yx, yy, dx, dy)
+  return x * xx + y * yx + dx, x * xy + y * yy + dy
+end
 local function matrix_invert(xx, xy, yx, yy, dx, dy)
   local determinante = xx*yy - xy*yx
   xx, xy, yx, yy = yy/determinante, -xy/determinante, -yx/determinante, xx/determinante
@@ -150,7 +156,7 @@ local function matrix_invert(xx, xy, yx, yy, dx, dy)
   return xx, xy, yx, yy, dx, dy
 end
 local function update_matrix(xx, xy, yx, yy, dx, dy)
-  pdf_output[#pdf_output + 1] = string.format('%.3f %.3f %.3f %.3f %.3f %.3f cm', xx, xy, yx, yy, dx, dy)
+  pdfprint(string.format('%.3f %.3f %.3f %.3f %.3f %.3f cm', xx, xy, yx, yy, dx, dy))
   local matrix = graphics_stack[#graphics_stack].matrix
   matrix[1], matrix[2],
   matrix[3], matrix[4],
@@ -561,6 +567,12 @@ local systemdict systemdict = {kind = 'dict', value = {
   neg = function()
     push(-pop_num())
   end,
+  round = function()
+    return push(math.floor(pop_num()+.5))
+  end,
+  ceiling = function()
+    return push(math.ceil(pop_num()))
+  end,
   cvi = function()
     local a = pop()
     if type(a) == 'table' and a.kind == 'executable' then
@@ -571,6 +583,43 @@ local systemdict systemdict = {kind = 'dict', value = {
     end
     if type(a) ~= 'number' then error'typecheck' end
     push(a//1)
+  end,
+  cvs = function()
+    local old_str = pop_string()
+    local a = pop()
+    local ta = type(a)
+    if ta == 'table' and a.kind == 'executable' then
+      a = a.value
+      ta = type(a)
+    end
+    if ta == 'string' then
+    elseif ta == 'boolean' then
+      a = a and 'true' or 'false'
+    elseif ta == 'number' then
+      a = tostring(a)
+    elseif ta == 'function' then
+      texio.write_nl'Warning: cvs on operators is unsupported. Replaced by dummy.'
+      a = '--nostringval--'
+    elseif ta == 'table' then
+      local kind = a.kind
+      if kind == 'string' or kind == 'name' then
+        a = a.value
+      elseif kind == 'operator' then
+        texio.write_nl'Warning: cvs on operators is unsupported. Replaced by dummy.'
+        a = '--nostringval--'
+      else
+        a = '--nostringval--'
+      end
+    else
+      assert(false)
+    end
+    if #old_str.value < #a then error'rangecheck' end
+    old_str.value = a .. string.sub(old_str.value, #a+1, -1)
+    return push{kind = 'string', value = a}
+  end,
+
+  string = function()
+    push{kind = 'string', value = string.rep('\0', pop_int())}
   end,
 
   array = function()
@@ -727,17 +776,17 @@ local systemdict systemdict = {kind = 'dict', value = {
   setlinewidth = function()
     local lw = pop_num()
     graphics_stack[#graphics_stack].linewidth = lw
-    pdf_output[#pdf_output + 1] = string.format('%.3f w', lw)
+    pdfprint(string.format('%.3f w', lw))
   end,
   setlinejoin = function()
     local linejoin = pop_int()
     graphics_stack[#graphics_stack].linejoin = linejoin
-    pdf_output[#pdf_output + 1] = string.format('%i j', linejoin)
+    pdfprint(string.format('%i j', linejoin))
   end,
   setlinecap = function()
     local linecap = pop_int()
     graphics_stack[#graphics_stack].linecap = linecap
-    pdf_output[#pdf_output + 1] = string.format('%i J', linecap)
+    pdfprint(string.format('%i J', linecap))
   end,
   currentpoint = function()
     local current_point = assert(graphics_stack[#graphics_stack].current_point, 'nocurrentpoint')
@@ -759,6 +808,17 @@ local systemdict systemdict = {kind = 'dict', value = {
       state.current_path = {x, y, 'm'}
       state.current_point = {x, y}
     end
+  end,
+  rmoveto = function()
+    local y = pop_num()
+    local x = pop_num()
+    local state = graphics_stack[#graphics_stack]
+    local current_path = assert(state.current_path, 'nocurrentpoint')
+    local current_point = state.current_point
+    x, y = current_point[1] + x, current_point[2] + y
+    local i = #current_path + 1
+    current_path[i], current_path[i+1], current_path[i+2] = x, y, 'm'
+    current_point[1], current_point[2] = x, y
   end,
   lineto = function()
     local y = pop_num()
@@ -849,7 +909,7 @@ local systemdict systemdict = {kind = 'dict', value = {
         current_path[i] = string.format('%.3f', current_path[i])
       end
     end
-    pdf_output[#pdf_output + 1] = table.concat(current_path, ' ')
+    pdfprint(table.concat(current_path, ' '))
   end,
   fill = function()
     local state = graphics_stack[#graphics_stack]
@@ -861,7 +921,7 @@ local systemdict systemdict = {kind = 'dict', value = {
         current_path[i] = string.format('%.3f', current_path[i])
       end
     end
-    pdf_output[#pdf_output + 1] = table.concat(current_path, ' ')
+    pdfprint(table.concat(current_path, ' '))
     state.current_path, state.current_point = nil
   end,
   stroke = function()
@@ -874,7 +934,7 @@ local systemdict systemdict = {kind = 'dict', value = {
         current_path[i] = string.format('%.3f', current_path[i])
       end
     end
-    pdf_output[#pdf_output + 1] = table.concat(current_path, ' ')
+    pdfprint(table.concat(current_path, ' '))
     state.current_path, state.current_point = nil
   end,
 
@@ -923,6 +983,34 @@ local systemdict systemdict = {kind = 'dict', value = {
       update_matrix(c, s, -s, c, 0, 0)
     end
   end,
+  transform = function()
+    local m = pop()
+    if type(m) == 'table' and m.kind == 'array' then
+      if #m ~= 6 then error'Unexpected size of matrix' end
+    else
+      push(m)
+      m = graphics_stack[#graphics_stack].matrix
+    end
+    local y = pop_num()
+    local x = pop_num()
+    x, y = matrix_transform(x, y, m[1], m[2], m[3], m[4], m[5], m[6])
+    push(x)
+    push(y)
+  end,
+  itransform = function()
+    local m = pop()
+    if type(m) == 'table' and m.kind == 'array' then
+      if #m ~= 6 then error'Unexpected size of matrix' end
+    else
+      push(m)
+      m = graphics_stack[#graphics_stack].matrix
+    end
+    local y = pop_num()
+    local x = pop_num()
+    x, y = matrix_transform(x, y, matrix_invert(m[1], m[2], m[3], m[4], m[5], m[6]))
+    push(x)
+    push(y)
+  end,
   -- setmatrix is not supported in PDF, so we invert the old matrix first
   setmatrix = function()
     local m = pop()
@@ -936,7 +1024,6 @@ local systemdict systemdict = {kind = 'dict', value = {
     local a, b, c, d, e, f = matrix_invert(old[1], old[2], old[3], old[4], old[5], old[6])
     update_matrix(a, b, c, d, e, f)
     update_matrix(m[1], m[2], m[3], m[4], m[5], m[6])
-    pdf_output[#pdf_output + 1] = 'q Q'
   end,
   setpdfcolor = function()
     local pdf = pop_string()
@@ -944,7 +1031,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     color.space = 'PDF'
     for i=2, #color do color[i] = nil end
     color[1] = pdf
-    pdf_output[#pdf_output + 1] = pdf.value
+    pdfprint(pdf.value)
   end,
   setgray = function()
     local g = pop_num()
@@ -997,11 +1084,11 @@ local systemdict systemdict = {kind = 'dict', value = {
 
   gsave = function()
     graphics_stack[#graphics_stack+1] = table.copy(graphics_stack[#graphics_stack])
-    pdf_output[#pdf_output + 1] = 'q'
+    pdfprint'q'
   end,
   grestore = function()
     graphics_stack[#graphics_stack] = nil
-    pdf_output[#pdf_output + 1] = 'Q'
+    pdfprint'Q'
   end,
 
   setglobal = pop_bool,
@@ -1035,7 +1122,25 @@ local systemdict systemdict = {kind = 'dict', value = {
     local fontdict = pop_dict()
     pop_key()
     push(fontdict)
+    -- texio.write_nl'Font support is not implemented'
+    -- No need to warn yet since every use will trigger the warning
+  end,
+  scalefont = function()
+    local factor = pop_num()
+    -- local fontdict = pop_dict()
+    -- push(fontdict)
+    -- texio.write_nl'Font support is not implemented'
+  end,
+  setfont = function()
+    local fontdict = pop_dict()
     texio.write_nl'Font support is not implemented'
+  end,
+  findfont = function()
+    local fontname = pop_key()
+    print('Looking for font', fontname)
+    texio.write_nl'Font support is not implemented'
+    push{kind = 'dict', value = {}}
+    -- error[[invalidfont]]
   end,
 
   realtime = function()
@@ -1132,7 +1237,6 @@ local func = luatexbase.new_luafunction'luaPSTheader'
 token.set_lua('luaPSTheader', func, 'protected')
 lua.get_functions_table()[func] = function()
   local stack_depth = #operand_stack
-  local output_count = #pdf_output
   local f = io.open(kpse.find_file(token.scan_argument(), 'PostScript header'), 'r')
   local src = f:read'a'
   f:close()
@@ -1140,9 +1244,6 @@ lua.get_functions_table()[func] = function()
   execute_ps(tokens)
   if #operand_stack ~= stack_depth then
     error'Unexpected values on operand stack'
-  end
-  if #pdf_output ~= output_count then
-    error'Unexpected output in header file'
   end
 end
 
@@ -1171,36 +1272,56 @@ lua.get_functions_table()[func] = function()
   -- print('TODO: pstVerb', command)
 end
 ]]
+
+local ps_tokens, saved_pdfprint
+local fid = font.define{
+  name = 'dummy virtual font for PS rendering',
+  -- type = 'virtual',
+  characters = {
+    [0] = {
+      commands = {
+        {'lua', function()
+          local tokens = ps_tokens
+          ps_tokens = nil
+          execute_ps(tokens)
+          pdfprint = saved_pdfprint -- Might help with nesting... Untested
+        end}
+      }
+    },
+  },
+}
+
 local func = luatexbase.new_luafunction'luaPST'
 token.set_lua('luaPST', func, 'protected')
 lua.get_functions_table()[func] = function()
-  local mode = token.scan_keyword'direct' and 'direct' or 'origin'
-  local command = token.scan_argument(true)
+  local mode = token.scan_keyword'direct' and 'page' or 'origin'
+  local tokens = parse_ps(token.scan_argument(true))
+  if mode == 'origin' then
+    table.insert(tokens, 1, 'gsave')
+    table.insert(tokens, 'grestore')
+  else
+    table.move(tokens, 1, #tokens, 4)
+    tokens[3] = 'moveto'
+  end
   local n = node.new('whatsit', 'late_lua')
   function n.data()
-    if mode == 'origin' then
-      command = string.format('gsave %s grestore', command)
-    else
+    if mode ~= 'origin' then
       local x, y = pdf.getpos()
-      command = string.format('%.5f %.5f moveto %s', x/65781.76, y/65781.76, command)
+      tokens[1], tokens[2] = x/65781.76, y/65781.76
     end
-    local tokens = parse_ps(command)
-    assert(#pdf_output == 0)
-    execute_ps(tokens)
-    for i = 1, #pdf_output do
-      pdf.print(mode, pdf_output[i])
-      pdf.print(mode, '\n')
-      pdf_output[i] = nil
-    end
-    -- local result = table.concat(pdf_output, '\n')
-    -- if #operand_stack ~= 0 then
-    --   texio.write_nl('term and log', 'Unexpected values on operand stack')
-    --   -- for i=1, #operand_stack do operand_stack[i] = nil end
-    -- end
+    assert(not ps_tokens)
+    ps_tokens = tokens
+    saved_pdfprint = pdfprint
+    function pdfprint(s) vf.pdf(mode, s) end
   end
-  node.write(n)
+  local nn = node.new('glyph')
+  nn.subtype = 256
+  nn.font, nn.char = fid, 0
+  n.next = nn
+  node.write((node.hpack(n)))
 end
 -- luatexbase.add_to_callback('pre_shipout_filter', function(n)
 --   print(n)
 --   return true
 -- end, 'WIP')
+-- font.current(fid)
