@@ -716,7 +716,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     elseif obj.kind == 'array' then
       push(key) key = pop_int()
       if key < 0 or key >= #val then error'rangecheck' end
-      push(val[key])
+      push(val[key+1])
     elseif obj.kind == 'dict' then
       push(key) key = pop_key()
       push(val[key])
@@ -742,7 +742,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     elseif obj.kind == 'array' then
       push(key) key = pop_int()
       if key < 0 or key >= #val then error'rangecheck' end
-      val[key] = value
+      val[key+1] = value
     elseif obj.kind == 'dict' then
       push(key) key = pop_key()
       val[key] = value
@@ -802,7 +802,7 @@ local systemdict systemdict = {kind = 'dict', value = {
   setlinecap = function()
     local linecap = pop_int()
     graphics_stack[#graphics_stack].linecap = linecap
-    pdfprint(string.format('%i J', linecap))
+    pdfprint(string.format('%i j', linecap))
   end,
   setstrokeadjust = function()
     local sa = pop_bool()
@@ -1080,7 +1080,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     color.space = 'RGB'
     for i=4, #color do color[i] = nil end
     color[1], color[2], color[3] = r, g, b
-    pdfprint(string.format('%.3f %.3f %.3f g %.3f %.3f %.3f G', r, g, b, r, g, b))
+    pdfprint(string.format('%.3f %.3f %.3f rg %.3f %.3f %.3f RG', r, g, b, r, g, b))
   end,
   setcmykcolor = function()
     local k = pop_num()
@@ -1091,7 +1091,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     color.space = 'CMYK'
     for i=5, #color do color[i] = nil end
     color[1], color[2], color[3], color[3] = c, m, y, k
-    pdfprint(string.format('%.3f %.3f %.3f %.3f g %.3f %.3f %.3f %.3f G', c, m, y, k, c, m, y, k))
+    pdfprint(string.format('%.3f %.3f %.3f %.3f k %.3f %.3f %.3f %.3f K', c, m, y, k, c, m, y, k))
   end,
   ['.setopacityalpha'] = function()
     error'Unsupported, use .setfillconstantalpha instead'
@@ -1254,6 +1254,8 @@ local systemdict systemdict = {kind = 'dict', value = {
     local ta = type(a)
     if (ta == 'table' and a.kind == 'executable') or ta == 'string' or ta == 'function' then
       return push(a)
+    elseif ta == 'table' and (a.kind == 'operator' or a.kind == 'name') then
+      return push(a.value)
     else
       return push{kind = 'executable', value = a}
     end
