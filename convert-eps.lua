@@ -398,7 +398,7 @@ local systemdict systemdict = {kind = 'dict', value = {
       local tval = type(val)
     end
     if tval == 'boolean' then
-      push(pop_bool() and val)
+      push(pop_bool() or val)
     elseif tval == 'number' then
       push(val | pop_int())
     else
@@ -430,6 +430,16 @@ local systemdict systemdict = {kind = 'dict', value = {
       b = b.value
     end
     push(a==b)
+  end,
+  ne = function()
+    local b, a = pop() a = pop()
+    if type(a) == 'table' and (a.kind == 'executable' or a.kind == 'name' or a.kind == 'operator') then
+      a = a.value
+    end
+    if type(b) == 'table' and (b.kind == 'executable' or b.kind == 'name' or b.kind == 'operator') then
+      b = b.value
+    end
+    push(a~=b)
   end,
   gt = function()
     local b, a = pop() a = pop()
@@ -656,6 +666,9 @@ local systemdict systemdict = {kind = 'dict', value = {
       error'dictstackunderflow'
     end
     dictionary_stack[#dictionary_stack] = nil
+  end,
+  currentdict = function()
+    push(dictionary_stack[#dictionary_stack])
   end,
   bind = function()
     local d = pop()
@@ -1284,6 +1297,8 @@ function execute_tok(tok, suppress_proc)
       local kind = vtok.kind
       if kind == 'array' then
         return execute_ps(vtok.value)
+      elseif kind == 'string' then
+        return execute_ps(assert(parse_ps(vtok.value), 'syntaxerror'))
       else
         error'Unimplemented'
       end
