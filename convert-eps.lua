@@ -755,6 +755,42 @@ local systemdict systemdict = {kind = 'dict', value = {
     table.move(arr.value, 1, #arr.value, #operand_stack + 1, operand_stack)
     push(arr)
   end,
+  getinterval = function()
+    local count = pop_int()
+    local index = pop_int()
+    local arr = pop()
+    if type(arr) ~= 'table' then error'typecheck' end
+    if arr.kind == 'executable' then
+      arr = arr.value
+      if type(arr) ~= 'table' then error'typecheck' end
+    end
+    if arr.kind == 'string' then
+      error'Not implemented'
+      push{kind = 'string', value = string.sub(arr.value, index + 1, index + count)} -- Untested
+    elseif arr.kind == 'array' then
+      -- TODO: At least for the array case, we could use metamethods to make get element sharing behavior
+      push{kind = 'array', value = table.move(arr.value, index + 1, index + count, 1, {})}
+    else
+      error'typecheck'
+    end
+  end,
+  putinterval = function()
+    local from = pop()
+    local index = pop_int()
+    if type(from) ~= 'table' then error'typecheck' end
+    if from.kind == 'executable' then
+      from = from.value
+      if type(from) ~= 'table' then error'typecheck' end
+    end
+    if from.kind == 'string' then
+      error'Not implemented'
+    elseif from.kind == 'array' then
+      local to = pop_dict()
+      table.move(from.value, 1, #from.value, index + 1, to.value)
+    else
+      error'typecheck'
+    end
+  end,
 
   dict = function()
     local size = pop_int()
