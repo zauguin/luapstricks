@@ -382,12 +382,77 @@ local systemdict systemdict = {kind = 'dict', value = {
       coroutine.yield(result)
     end
   end,
+  forall = function()
+    local proc = pop_proc()
+    local obj = pop()
+    if type(obj) ~= 'table' then error'typecheck' end
+    if obj.kind == 'executable' then
+      obj = obj.value
+      if type(obj) ~= 'table' then error'typecheck' end
+    end
+    local coro = coroutine.wrap(
+         obj.kind == 'array' and function()
+           for i=1, #obj.value do
+             push(obj.value[i])
+             execute_ps(proc)
+           end
+         end
+      or obj.kind == 'string' and function()
+           for b in string.bytes(obj.value) do
+             push(b)
+             execute_ps(proc)
+           end
+         end
+      or obj.kind == 'dict' and function()
+           for k, v in next, obj.value do
+             push(k)
+             push(v)
+             execute_ps(proc)
+           end
+         end
+      or error'typecheck')
+    local result = coro(proc)
+    if result == 'exit' or not result then
+    else
+      coroutine.yield(result)
+    end
+  end,
   ['repeat'] = function()
     local proc = pop_proc()
     local count = pop_num()
     local coro = coroutine.wrap(function()
       for i=1, count do
         execute_ps(proc)
+      end
+    end)
+    local result = coro(proc)
+    if result == 'exit' or not result then
+    else
+      coroutine.yield(result)
+    end
+  end,
+
+  pathforall = function()
+    local close = pop_proc()
+    local curve = pop_proc()
+    local line = pop_proc()
+    local move = pop_proc()
+    local state = graphics_stack[#graphics_stack]
+    local path = state.current_path
+    if not path then return end
+    path = table.move(path, 1, #path, 1, {}) -- We don't want to be affected by modifications
+    local coro = coroutine.wrap( function()
+      local i = 1
+      while true do
+        local entry = path[i]
+        if type(entry) == 'string' then
+          execute_ps(entry == 'm' and move or entry == 'l' and line or entry == 'c' and curve or entry == 'h' and close or error'Unexpected path operator')
+        elseif entry then
+          push(entry)
+        else
+          break
+        end
+        i = i + 1
       end
     end)
     local result = coro(proc)
