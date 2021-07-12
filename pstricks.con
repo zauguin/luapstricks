@@ -1,14 +1,61 @@
-\directlua{require'convert-eps'}
-\def\pstdriver{LuaLaTeX}%
-\def\pstverb{\luaPST}%
-\def\pstVerb{\luaPST direct}%
-%\let\pstVerb\message
+\ifdefined\RequirePackage
+  \RequirePackage{iftex}
+\else
+  \input iftex.sty
+\fi
+
+\ifluatex\csname fi\endcsname\csname ifpdf\endcsname
+
+  \directlua{require'convert-eps'}
+  \def\pstdriver{LuaLaTeX}%
+  \def\pstverb{\luaPST}%
+  \def\pstVerb{\luaPST direct}%
+  \def\pstunit{1bp}%
+  \def\pstverbscale{}
+  \def\pstnodescale{}
+  \def\pstheader{\luaPSTheader}
+  % Not sure if we need ``neg'' here or not
+  % \def\pstrotate{CP CP translate 3 -1 roll neg rotate \tx@NET}
+
+  \expandafter\endinput
+\fi
+
+%% $Id: pstricks.con 4 2020-06-09 08:32:19Z herbert $
+%% BEGIN: pstricks.con (for dvips driver)
+%%
+%% Configuration file for PSTricks
+%%
+%% Version 1.00 (2010/01/16)
+%%
+%% For use with Rokicki's dvips (tested with v5.74 and older)
+
+\def\pstdriver{Rokicki's dvips}
+{\catcode`\"=12\gdef\pstverb#1{\special{" #1}}}  % Check catcode of "
 \def\pstunit{1bp}%
-\def\pstverbscale{}
+\def\pstVerb#1{\special{ps:#1}}% hv write it without a preceding space
+\def\pstverbscale{SDict begin normalscale end}
 \def\pstnodescale{}
-\def\pstheader{\luaPSTheader}
-% \def\pstrotate{CP CP translate 3 -1 roll rotate \tx@NET}
+% DG/SR modification begin  - Apr. 28, 1997 (D. Carlisle + S. Rahtz)
+% \def\pstheader#1{\special{header=#1}}
+% We used to check for |\AtBeginDvi|, but that was broken in early release
+% so we now check for the existence of |\textsuperscript| (added 1995/05/16)
+\ifx\textsuperscript\@undefined
+   \def\pstheader#1{\special{header=#1}}
+\else
+  \ifx\Gin@PS@file@header\@undefined
+    \def\pstheader#1{\AtBeginDvi{\special{header=#1}}}
+  \else
+    \let\pstheader\Gin@PS@file@header
+  \fi
+\fi
+% DG/SR modification end
+%%
+%% In the following, CP is short for currentpoint.
+%% The neg is necessary because dvips scales the coordinates by 1 -1.
+%% \tx@NET means neg exch neg exch translate.
 \def\pstrotate{CP CP translate 3 -1 roll neg rotate \tx@NET}
+%%
+%% ****************** END Rokicki's dvips *****************************
 
 %%%%%%%%%%%%%%%%%%% !! CUSTOMIZATION STUFF GOES HERE: !! %%%%%%%%%%%%%%%%%%
 %% If you want to include your own customizations to pstricks.tex, then
