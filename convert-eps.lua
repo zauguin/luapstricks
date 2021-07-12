@@ -146,6 +146,7 @@ local graphics_stack = {{
   linecap = nil,
   strokeadjust = nil,
   font = nil,
+  dash = nil,
 }}
 
 local function matrix_transform(x, y, xx, xy, yx, yy, dx, dy)
@@ -807,6 +808,16 @@ local systemdict systemdict = {kind = 'dict', value = {
     local sa = pop_bool()
     graphics_stack[#graphics_stack].strokeadjust = sa
     -- TODO: PDF Instructions
+  end,
+  setdash = function()
+    local offset = pop_num()
+    local patt = pop_array().value
+    graphics_stack[#graphics_stack].dash = {offset = offset, pattern = patt}
+    local mypatt = {}
+    for i=1, #patt do
+      mypatt[i] = string.format('%.3f', patt[i])
+    end
+    pdfprint(string.format('[%s] %.3f d', table.concat(mypatt, ' '), offset))
   end,
   currentpoint = function()
     local current_point = assert(graphics_stack[#graphics_stack].current_point, 'nocurrentpoint')
