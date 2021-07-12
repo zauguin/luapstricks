@@ -221,6 +221,42 @@ local function bind(proc)
   end
 end
 
+local subdivide, flatten do
+  function subdivide(t, x0, y0, x1, y1, x2, y2, x3, y3)
+    local mt = 1-t
+    local x01, y01 = mt * x0 + t * x1, mt * y0 + t * y1
+    local x12, y12 = mt * x1 + t * x2, mt * y1 + t * y2
+    local x23, y23 = mt * x2 + t * x3, mt * y2 + t * y3
+    local x012, y012 = mt * x01 + t * x12, mt * y01 + t * y12
+    local x123, y123 = mt * x12 + t * x23, mt * y12 + t * y23
+    local x0123, y0123 = mt * x012 + t * x123, mt * y012 + t * y123
+    return x01, y01, x012, y012, x0123, y0123, x123, y123, x23, y23, x3, y3
+  end
+  local function flatness(x0, y0, x1, y1, x2, y2, x3, y3)
+    local dx, dy = x3-x0, y3-y0
+    local dist = math.sqrt(dx*dx + dy*dy)
+    local d1 = math.abs(dx * (x0-x1) - dy * (y0-y1)) / dist
+    local d2 = math.abs(dx * (x0-x2) - dy * (y0-y2)) / dist
+    return d1 > d2 and d1 or d2
+  end
+  function flatten(out, target, x0, y0, x1, y1, x2, y2, x3, y3)
+    local current = flatness(x0, y0, x1, y1, x2, y2, x3, y3)
+    if current <= target then
+      local i = #out
+      -- out[i+1], out[i+2],
+      -- out[i+3], out[i+4],
+      -- out[i+5], out[i+6], out[i+7]
+      --   = x1, y1, x2, y2, x3, y3, 'c'
+      out[i+1], out[i+2], out[i+3]
+        = x3, y3, 'l'
+      return
+    end
+    local a, b, c, d, e, f, g, h, i, j, k, l = subdivide(.5, x0, y0, x1, y1, x2, y2, x3, y3)
+    flatten(out, target, x0, y0, a, b, c, d, e, f)
+    return flatten(out, target, e, f, g, h, i, j, k, l)
+  end
+end
+
 local mark = {kind = 'mark'}
 local null = {kind = 'null'}
 local globaldict = {kind = 'dict', value = {}}
@@ -967,6 +1003,37 @@ local systemdict systemdict = {kind = 'dict', value = {
     end
     pdfprint(table.concat(current_path, ' '))
     state.current_path, state.current_point = nil
+  end,
+  flattenpath = function()
+    local state = graphics_stack[#graphics_stack]
+    local old_path = assert(state.current_path, 'nocurrentpoint')
+    local new_path = {}
+    local last_x, last_y = nil, 0
+    local saved_x, saved_y
+    local last_op = 1
+    for i=1, #old_path do
+      local entry = old_path[i]
+      if type(entry) == 'string' then
+        if entry == 'c' then
+          assert(i - last_op == 6)
+          flatten(new_path, 1, saved_x, saved_y, table.unpack(old_path, last_op, i-1))-- TODO Replace 1 with flatten graphic state parameter
+          table.move(old_path, last_op + 4, last_op + 5, #new_path + 1, new_path)
+          new_path[#new_path+1] = 'l'
+        else
+          table.move(old_path, last_op, i, #new_path + 1, new_path)
+        end
+        saved_x, saved_y = last_x, last_y
+        last_op = i + 1
+      else
+        if last_y then
+          last_x, last_y = entry
+        else
+          last_y = entry
+        end
+      end
+    end
+    assert(last_op == #old_path + 1)
+    state.current_path = new_path
   end,
 
   scale = function()
