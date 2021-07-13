@@ -101,8 +101,18 @@ local function pop()
   operand_stack[height] = nil
   return v
 end
-local pop_num = pop
-local pop_int = pop
+local function pop_num()
+  local n = pop()
+  if type(n) == 'table' and n.kind == 'executable' then
+    n = n.value
+  end
+  if type(n) ~= 'number' then
+    table.print{v, operand_stack}
+    error'typecheck'
+  end
+  return n
+end
+local pop_int = pop_num
 local function pop_proc()
   local v = pop()
   if type(v) ~= 'table' or v.kind ~= 'executable' or type(v.value) ~= 'table' or v.value.kind ~= 'array' then
@@ -265,6 +275,7 @@ local userdict = {kind = 'dict', value = {
     normalscale = {kind = 'executable', value = {kind = 'array', value = {}}},
   }},
 }}
+local FontDirectory = {kind = 'dict', value = {}}
 local systemdict systemdict = {kind = 'dict', value = {
   dup = function()
     local v = pop()
@@ -280,12 +291,51 @@ local systemdict systemdict = {kind = 'dict', value = {
     pop()
   end,
   copy = function()
-    local n = pop_int()
-    local height = #operand_stack
-    if n > height then
-      error'copy argument larger then stack'
+    local arg = pop()
+    local exec
+    if type(arg) == 'table' and arg.kind == 'executable' then
+      exec = true
+      arg = arg.value
     end
-    table.move(operand_stack, height-n+1, height, height+1)
+    if type(arg) == 'number' then
+      local height = #operand_stack
+      if arg > height then
+        error'copy argument larger then stack'
+      end
+      table.move(operand_stack, height-arg+1, height, height+1)
+    elseif type(arg) == 'table' then
+      -- See remarks in getinterval about missing functionality
+      local kind = arg.kind
+      if kind == 'array' then
+        local src = pop_array().value
+        if #src ~= #arg.value then
+          error'copy with different sized arrays is not implemented yet'
+        end
+        table.move(src, 1, #src, 1, arg.value)
+      elseif kind == 'string' then
+        local src = pop_string().value
+        if #src == #arg.value then
+          arg.value = src
+        elseif #src < #arg.value then
+          arg.value = src .. string.sub(arg.value, #src+1)
+          arg = {kind = 'string', value = src}
+        else
+          error'rangecheck'
+        end
+      elseif kind == 'dict' then
+        local src = pop_dict().value
+        if next(arg.value) then
+          error'Target dictionary must be empty'
+        end
+        for k, v in next, src do
+          arg.value[k] = v
+        end
+      else
+        error'typecheck'
+      end
+    else
+      error'typecheck'
+    end
   end,
   roll = function()
     local j = pop_int()
@@ -422,6 +472,19 @@ local systemdict systemdict = {kind = 'dict', value = {
     local count = pop_num()
     local coro = coroutine.wrap(function()
       for i=1, count do
+        execute_ps(proc)
+      end
+    end)
+    local result = coro(proc)
+    if result == 'exit' or not result then
+    else
+      coroutine.yield(result)
+    end
+  end,
+  loop = function()
+    local proc = pop_proc()
+    local coro = coroutine.wrap(function()
+      while true do
         execute_ps(proc)
       end
     end)
@@ -687,6 +750,20 @@ local systemdict systemdict = {kind = 'dict', value = {
   ceiling = function()
     return push(math.ceil(pop_num()))
   end,
+  cvn = function()
+    local a = pop()
+    if type(a) == 'table' and a.kind == 'executable' then
+      local val = a.value
+      if type(val) ~= 'table' or val.kind ~= 'string' then
+        error'typecheck'
+      end
+      push(val.value)
+    end
+    if type(a) ~= 'table' or a.kind ~= 'string' then
+      error'typecheck'
+    end
+    return push{kind = 'name', value = a.value}
+  end,
   cvi = function()
     local a = pop()
     if type(a) == 'table' and a.kind == 'executable' then
@@ -697,6 +774,17 @@ local systemdict systemdict = {kind = 'dict', value = {
     end
     if type(a) ~= 'number' then error'typecheck' end
     push(a//1)
+  end,
+  cvr = function()
+    local a = pop()
+    if type(a) == 'table' and a.kind == 'executable' then
+      a = a.value
+    end
+    if type(a) == 'table' and a.kind == 'string' then
+      a = assert((number * -1):match(a.value), 'syntaxerror')
+    end
+    if type(a) ~= 'number' then error'typecheck' end
+    push(a*1.)
   end,
   cvs = function()
     local old_str = pop_string()
@@ -765,7 +853,6 @@ local systemdict systemdict = {kind = 'dict', value = {
       if type(arr) ~= 'table' then error'typecheck' end
     end
     if arr.kind == 'string' then
-      error'Not implemented'
       push{kind = 'string', value = string.sub(arr.value, index + 1, index + count)} -- Untested
     elseif arr.kind == 'array' then
       -- TODO: At least for the array case, we could use metamethods to make get element sharing behavior
@@ -1225,12 +1312,12 @@ local systemdict systemdict = {kind = 'dict', value = {
     update_matrix(m[1], m[2], m[3], m[4], m[5], m[6])
   end,
   setpdfcolor = function()
-    local pdf = pop_string()
+    local pdf = pop_string().value
     local color = graphics_stack[#graphics_stack].color
     color.space = 'PDF'
     for i=2, #color do color[i] = nil end
     color[1] = pdf
-    pdfprint(pdf.value)
+    pdfprint(pdf)
   end,
   setgray = function()
     local g = pop_num()
@@ -1279,6 +1366,33 @@ local systemdict systemdict = {kind = 'dict', value = {
     local state = graphics_stack[#graphics_stack]
     state.current_point = nil
     state.current_path = nil
+  end,
+
+  currentrgbcolor = function()
+    local r
+    local g
+    local b
+    local color = graphics_stack[#graphics_stack].color
+    if not color then error'Color has to be set before it is queried' end
+    local space = color.space
+    if space == 'RGB' then
+      r, g, b = color[1], color[2], color[3]
+    elseif space == 'Gray' then
+      r = color[1]
+      g, b = r, r
+    elseif space == 'CMYK' then
+      local c, m, y, k = color[1], color[2], color[3], color[4]
+      c, m, y = c+k, m+k, y+k
+      r, g, b = c >= 1 and 0 or 1-c, m >= 1 and 0 or 1-m, y >= 1 and 0 or 1-y
+    elseif space == 'PDF' then
+      r, g, b = 0, 0, 0
+      print('???', 'torgb', color[1])
+    else
+      r, g, b = 0, 0, 0
+    end
+    push(r)
+    push(g)
+    push(b)
   end,
 
   gsave = function()
@@ -1364,15 +1478,33 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
   definefont = function()
     local fontdict = pop_dict()
-    pop_key()
+    local fontkey = pop_key()
     fontdict.value.FontMatrix = fontdict.value.FontMatrix or {1, 0, 0, 1, 0, 0}
+    if assert(fontdict.value.FontType) == 0x1CA then
+      local fontname = fontdict.value.FontName
+      if type(fontname) == 'table' and fontname.kind == 'name' then
+        fontname = fontname.value
+      elseif type(fontname) ~= 'string' then
+        error'typecheck'
+      end
+      local fid = fonts.definers.read(fontname, 65782)
+      if not fid then error'invalidfont' end
+      if not tonumber(fid) then
+        local data = fid
+        fid = font.define(data)
+        fonts.definers.register(data, fid)
+      end
+      fontdict.value.FID = fid
+    else
+      texio.write_nl'definefont is not implemnted. Pushing dummy font.'
+    end
+    FontDirectory[fontkey] = fontdict
     push(fontdict)
-    texio.write_nl'definefont is not implemnted. Pushing dummy font.'
-    -- No need to warn yet since every use will trigger the warning
   end,
   scalefont = function()
     local factor = pop_num()
-    local fontdict = pop_dict().value
+    local fontdict = pop_dict()--.value
+    fontdict = fontdict.value
     local new_fontdict = {}
     for k,v in next, fontdict do
       new_fontdict[k] = v
@@ -1390,6 +1522,10 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
   findfont = function()
     local fontname = pop_key()
+    local fontdict = FontDirectory[fontname]
+    if fontdict then push(fontdict) return end
+
+    fontname = font_aliases[fontname] or fontname
     local fid = fonts.definers.read(fontname, 65782)
     if not fid then error'invalidfont' end
     if not tonumber(fid) then
@@ -1400,6 +1536,8 @@ local systemdict systemdict = {kind = 'dict', value = {
     return push{kind = 'dict', value = {
       FID = fid,
       FontMatrix = {1, 0, 0, 1, 0, 0},
+      FontName = {kind = 'name', value = fontname},
+      FontType = 0x1CA,
     }}
   end,
 
@@ -1417,6 +1555,58 @@ local systemdict systemdict = {kind = 'dict', value = {
     push(math.random(0, 0xFFFFFFFF))
   end,
 
+  type = function()
+    local val = pop()
+    local tval = type(val)
+    if tval == 'table' and val.kind == 'executable' then
+      val = val.value
+      tval = type(val)
+    end
+    local tname
+    if tval == 'string' then
+      tname = 'nametype'
+    elseif tval == 'number' then
+      tname = math.type(val) == 'integer' and 'integertype' or 'realtype' 
+    elseif tval == 'boolean' then
+      tname = 'booleantype'
+    elseif tval == 'function' then
+      tname = 'operatortype'
+    elseif tval == 'table' then
+      local kind = val.kind
+      if kind == 'name' then
+        tname = 'nametype'
+      elseif kind == 'operator' then
+        tname = 'operatortype'
+      elseif kind == 'array' then
+        tname = 'arraytype'
+      elseif kind == 'dict' then
+        tname = 'dicttype'
+      elseif kind == 'dict' then
+        tname = 'dicttype'
+      elseif kind == 'null' then
+        tname = 'nulltype'
+      elseif kind == 'mark' then
+        tname = 'nulltype'
+      elseif kind == 'string' then
+        tname = 'stringtype'
+      else
+        assert(false, 'Unexpected type')
+      end
+    else
+      assert(false, 'Unexpected type')
+    end
+    push{kind = 'name', value = tname}
+    -- filetype
+    -- fonttype
+    -- gstatetype (LanguageLevel 2)
+    -- packedarraytype (LanguageLevel 2)
+    -- savetype
+  end,
+  xcheck = function()
+    local a = pop()
+    local ta = type(a)
+    push(ta == 'function' or ta == 'name' or (ta == 'table' and a.kind == 'executable'))
+  end,
   cvx = function()
     local a = pop()
     local ta = type(a)
@@ -1457,6 +1647,266 @@ local systemdict systemdict = {kind = 'dict', value = {
   ['false'] = false,
   systemdict = systemdict,
   globaldict = globaldict,
+  FontDirectory = FontDirectory,
+
+  ISOLatin1Encoding = {kind = 'array', value = {
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = 'space'},
+    {kind = 'name', value = 'exclam'},
+    {kind = 'name', value = 'quotedbl'},
+    {kind = 'name', value = 'numbersign'},
+    {kind = 'name', value = 'dollar'},
+    {kind = 'name', value = 'percent'},
+    {kind = 'name', value = 'ampersand'},
+    {kind = 'name', value = 'quoteright'},
+    {kind = 'name', value = 'parenleft'},
+    {kind = 'name', value = 'parenright'},
+    {kind = 'name', value = 'asterisk'},
+    {kind = 'name', value = 'plus'},
+    {kind = 'name', value = 'comma'},
+    {kind = 'name', value = 'minus'},
+    {kind = 'name', value = 'period'},
+    {kind = 'name', value = 'slash'},
+    {kind = 'name', value = 'zero'},
+    {kind = 'name', value = 'one'},
+    {kind = 'name', value = 'two'},
+    {kind = 'name', value = 'three'},
+    {kind = 'name', value = 'four'},
+    {kind = 'name', value = 'five'},
+    {kind = 'name', value = 'six'},
+    {kind = 'name', value = 'seven'},
+    {kind = 'name', value = 'eight'},
+    {kind = 'name', value = 'nine'},
+    {kind = 'name', value = 'colon'},
+    {kind = 'name', value = 'semicolon'},
+    {kind = 'name', value = 'less'},
+    {kind = 'name', value = 'equal'},
+    {kind = 'name', value = 'greater'},
+    {kind = 'name', value = 'question'},
+    {kind = 'name', value = 'at'},
+    {kind = 'name', value = 'A'},
+    {kind = 'name', value = 'B'},
+    {kind = 'name', value = 'C'},
+    {kind = 'name', value = 'D'},
+    {kind = 'name', value = 'E'},
+    {kind = 'name', value = 'F'},
+    {kind = 'name', value = 'G'},
+    {kind = 'name', value = 'H'},
+    {kind = 'name', value = 'I'},
+    {kind = 'name', value = 'J'},
+    {kind = 'name', value = 'K'},
+    {kind = 'name', value = 'L'},
+    {kind = 'name', value = 'M'},
+    {kind = 'name', value = 'N'},
+    {kind = 'name', value = 'O'},
+    {kind = 'name', value = 'P'},
+    {kind = 'name', value = 'Q'},
+    {kind = 'name', value = 'R'},
+    {kind = 'name', value = 'S'},
+    {kind = 'name', value = 'T'},
+    {kind = 'name', value = 'U'},
+    {kind = 'name', value = 'V'},
+    {kind = 'name', value = 'W'},
+    {kind = 'name', value = 'X'},
+    {kind = 'name', value = 'Y'},
+    {kind = 'name', value = 'Z'},
+    {kind = 'name', value = 'bracketleft'},
+    {kind = 'name', value = 'backslash'},
+    {kind = 'name', value = 'bracketright'},
+    {kind = 'name', value = 'asciicircum'},
+    {kind = 'name', value = 'underscore'},
+    {kind = 'name', value = 'quoteleft'},
+    {kind = 'name', value = 'a'},
+    {kind = 'name', value = 'b'},
+    {kind = 'name', value = 'c'},
+    {kind = 'name', value = 'd'},
+    {kind = 'name', value = 'e'},
+    {kind = 'name', value = 'f'},
+    {kind = 'name', value = 'g'},
+    {kind = 'name', value = 'h'},
+    {kind = 'name', value = 'i'},
+    {kind = 'name', value = 'j'},
+    {kind = 'name', value = 'k'},
+    {kind = 'name', value = 'l'},
+    {kind = 'name', value = 'm'},
+    {kind = 'name', value = 'n'},
+    {kind = 'name', value = 'o'},
+    {kind = 'name', value = 'p'},
+    {kind = 'name', value = 'q'},
+    {kind = 'name', value = 'r'},
+    {kind = 'name', value = 's'},
+    {kind = 'name', value = 't'},
+    {kind = 'name', value = 'u'},
+    {kind = 'name', value = 'v'},
+    {kind = 'name', value = 'w'},
+    {kind = 'name', value = 'x'},
+    {kind = 'name', value = 'y'},
+    {kind = 'name', value = 'z'},
+    {kind = 'name', value = 'braceleft'},
+    {kind = 'name', value = 'bar'},
+    {kind = 'name', value = 'braceright'},
+    {kind = 'name', value = 'asciitilde'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = 'dotlessi'},
+    {kind = 'name', value = 'grave'},
+    {kind = 'name', value = 'acute'},
+    {kind = 'name', value = 'circumflex'},
+    {kind = 'name', value = 'tilde'},
+    {kind = 'name', value = 'macron'},
+    {kind = 'name', value = 'breve'},
+    {kind = 'name', value = 'dotaccent'},
+    {kind = 'name', value = 'dieresis'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = 'ring'},
+    {kind = 'name', value = 'cedilla'},
+    {kind = 'name', value = '.notdef'},
+    {kind = 'name', value = 'hungarumlaut'},
+    {kind = 'name', value = 'ogonek'},
+    {kind = 'name', value = 'caron'},
+    {kind = 'name', value = 'space'},
+    {kind = 'name', value = 'exclamdown'},
+    {kind = 'name', value = 'cent'},
+    {kind = 'name', value = 'sterling'},
+    {kind = 'name', value = 'currency'},
+    {kind = 'name', value = 'yen'},
+    {kind = 'name', value = 'brokenbar'},
+    {kind = 'name', value = 'section'},
+    {kind = 'name', value = 'dieresis'},
+    {kind = 'name', value = 'copyright'},
+    {kind = 'name', value = 'ordfeminine'},
+    {kind = 'name', value = 'guillemotleft'},
+    {kind = 'name', value = 'logicalnot'},
+    {kind = 'name', value = 'hyphen'},
+    {kind = 'name', value = 'registered'},
+    {kind = 'name', value = 'macron'},
+    {kind = 'name', value = 'degree'},
+    {kind = 'name', value = 'plusminus'},
+    {kind = 'name', value = 'twosuperior'},
+    {kind = 'name', value = 'threesuperior'},
+    {kind = 'name', value = 'acute'},
+    {kind = 'name', value = 'mu'},
+    {kind = 'name', value = 'paragraph'},
+    {kind = 'name', value = 'periodcentered'},
+    {kind = 'name', value = 'cedilla'},
+    {kind = 'name', value = 'onesuperior'},
+    {kind = 'name', value = 'ordmasculine'},
+    {kind = 'name', value = 'guillemotright'},
+    {kind = 'name', value = 'onequarter'},
+    {kind = 'name', value = 'onehalf'},
+    {kind = 'name', value = 'threequarters'},
+    {kind = 'name', value = 'questiondown'},
+    {kind = 'name', value = 'Agrave'},
+    {kind = 'name', value = 'Aacute'},
+    {kind = 'name', value = 'Acircumflex'},
+    {kind = 'name', value = 'Atilde'},
+    {kind = 'name', value = 'Adieresis'},
+    {kind = 'name', value = 'Aring'},
+    {kind = 'name', value = 'AE'},
+    {kind = 'name', value = 'Ccedilla'},
+    {kind = 'name', value = 'Egrave'},
+    {kind = 'name', value = 'Eacute'},
+    {kind = 'name', value = 'Ecircumflex'},
+    {kind = 'name', value = 'Edieresis'},
+    {kind = 'name', value = 'Igrave'},
+    {kind = 'name', value = 'Iacute'},
+    {kind = 'name', value = 'Icircumflex'},
+    {kind = 'name', value = 'Idieresis'},
+    {kind = 'name', value = 'Eth'},
+    {kind = 'name', value = 'Ntilde'},
+    {kind = 'name', value = 'Ograve'},
+    {kind = 'name', value = 'Oacute'},
+    {kind = 'name', value = 'Ocircumflex'},
+    {kind = 'name', value = 'Otilde'},
+    {kind = 'name', value = 'Odieresis'},
+    {kind = 'name', value = 'multiply'},
+    {kind = 'name', value = 'Oslash'},
+    {kind = 'name', value = 'Ugrave'},
+    {kind = 'name', value = 'Uacute'},
+    {kind = 'name', value = 'Ucircumflex'},
+    {kind = 'name', value = 'Udieresis'},
+    {kind = 'name', value = 'Yacute'},
+    {kind = 'name', value = 'Thorn'},
+    {kind = 'name', value = 'germandbls'},
+    {kind = 'name', value = 'agrave'},
+    {kind = 'name', value = 'aacute'},
+    {kind = 'name', value = 'acircumflex'},
+    {kind = 'name', value = 'atilde'},
+    {kind = 'name', value = 'adieresis'},
+    {kind = 'name', value = 'aring'},
+    {kind = 'name', value = 'ae'},
+    {kind = 'name', value = 'ccedilla'},
+    {kind = 'name', value = 'egrave'},
+    {kind = 'name', value = 'eacute'},
+    {kind = 'name', value = 'ecircumflex'},
+    {kind = 'name', value = 'edieresis'},
+    {kind = 'name', value = 'igrave'},
+    {kind = 'name', value = 'iacute'},
+    {kind = 'name', value = 'icircumflex'},
+    {kind = 'name', value = 'idieresis'},
+    {kind = 'name', value = 'eth'},
+    {kind = 'name', value = 'ntilde'},
+    {kind = 'name', value = 'ograve'},
+    {kind = 'name', value = 'oacute'},
+    {kind = 'name', value = 'ocircumflex'},
+    {kind = 'name', value = 'otilde'},
+    {kind = 'name', value = 'odieresis'},
+    {kind = 'name', value = 'divide'},
+    {kind = 'name', value = 'oslash'},
+    {kind = 'name', value = 'ugrave'},
+    {kind = 'name', value = 'uacute'},
+    {kind = 'name', value = 'ucircumflex'},
+    {kind = 'name', value = 'udieresis'},
+    {kind = 'name', value = 'yacute'},
+    {kind = 'name', value = 'thorn'},
+    {kind = 'name', value = 'ydieresis'},
+  }}
 }}
 systemdict.value.systemdict = systemdict
 dictionary_stack = {systemdict, globaldict, userdict}
@@ -1483,6 +1933,8 @@ function execute_tok(tok, suppress_proc)
       else
         error'Unimplemented'
       end
+    elseif ttok == 'number' then
+      return push(tok)
     else
       error'Unimplemented'
     end
