@@ -87,6 +87,12 @@ local function parse_ps(s)
   return tokens
 end
 
+local font_aliases = {
+  ['NimbusSanL-Regu'] = 'zhvreg',
+  ['NimbusRomNo9L-Regu'] = 'nimbusromanregular',
+  ['NimbusMonL-Regu'] = 'zcolight',
+}
+
 local operand_stack = {}
 
 local function push(value)
@@ -870,7 +876,9 @@ local systemdict systemdict = {kind = 'dict', value = {
       if type(from) ~= 'table' then error'typecheck' end
     end
     if from.kind == 'string' then
-      error'Not implemented'
+      local to = pop_string()
+      from = from.value
+      to.value = string.sub(to.value, 1, index) .. from .. string.sub(to.value, index + 1 + #from)
     elseif from.kind == 'array' then
       local to = pop_dict()
       table.move(from.value, 1, #from.value, index + 1, to.value)
