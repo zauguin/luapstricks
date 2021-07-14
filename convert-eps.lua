@@ -113,7 +113,6 @@ local function pop_num()
     n = n.value
   end
   if type(n) ~= 'number' then
-    table.print{v, operand_stack}
     error'typecheck'
   end
   return n
@@ -127,7 +126,16 @@ local function pop_proc()
   return v.value.value
 end
 local pop_bool = pop
-local pop_dict = pop
+local function pop_dict()
+  local dict = pop()
+  if type(dict) ~= 'table' then error'typecheck' end
+  if dict.kind == 'executable' then
+    dict = dict.value
+    if type(dict) ~= 'table' then error'typecheck' end
+  end
+  if dict.kind ~= 'dict' then error'typecheck' end
+  return dict
+end
 local pop_array = pop
 local pop_string = pop
 local function pop_key()
@@ -339,6 +347,7 @@ local systemdict systemdict = {kind = 'dict', value = {
       else
         error'typecheck'
       end
+      push(exec and {kind = 'executable', value = arg} or arg)
     else
       error'typecheck'
     end
@@ -721,6 +730,10 @@ local systemdict systemdict = {kind = 'dict', value = {
     local b, a = pop_num() a = pop_num()
     push(a/b)
   end,
+  idiv = function()
+    local b, a = pop_num() a = pop_num()
+    push(a//b)
+  end,
   mod = function()
     local b, a = pop_num() a = pop_num()
     push(a%b)
@@ -880,7 +893,7 @@ local systemdict systemdict = {kind = 'dict', value = {
       from = from.value
       to.value = string.sub(to.value, 1, index) .. from .. string.sub(to.value, index + 1 + #from)
     elseif from.kind == 'array' then
-      local to = pop_dict()
+      local to = pop_array()
       table.move(from.value, 1, #from.value, index + 1, to.value)
     else
       error'typecheck'
@@ -928,6 +941,18 @@ local systemdict systemdict = {kind = 'dict', value = {
     local key = pop_key()
     local dict = pop()
     push(dict.value[key] ~= nil)
+  end,
+  where = function()
+    local key = pop_key()
+    for i = #dictionary_stack, 1, -1 do
+      local dict = dictionary_stack[i]
+      local value = dict.value[name]
+      if value ~= nil then
+        push(dict)
+        return push(true)
+      end
+    end
+    return push(false)
   end,
   load = function()
     push(lookup(pop_key()))
@@ -981,6 +1006,11 @@ local systemdict systemdict = {kind = 'dict', value = {
     else
       error'typecheck'
     end
+  end,
+  undef = function()
+    local key = pop_key()
+    local dict = pop_dict().value
+    dict[key] = nil
   end,
   length = function()
     local obj = pop()
@@ -1118,6 +1148,20 @@ local systemdict systemdict = {kind = 'dict', value = {
     local current_point = state.current_point
     current_point[1], current_point[2] = x3, y3
   end,
+  closepath = function()
+    local state = graphics_stack[#graphics_stack]
+    local current_path = state.current_path
+    local current_point = state.current_point
+    if not current_path then return end
+    local x, y
+    for i=#current_path, 1, -1 do
+      if current_path[i] == 'm' then
+        x, y = assert(tonumber(current_path[i-2])), assert(tonumber(current_path[i-1]))
+      end
+    end
+    current_point[1], current_point[2] = assert(x), y
+    current_path[#current_path + 1] = 'h'
+  end,
 
   arc = function()
     local a2 = pop_num()
@@ -1206,6 +1250,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     local new_path = {}
     local last_x, last_y = nil, 0
     local saved_x, saved_y
+    local subpath_x, subpath_y
     local last_op = 1
     for i=1, #old_path do
       local entry = old_path[i]
@@ -1215,6 +1260,10 @@ local systemdict systemdict = {kind = 'dict', value = {
           flatten(new_path, 1, saved_x, saved_y, table.unpack(old_path, last_op, i-1))-- TODO Replace 1 with flatten graphic state parameter
           table.move(old_path, last_op + 4, last_op + 5, #new_path + 1, new_path)
           new_path[#new_path+1] = 'l'
+        elseif entry == 'm' then
+          subpath_x, subpath_y = last_x, last_y
+        elseif entry == 'h' then
+          last_x, last_y = subpath_x, subpath_y
         else
           table.move(old_path, last_op, i, #new_path + 1, new_path)
         end
