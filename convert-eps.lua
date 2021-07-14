@@ -173,6 +173,23 @@ local graphics_stack = {{
   dash = nil,
 }}
 
+local ExtGStateCount = 0
+local pdfdict_gput = token.create'pdfdict_gput:nnn'
+local lbrace = token.create(string.byte'{')
+local rbrace = token.create(string.byte'}')
+local ExtGState = setmetatable({}, {__index = function(t, k)
+  ExtGStateCount = ExtGStateCount + 1
+  local name = 'PSExtG' .. ExtGStateCount
+  tex.runtoks(function()
+    tex.write(pdfdict_gput, lbrace, 'g__pdf_Core/Page/Resources/ExtGState', rbrace, lbrace, name, rbrace, lbrace, k, rbrace)
+  end)
+  ltx.__pdf.Page.Resources.ExtGState = true
+  ltx.pdf.Page_Resources_gpush(tex.count.g_shipout_readonly_int)
+  name = '/' .. name .. ' gs'
+  t[k] = name
+  return name
+end})
+
 local function matrix_transform(x, y, xx, xy, yx, yy, dx, dy)
   return x * xx + y * yx + dx, x * xy + y * yy + dy
 end
@@ -978,7 +995,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     local key = pop_key()
     for i = #dictionary_stack, 1, -1 do
       local dict = dictionary_stack[i]
-      local value = dict.value[name]
+      local value = dict.value[key]
       if value ~= nil then
         push(dict)
         return push(true)
@@ -1101,7 +1118,7 @@ local systemdict systemdict = {kind = 'dict', value = {
   setstrokeadjust = function()
     local sa = pop_bool()
     graphics_stack[#graphics_stack].strokeadjust = sa
-    -- TODO: PDF Instructions
+    pdfprint(ExtGState[sa and '<</SA true>>' or '<</SA false>>'])
   end,
   setdash = function()
     local offset = pop_num()
@@ -1437,17 +1454,16 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
   ['.setopacityalpha'] = function()
     error'Unsupported, use .setfillconstantalpha instead'
-    -- TODO: PDF instructions
   end,
   ['.setfillconstantalpha'] = function()
     local alpha = pop_num()
     graphics_stack[#graphics_stack].fillconstantalpha = alpha
-    -- TODO: PDF instructions
+    pdfprint(ExtGState['<</ca ' .. alpha .. '>>'])
   end,
   ['.setstrokeconstantalpha'] = function()
     local alpha = pop_num()
     graphics_stack[#graphics_stack].strokeconstantalpha = alpha
-    -- TODO: PDF instructions
+    pdfprint(ExtGState['<</CA ' .. alpha .. '>>'])
   end,
   newpath = function()
     local state = graphics_stack[#graphics_stack]
