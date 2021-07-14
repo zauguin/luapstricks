@@ -245,6 +245,38 @@ local function bind(proc)
   end
 end
 
+local setpdfcolor do
+  local pdf_rgb = number * whitespace * number * whitespace * number * whitespace * 'rg'
+                * whitespace * number * whitespace * number * whitespace * number * whitespace * 'RG' * -1
+  local pdf_cmyk = number * whitespace * number * whitespace * number * whitespace * number * whitespace * 'k'
+                 * whitespace * number * whitespace * number * whitespace * number * whitespace * number * whitespace * 'K' * -1
+  local pdf_gray = number * whitespace * 'g'
+                 * whitespace * number * whitespace * 'G' * -1
+  function setpdfcolor(pdf, color)
+    for i=1, #color do color[i] = nil end
+    local r, g, b, R, G, B = pdf_rgb:match(pdf)
+    if r and r == R and g == G and b == B then
+      color.space = 'RGB'
+      color[1], color[2], color[3] = R, G, B
+      return
+    end
+    local c, m, y, k, C, M, Y, K = pdf_cmyk:match(pdf)
+    if c and c == C and m == M and y == Y and k == K then
+      color.space = 'CMYK'
+      color[1], color[2], color[3], color[4] = C, M, Y, K
+      return
+    end
+    g, G = pdf_gray:match(pdf)
+    if g and g == G then
+      color.space = 'Gray'
+      color[1] = G
+      return
+    end
+    color.space = 'PDF'
+    color[1] = pdf
+  end
+end
+
 local subdivide, flatten do
   function subdivide(t, x0, y0, x1, y1, x2, y2, x3, y3)
     local mt = 1-t
@@ -1210,13 +1242,14 @@ local systemdict systemdict = {kind = 'dict', value = {
     local state = graphics_stack[#graphics_stack]
     local current_path = state.current_path
     if not current_path then return end
-    current_path[#current_path+1] = 'W n'
     for i = 1, #current_path do
       if type(current_path[i]) == 'number' then
-        current_path[i] = string.format('%.3f', current_path[i])
+        pdfprint(string.format('%.3f', current_path[i]))
+      else
+        pdfprint(current_path[i])
       end
     end
-    pdfprint(table.concat(current_path, ' '))
+    pdfprint'W n'
   end,
   fill = function()
     local state = graphics_stack[#graphics_stack]
@@ -1370,11 +1403,8 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
   setpdfcolor = function()
     local pdf = pop_string().value
-    local color = graphics_stack[#graphics_stack].color
-    color.space = 'PDF'
-    for i=2, #color do color[i] = nil end
-    color[1] = pdf
     pdfprint(pdf)
+    return setpdfcolor(pdf, graphics_stack[#graphics_stack].color)
   end,
   setgray = function()
     local g = pop_num()
