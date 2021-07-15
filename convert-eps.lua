@@ -1310,11 +1310,12 @@ local systemdict systemdict = {kind = 'dict', value = {
           flatten(new_path, 1, saved_x, saved_y, table.unpack(old_path, last_op, i-1))-- TODO Replace 1 with flatten graphic state parameter
           table.move(old_path, last_op + 4, last_op + 5, #new_path + 1, new_path)
           new_path[#new_path+1] = 'l'
-        elseif entry == 'm' then
-          subpath_x, subpath_y = last_x, last_y
-        elseif entry == 'h' then
-          last_x, last_y = subpath_x, subpath_y
         else
+          if entry == 'm' then
+            subpath_x, subpath_y = last_x, last_y
+          elseif entry == 'h' then
+            last_x, last_y = subpath_x, subpath_y
+          end
           table.move(old_path, last_op, i, #new_path + 1, new_path)
         end
         saved_x, saved_y = last_x, last_y
@@ -1379,6 +1380,7 @@ local systemdict systemdict = {kind = 'dict', value = {
   transform = function()
     local m = pop()
     if type(m) == 'table' and m.kind == 'array' then
+      m = m.value
       if #m ~= 6 then error'Unexpected size of matrix' end
     else
       push(m)
@@ -1393,6 +1395,7 @@ local systemdict systemdict = {kind = 'dict', value = {
   itransform = function()
     local m = pop()
     if type(m) == 'table' and m.kind == 'array' then
+      m = m.value
       if #m ~= 6 then error'Unexpected size of matrix' end
     else
       push(m)
