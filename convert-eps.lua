@@ -174,10 +174,10 @@ local function pop_key()
     local kind = key.kind
     if kind == 'executable' then
       key = key.value
-      if type(key) == 'table' and key.kind == 'string' then
-        key = key.value
-      end
-    elseif kind == 'executable' or kind == 'name' then
+      if type(key) ~= 'table' then return key end
+      kind = key.kind
+    end
+    if kind == 'string' or kind == 'name' or kind == 'operator' then
       key = key.value
     end
   end
@@ -996,8 +996,14 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
   bind = function()
     local d = pop()
-    push(d) push(d)
-    bind(pop_proc())
+    push(d)
+    if type(d) ~= 'table' then error'typecheck' end
+    if d.kind == 'executable' then
+      d = d.value
+      if type(d) ~= 'table' then error'typecheck' end
+    end
+    if d.kind ~= 'array' then error'typecheck' end
+    bind(d.value)
   end,
   def = function()
     local value = pop()
@@ -1741,6 +1747,20 @@ local systemdict systemdict = {kind = 'dict', value = {
     local a = pop()
     local ta = type(a)
     push(ta == 'function' or ta == 'name' or (ta == 'table' and a.kind == 'executable'))
+  end,
+  cvlit = function()
+    local a = pop()
+    local ta = type(a)
+    if (ta == 'table' and a.kind == 'executable') or ta == 'string' or ta == 'function' then
+      return push(a.value)
+    end
+    if ta == 'string' then
+      return push{kind = 'name', value = a}
+    end
+    if ta == 'function' then
+      return push{kind = 'operator', value = a}
+    end
+    return push(a)
   end,
   cvx = function()
     local a = pop()
