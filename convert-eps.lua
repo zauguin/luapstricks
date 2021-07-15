@@ -37,6 +37,36 @@ local radix = l.Cmt(l.R'09' * l.R'09'^-1 / tonumber * '#', function(subj, pos, r
 end)
 local number = radix + real -- + integer -- Every integer is also a real
 
+local str_view do
+  local meta = {
+    __index = function(s, k)
+      if k == 'value' then
+        return string.sub(s.base.value, s.offset, s.last)
+      end
+    end,
+    __newindex = function(s, k, v)
+      if k == 'value' then
+        s.base.value = string.sub(s.base.value, 1, s.offset-1) .. v .. string.sub(s.base.value, s.last+1)
+        return
+      end
+      -- We could do rawset here, but there is no reason for setting keys anyway
+      assert(false)
+    end,
+  }
+  function str_view(base, offset, length)
+    if getmetatable(base) == meta then
+      offset = offset + base.offset - 1
+      base = base.base
+    end
+    return setmetatable({
+      kind = 'string',
+      base = base,
+      offset = offset,
+      last = offset + length - 1,
+    }, meta)
+  end
+end
+
 local string_patt do
   local literal = '(' * l.Cs(l.P{(
       l.Cg('\\' * (
@@ -378,13 +408,12 @@ local systemdict systemdict = {kind = 'dict', value = {
       elseif kind == 'string' then
         local src = pop_string().value
         if #src == #arg.value then
-          arg.value = src
         elseif #src < #arg.value then
-          arg.value = src .. string.sub(arg.value, #src+1)
-          arg = {kind = 'string', value = src}
+          arg = str_view(arg, 1, #src)
         else
           error'rangecheck'
         end
+        arg.value = src
       elseif kind == 'dict' then
         local src = pop_dict().value
         if next(arg.value) then
@@ -921,7 +950,7 @@ local systemdict systemdict = {kind = 'dict', value = {
       if type(arr) ~= 'table' then error'typecheck' end
     end
     if arr.kind == 'string' then
-      push{kind = 'string', value = string.sub(arr.value, index + 1, index + count)} -- Untested
+      push(str_view(arr, index + 1, count))
     elseif arr.kind == 'array' then
       -- TODO: At least for the array case, we could use metamethods to make get element sharing behavior
       push{kind = 'array', value = table.move(arr.value, index + 1, index + count, 1, {})}
@@ -2091,7 +2120,7 @@ local fid = font.define{
   name = 'dummy virtual font for PS rendering',
   -- type = 'virtual',
   characters = {
-    [0] = {
+    [0x1F3A8] = {
       commands = {
         {'lua', function(fid)
           local n = node.new('glyph', 256)
@@ -2142,7 +2171,7 @@ lua.get_functions_table()[func] = function()
   end
   local nn = node.new('glyph')
   nn.subtype = 256
-  nn.font, nn.char = fid, 0
+  nn.font, nn.char = fid, 0x1F3A8
   n.next = nn
   if 'horizontal' ~= modes[math.abs(tex.nest.top.mode)] then
     n = node.hpack(n) -- Glyphs can only appear in hmode
