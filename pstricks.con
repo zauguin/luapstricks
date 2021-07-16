@@ -6,7 +6,7 @@
 
 \ifluatex\csname fi\endcsname\csname ifpdf\endcsname
 
-  \directlua{require'convert-eps'}
+  \directlua{require'luapstricks'}
   \def\pstdriver{LuaLaTeX}%
   \def\pstverb{\luaPST}%
   \def\pstVerb{\luaPST direct}%

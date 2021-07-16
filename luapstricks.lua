@@ -205,9 +205,12 @@ local graphics_stack = {{
 
 local ExtGStateCount = 0
 local pdfdict_gput = token.create'pdfdict_gput:nnn'
+if pdfdict_gput.cmdname == 'undefined_cs' then
+  pdfdict_gput = nil
+end
 local lbrace = token.create(string.byte'{')
 local rbrace = token.create(string.byte'}')
-local ExtGState = setmetatable({}, {__index = function(t, k)
+local ExtGState = setmetatable({}, {__index = pdfdict_gput and function(t, k)
   ExtGStateCount = ExtGStateCount + 1
   local name = 'PSExtG' .. ExtGStateCount
   tex.runtoks(function()
@@ -218,6 +221,9 @@ local ExtGState = setmetatable({}, {__index = function(t, k)
   name = '/' .. name .. ' gs'
   t[k] = name
   return name
+end or function()
+  texio.write_nl"Extended graphic state modifications dropped since `pdfmanagement-testphase' is not loaded."
+  return ''
 end})
 
 local function matrix_transform(x, y, xx, xy, yx, yy, dx, dy)
@@ -2174,14 +2180,14 @@ token.set_lua('luaPST', func, 'protected')
 lua.get_functions_table()[func] = function()
   local mode = token.scan_keyword'direct' and 'page' or 'origin'
   local tokens = parse_ps(token.scan_argument(true))
+  table.move(tokens, 1, #tokens, mode == 'origin' and 5 or 4)
+  tokens[1], tokens[2] = 'null', 'null'
   if mode == 'origin' then
-    table.insert(tokens, 1, 'translate')
-    table.insert(tokens, 1, 'gsave')
-    table.insert(tokens, 'grestore')
+    tokens[3], tokens[4] = 'gsave', 'translate'
+    tokens[#tokens+1] = 'grestore'
   else
-    table.insert(tokens, 1, 'moveto')
+    tokens[3] = 'moveto'
   end
-  table.move(tokens, 1, #tokens, 3)
   local n = node.new('whatsit', 'late_lua')
   function n.data()
     local x, y = pdf.getpos()
