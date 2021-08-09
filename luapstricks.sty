@@ -5,13 +5,6 @@
 
 \RequirePackage{iftex,pstricks}
 \ifluatex
-  % Set the font ro zhvreg. That's the fontname of the OpenType font corresponding to pstricks's default
-  \psset[pstricks]{gridfont=zhvreg}
   \def\c@lor@to@ps#1\@@{(#1) setpdfcolor}
-  %\def\c@lor@ps@#1 #2\@@{TeXDict begin #1 end}
-  %\def\c@lor@ps@rgb#1\@@{#1 setrgbcolor}
-  %\def\c@lor@ps@hsb#1\@@{#1 sethsbcolor}
-  %\def\c@lor@ps@cmyk#1\@@{#1 setcmykcolor}
-  %\def\c@lor@ps@gray#1\@@{#1 setgray}
 \fi
 \endinput
