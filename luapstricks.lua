@@ -1541,6 +1541,19 @@ local systemdict systemdict = {kind = 'dict', value = {
     push(g)
     push(b)
   end,
+  currentfont = function()
+    local f = graphics_stack[#graphics_stack].font
+    if f then
+      push(f)
+    else
+      push{kind = 'dict', value = {
+         FID = font.current(),
+         FontMatrix = {1, 0, 0, 1, 0, 0},
+         FontName = {kind = 'name', value = tex.fontname(font.current())},
+         FontType = 0x1CA,
+       }}
+    end
+  end,
 
   gsave = function()
     graphics_stack[#graphics_stack+1] = table.copy(graphics_stack[#graphics_stack])
