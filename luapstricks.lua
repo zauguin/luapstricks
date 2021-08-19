@@ -1154,7 +1154,7 @@ local systemdict systemdict = {kind = 'dict', value = {
   setlinecap = function()
     local linecap = pop_int()
     graphics_stack[#graphics_stack].linecap = linecap
-    pdfprint(string.format('%i j', linecap))
+    pdfprint(string.format('%i J', linecap))
   end,
   setstrokeadjust = function()
     local sa = pop_bool()
