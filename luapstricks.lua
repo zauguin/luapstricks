@@ -120,7 +120,9 @@ end
 local font_aliases = {
   ['NimbusSanL-Regu'] = 'zhvreg',
   ['NimbusRomNo9L-Regu'] = 'nimbusromanregular',
+  ['NimbusRomNo9L-Bold'] = 'nimbusromanbold',
   ['NimbusMonL-Regu'] = 'zcolight',
+  ['StandardSymL'] = 'StandardSymbolsPS',
 }
 
 local operand_stack = {}
