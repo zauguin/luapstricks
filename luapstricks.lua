@@ -205,6 +205,7 @@ local graphics_stack = {{
   dash = nil,
 }}
 
+local char_width_storage -- Non nil only at the beginning of a Type 3 glyph. Used to export the width.
 local ExtGStateCount = 0
 local pdfdict_gput = token.create'pdfdict_gput:nnn'
 if pdfdict_gput.cmdname == 'undefined_cs' then
@@ -238,7 +239,7 @@ local function matrix_invert(xx, xy, yx, yy, dx, dy)
   return xx, xy, yx, yy, dx, dy
 end
 local function update_matrix(xx, xy, yx, yy, dx, dy)
-  pdfprint(string.format('%.3f %.3f %.3f %.3f %.3f %.3f cm', xx, xy, yx, yy, dx, dy))
+  pdfprint(string.format('%.4f %.4f %.4f %.4f %.4f %.4f cm', xx, xy, yx, yy, dx, dy))
   local matrix = graphics_stack[#graphics_stack].matrix
   matrix[1], matrix[2],
   matrix[3], matrix[4],
@@ -1314,6 +1315,19 @@ local systemdict systemdict = {kind = 'dict', value = {
     end
     pdfprint'W n'
   end,
+  eofill = function()
+    local state = graphics_stack[#graphics_stack]
+    local current_path = state.current_path
+    if not current_path then return end
+    current_path[#current_path+1] = 'f*'
+    for i = 1, #current_path do
+      if type(current_path[i]) == 'number' then
+        current_path[i] = string.format('%.3f', current_path[i])
+      end
+    end
+    pdfprint(table.concat(current_path, ' '))
+    state.current_path, state.current_point = nil
+  end,
   fill = function()
     local state = graphics_stack[#graphics_stack]
     local current_path = state.current_path
@@ -1615,7 +1629,8 @@ local systemdict systemdict = {kind = 'dict', value = {
     local psfont = assert(state.font, 'invalidfont').value
     local fid = psfont.FID
     local matrix = psfont.FontMatrix.value
-    if not fid then
+    local fonttype = psfont.FontType
+    if fonttype ~= 0x1CA then
       texio.write_nl'Font support is not implemented'
       return
     end
@@ -1636,27 +1651,51 @@ local systemdict systemdict = {kind = 'dict', value = {
     local str = pop_string().value
     local state = graphics_stack[#graphics_stack]
     local current_point = assert(state.current_point, 'nocurrentpoint')
-    local psfont = assert(state.font, 'invalidfont').value
+    local rawpsfont = assert(state.font, 'invalidfont')
+    local psfont = rawpsfont.value
     local fid = psfont.FID
     local matrix = psfont.FontMatrix.value
-    if not fid then
+    local fonttype = psfont.FontType
+    if fonttype ~= 0x1CA and fonttype ~= 3 then
       texio.write_nl'Font support is not implemented'
       return
     end
-    local characters = assert(font.getfont(fid)).characters
-    local w = 0
     update_matrix(
       matrix[1],                    matrix[2],
       matrix[3],                    matrix[4],
       matrix[5] + current_point[1], matrix[6] + current_point[2])
-    vf.push()
-    vf.fontid(fid)
-    for b in string.bytes(str) do
-      vf.char(b)
-      local char = characters[b]
-      w = w + (char and char.width or 0)
+    local w = 0
+    if fonttype == 0x1CA then
+      local characters = assert(font.getfont(fid)).characters
+      vf.push()
+      vf.fontid(fid)
+      for b in string.bytes(str) do
+        vf.char(b)
+        local char = characters[b]
+        w = w + (char and char.width or 0)
+      end
+      vf.pop()
+    elseif fonttype == 3 then
+      local w = 0
+      for b in string.bytes(str) do
+        systemdict.value.gsave()
+        local state = graphics_stack[#graphics_stack]
+        state.current_point, state.current_path = nil
+        push(rawpsfont)
+        push(b)
+        local this_w
+        char_width_storage = function(width)
+          this_w = width
+        end
+        execute_tok(psfont.BuildChar) -- FIXME(maybe): Switch to BuildGlyph?
+        systemdict.value.grestore()
+        w = w + assert(this_w, 'Type 3 character failed to set width')
+        update_matrix(1, 0, 0, 1, this_w, 0)
+      end
+      update_matrix(1, 0, 0, 1, -w, 0)
+    else
+      assert(false)
     end
-    vf.pop()
     push(w/65781.76)
     push(0)
     systemdict.value.rmoveto()
@@ -1747,6 +1786,31 @@ local systemdict systemdict = {kind = 'dict', value = {
       FontName = {kind = 'name', value = fontname},
       FontType = 0x1CA,
     }}
+  end,
+
+  setcharwidth = function()
+    -- Pop and ignore the advance height -- FIXME(maybe)
+    pop_num()
+    assert(char_width_storage, 'undefined')(pop_num())
+    char_width_storage = nil
+  end,
+  setcachedevice = function()
+    -- First pop and ignore the bounding box
+    pop_num()
+    pop_num()
+    pop_num()
+    pop_num()
+    -- Fallback to setcharwidth
+    systemdict.value.setcharwidth()
+  end,
+  setcachedevice2 = function()
+    -- First pop additional entries for setccachedevice2 -- TODO: Implement other writing modes
+    pop_num()
+    pop_num()
+    pop_num()
+    pop_num()
+    -- Fallback to setcachedevice
+    systemdict.value.setcachedevice()
   end,
 
   realtime = function()
