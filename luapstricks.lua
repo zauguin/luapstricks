@@ -853,6 +853,9 @@ local systemdict systemdict = {kind = 'dict', value = {
   ceiling = function()
     return push(math.ceil(pop_num()))
   end,
+  floor = function()
+    return push(math.floor(pop_num()))
+  end,
   cvn = function()
     local a = pop()
     if type(a) == 'table' and a.kind == 'executable' then
@@ -1376,10 +1379,11 @@ local systemdict systemdict = {kind = 'dict', value = {
   scale = function()
     local m = pop()
     if type(m) == 'table' and m.kind == 'array' then
-      if #m ~= 6 then error'Unexpected size of matrix' end
+      local mv = m.value
+      if #mv ~= 6 then error'Unexpected size of matrix' end
       local y = pop_num()
       local x = pop_num()
-      m[1], m[2], m[3], m[4], m[5], m[6] = x, 0, 0, y, 0, 0
+      mv[1], mv[2], mv[3], mv[4], mv[5], mv[6] = x, 0, 0, y, 0, 0
       push(m)
     else
       push(m)
@@ -1391,10 +1395,11 @@ local systemdict systemdict = {kind = 'dict', value = {
   translate = function()
     local m = pop()
     if type(m) == 'table' and m.kind == 'array' then
-      if #m ~= 6 then error'Unexpected size of matrix' end
+      local mv = m.value
+      if #mv ~= 6 then error'Unexpected size of matrix' end
       local y = pop_num()
       local x = pop_num()
-      m[1], m[2], m[3], m[4], m[5], m[6] = 1, 0, 0, 1, x, y
+      mv[1], mv[2], mv[3], mv[4], mv[5], mv[6] = 1, 0, 0, 1, x, y
       push(m)
     else
       push(m)
@@ -1406,10 +1411,11 @@ local systemdict systemdict = {kind = 'dict', value = {
   rotate = function()
     local m = pop()
     if type(m) == 'table' and m.kind == 'array' then
-      if #m ~= 6 then error'Unexpected size of matrix' end
+      local mv = m.value
+      if #mv ~= 6 then error'Unexpected size of matrix' end
       local angle = math.rad(pop_num())
       local s, c = math.sin(angle), math.cos(angle)
-      m[1], m[2], m[3], m[4], m[5], m[6] = c, s, -s, c, 0, 0
+      mv[1], mv[2], mv[3], mv[4], mv[5], mv[6] = c, s, -s, c, 0, 0
       push(m)
     else
       push(m)
@@ -1447,6 +1453,27 @@ local systemdict systemdict = {kind = 'dict', value = {
     x, y = matrix_transform(x, y, matrix_invert(m[1], m[2], m[3], m[4], m[5], m[6]))
     push(x)
     push(y)
+  end,
+  concatmatrix = function()
+    local m3a = pop_array()
+    local m3 = m3a.value
+    if #m3 ~= 6 then error'Unexpected size of matrix' end
+    local m2 = pop_array().value
+    if #m2 ~= 6 then error'Unexpected size of matrix' end
+    local m1 = pop_array().value
+    if #m1 ~= 6 then error'Unexpected size of matrix' end
+    m3[1], m3[2],
+    m3[3], m3[4],
+    m3[5], m3[6]
+      = m1[1] * m2[1] + m1[2] * m2[3],         m1[1] * m2[2] + m1[2] * m2[4],
+        m1[3] * m2[1] + m1[4] * m2[3],         m1[3] * m2[2] + m1[4] * m2[4],
+        m1[5] * m2[1] + m1[6] * m2[3] + m2[5], m1[5] * m2[2] + m1[6] * m2[4] + m2[6]
+    push(m3a)
+  end,
+  concat = function()
+    local m = pop_array()
+    if #m3 ~= 6 then error'Unexpected size of matrix' end
+    update_matrix(m[1], m[2], m[3], m[4], m[5], m[6])
   end,
   -- setmatrix is not supported in PDF, so we invert the old matrix first
   setmatrix = function()
@@ -1548,7 +1575,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     else
       push{kind = 'dict', value = {
          FID = font.current(),
-         FontMatrix = {1, 0, 0, 1, 0, 0},
+         FontMatrix = {kind = 'array', value = {1, 0, 0, 1, 0, 0}},
          FontName = {kind = 'name', value = tex.fontname(font.current())},
          FontType = 0x1CA,
        }}
@@ -1585,7 +1612,7 @@ local systemdict systemdict = {kind = 'dict', value = {
       local state = graphics_stack[#graphics_stack]
     local psfont = assert(state.font, 'invalidfont').value
     local fid = psfont.FID
-    local matrix = psfont.FontMatrix
+    local matrix = psfont.FontMatrix.value
     if not fid then
       texio.write_nl'Font support is not implemented'
       return
@@ -1609,7 +1636,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     local current_point = assert(state.current_point, 'nocurrentpoint')
     local psfont = assert(state.font, 'invalidfont').value
     local fid = psfont.FID
-    local matrix = psfont.FontMatrix
+    local matrix = psfont.FontMatrix.value
     if not fid then
       texio.write_nl'Font support is not implemented'
       return
@@ -1639,7 +1666,7 @@ local systemdict systemdict = {kind = 'dict', value = {
   definefont = function()
     local fontdict = pop_dict()
     local fontkey = pop_key()
-    fontdict.value.FontMatrix = fontdict.value.FontMatrix or {1, 0, 0, 1, 0, 0}
+    fontdict.value.FontMatrix = fontdict.value.FontMatrix or {kind = 'array', value = {1, 0, 0, 1, 0, 0}}
     if assert(fontdict.value.FontType) == 0x1CA then
       local fontname = fontdict.value.FontName
       if type(fontname) == 'table' and fontname.kind == 'name' then
@@ -1661,6 +1688,23 @@ local systemdict systemdict = {kind = 'dict', value = {
     FontDirectory[fontkey] = fontdict
     push(fontdict)
   end,
+  makefont = function()
+    local m = pop_array().value
+    if #m ~= 6 then error'Unexpected size of matrix' end
+    local fontdict = pop_dict()--.value
+    fontdict = fontdict.value
+    local new_fontdict = {}
+    for k,v in next, fontdict do
+      new_fontdict[k] = v
+    end
+    local old_m = assert(fontdict.FontMatrix, 'invalidfont').value
+    new_fontdict.FontMatrix = {kind = 'array', value = {
+      old_m[1] * m[1] + old_m[2] * m[3],        old_m[1] * m[2] + old_m[2] * m[4],
+      old_m[3] * m[1] + old_m[4] * m[3],        old_m[3] * m[2] + old_m[4] * m[4],
+      old_m[5] * m[1] + old_m[6] * m[3] + m[5], old_m[5] * m[2] + old_m[6] * m[4] + m[6],
+    }}
+    push{kind = 'dict', value = new_fontdict}
+  end,
   scalefont = function()
     local factor = pop_num()
     local fontdict = pop_dict()--.value
@@ -1669,10 +1713,12 @@ local systemdict systemdict = {kind = 'dict', value = {
     for k,v in next, fontdict do
       new_fontdict[k] = v
     end
-    local old_m = assert(fontdict.FontMatrix, 'invalidfont')
-    new_fontdict.FontMatrix = {factor * old_m[1], factor * old_m[2],
-                               factor * old_m[3], factor * old_m[4],
-                               factor * old_m[5], factor * old_m[6]}
+    local old_m = assert(fontdict.FontMatrix, 'invalidfont').value
+    new_fontdict.FontMatrix = {kind = 'array', value = {
+      factor * old_m[1], factor * old_m[2],
+      factor * old_m[3], factor * old_m[4],
+      factor * old_m[5], factor * old_m[6],
+    }}
     push{kind = 'dict', value = new_fontdict}
   end,
   setfont = function()
@@ -1695,7 +1741,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     end
     return push{kind = 'dict', value = {
       FID = fid,
-      FontMatrix = {1, 0, 0, 1, 0, 0},
+      FontMatrix = {kind = 'array', value = {1, 0, 0, 1, 0, 0}},
       FontName = {kind = 'name', value = fontname},
       FontType = 0x1CA,
     }}
