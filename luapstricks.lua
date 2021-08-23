@@ -1350,25 +1350,37 @@ local systemdict systemdict = {kind = 'dict', value = {
 
     local ox1, oy1 = r * math.cos(a1), r * math.sin(a1)
     local ox2, oy2 = r * math.cos(a2), r * math.sin(a2)
-    local t1, t2 = matrix_transform(0, 0, matrix_invert(dx1, dy1, -dx2, -dy2, (x0-ox1)-(x1-ox2), (y0-oy1)-(y1-oy2)))
-    local cx, cy = x0 - ox1 + t1 * dx1, y0 - oy1 + t1 * dy1
-    local ccx, ccy = x1 - ox2 + t2 * dx2, y1 - oy2 + t2 * dy2
+    -- Now we need to calculate the intersection of the lines offset by o1/o2
+    -- to determine the center. We inlin eth ematix inverse for performance and better handling of edge cases.
+    -- local t1, t2 = matrix_transform(0, 0, matrix_invert(dx1, dy1, dx2, dy2, ox2-ox1, oy2-oy1))
+    local det = dx1*dy2 - dy1*dx2
+    if math.abs(det) < 0.0000001 then
+      -- Just draw a line
+      push(x1)
+      push(y1)
+      systemdict.value.lineto()
+      push(x1)
+      push(y1)
+      push(x1)
+      push(y1)
+      return
+    end
+    local t1 = (ox1 - ox2) * dy2/det + (oy2 - oy1) * dx2/det
+    local cx, cy = x1 - ox1 + t1 * dx1, y1 - oy1 + t1 * dy1
+    -- local ccx, ccy = x1 - ox2 - t2 * dx2, y1 - oy2 + t2 * dy2
     drawarc(cx, cy, r, a1*180/math.pi, a2*180/math.pi)
-    -- end
 
-    -- local a2 = pop_num()
-    -- local a1 = pop_num()
-    -- local r = pop_num()
-    -- local yc = pop_num()
-    -- local xc = pop_num()
-    -- while a1 < a2 do
-    --   a1 = a1 + 360
-    -- end
-    -- drawarc(xc, yc, r, a1*180/math.pi, a2*180/math.pi)
-    push(0)
-    push(0)
-    push(0)
-    push(0)
+    push(cx + ox1)
+    push(cy + oy1)
+    push(cx + ox2)
+    push(cy + oy2)
+  end,
+  arct = function()
+    systemdict.value.arcto()
+    pop()
+    pop()
+    pop()
+    pop()
   end,
 
   clip = function()
