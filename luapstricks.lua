@@ -1316,6 +1316,60 @@ local systemdict systemdict = {kind = 'dict', value = {
     end
     drawarc(xc, yc, r, a1, a2)
   end,
+  arcto = function()
+    local r = pop_num()
+    local y2 = pop_num()
+    local x2 = pop_num()
+    local y1 = pop_num()
+    local x1 = pop_num()
+
+    local state = graphics_stack[#graphics_stack]
+    local current_path = assert(state.current_path, 'nocurrentpoint')
+    local current_point = state.current_point
+    local x0, y0 = current_point[1], current_point[2]
+
+    local dx1, dy1 = x1 - x0, y1 - y0
+    local dx2, dy2 = x2 - x1, y2 - y1
+
+    local a1 = math.atan(dy1, dx1)
+    local a2 = math.atan(dy2, dx2)
+
+    if a1 - math.pi > a2 then
+      a1 = a1 - 2*math.pi
+    elseif a2 - math.pi > a1 then
+      a2 = a2 - 2*math.pi
+    end
+
+    if a1 > a2 then
+      a1 = a1 + math.pi/2
+      a2 = a2 + math.pi/2
+    else
+      a1 = a1 - math.pi/2
+      a2 = a2 - math.pi/2
+    end
+
+    local ox1, oy1 = r * math.cos(a1), r * math.sin(a1)
+    local ox2, oy2 = r * math.cos(a2), r * math.sin(a2)
+    local t1, t2 = matrix_transform(0, 0, matrix_invert(dx1, dy1, -dx2, -dy2, (x0-ox1)-(x1-ox2), (y0-oy1)-(y1-oy2)))
+    local cx, cy = x0 - ox1 + t1 * dx1, y0 - oy1 + t1 * dy1
+    local ccx, ccy = x1 - ox2 + t2 * dx2, y1 - oy2 + t2 * dy2
+    drawarc(cx, cy, r, a1*180/math.pi, a2*180/math.pi)
+    -- end
+
+    -- local a2 = pop_num()
+    -- local a1 = pop_num()
+    -- local r = pop_num()
+    -- local yc = pop_num()
+    -- local xc = pop_num()
+    -- while a1 < a2 do
+    --   a1 = a1 + 360
+    -- end
+    -- drawarc(xc, yc, r, a1*180/math.pi, a2*180/math.pi)
+    push(0)
+    push(0)
+    push(0)
+    push(0)
+  end,
 
   clip = function()
     local state = graphics_stack[#graphics_stack]
