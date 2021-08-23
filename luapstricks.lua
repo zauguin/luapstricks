@@ -270,6 +270,41 @@ local function update_matrix(xx, xy, yx, yy, dx, dy)
   current_point[1], current_point[2] = xx * x + yx * y + dx, xy * x + yy * y + dy
 end
 
+function drawarc(xc, yc, r, a1, a2)
+  a1, a2 = math.rad(a1), math.rad(a2)
+  local dx, dy = r*math.cos(a1), r*math.sin(a1)
+  local x, y = xc + dx, yc + dy
+  local segments = math.ceil(math.abs(a2-a1)/(math.pi*.5))
+  local da = (a2-a1)/segments
+  local state = graphics_stack[#graphics_stack]
+  local current_path = state.current_path
+  local i
+  if current_path then
+    i = #current_path + 1
+    current_path[i], current_path[i+1], current_path[i+2] = x, y, 'l'
+    i = i + 3
+  else
+    current_path = {x, y, 'm'}
+    i = 4
+    state.current_path = current_path
+    state.current_point = {}
+  end
+  local factor = 4*math.tan(da/4)/3
+  dx, dy = factor*dy, -factor*dx
+  for _=1, segments do
+    current_path[i], current_path[i+1] = x - dx, y - dy
+    a1 = a1 + da
+    dx, dy = r*math.cos(a1), r*math.sin(a1)
+    x, y = xc + dx, yc + dy
+    dx, dy = factor*dy, -factor*dx
+    current_path[i+2], current_path[i+3] = x + dx, y + dy
+    current_path[i+4], current_path[i+5] = x, y
+    current_path[i+6] = 'c'
+    i = i + 7
+  end
+  state.current_point[1], state.current_point[2] = x, y
+end
+
 local function try_lookup(name)
   for i = #dictionary_stack, 1, -1 do
     local dict = dictionary_stack[i]
@@ -1268,38 +1303,18 @@ local systemdict systemdict = {kind = 'dict', value = {
     while a2 < a1 do
       a2 = a2 + 360
     end
-    a1, a2 = math.rad(a1), math.rad(a2)
-    local dx, dy = r*math.cos(a1), r*math.sin(a1)
-    local x, y = xc + dx, yc + dy
-    local segments = math.ceil((a2-a1)/(math.pi*.5))
-    local da = (a2-a1)/segments
-    local state = graphics_stack[#graphics_stack]
-    local current_path = state.current_path
-    local i
-    if current_path then
-      i = #current_path + 1
-      current_path[i], current_path[i+1], current_path[i+2] = x, y, 'l'
-      i = i + 3
-    else
-      current_path = {x, y, 'm'}
-      i = 4
-      state.current_path = current_path
-      state.current_point = {}
+    drawarc(xc, yc, r, a1, a2)
+  end,
+  arcn = function()
+    local a2 = pop_num()
+    local a1 = pop_num()
+    local r = pop_num()
+    local yc = pop_num()
+    local xc = pop_num()
+    while a1 < a2 do
+      a1 = a1 + 360
     end
-    local factor = 4*math.tan(da/4)/3
-    dx, dy = factor*dy, -factor*dx
-    for _=1, segments do
-      current_path[i], current_path[i+1] = x - dx, y - dy
-      a1 = a1 + da
-      dx, dy = r*math.cos(a1), r*math.sin(a1)
-      x, y = xc + dx, yc + dy
-      dx, dy = factor*dy, -factor*dx
-      current_path[i+2], current_path[i+3] = x + dx, y + dy
-      current_path[i+4], current_path[i+5] = x, y
-      current_path[i+6] = 'c'
-      i = i + 7
-    end
-    state.current_point[1], state.current_point[2] = x, y
+    drawarc(xc, yc, r, a1, a2)
   end,
 
   clip = function()
