@@ -190,7 +190,7 @@ local execute_ps, execute_tok
 
 local dictionary_stack
 local graphics_stack = {{
-  matrix = {1, 0, 0, 1, 0, 0},
+  matrix = {72, 0, 0, 72, 0, 0},
   linewidth = nil,
   current_path = nil,
   current_point = nil,
