@@ -238,8 +238,8 @@ local function matrix_invert(xx, xy, yx, yy, dx, dy)
   dx, dy = - dx * xx - dy * yx, - dx * xy - dy * yy
   return xx, xy, yx, yy, dx, dy
 end
+local delayed_matrix = {1, 0, 0, 1, 0, 0}
 local function update_matrix(xx, xy, yx, yy, dx, dy)
-  pdfprint(string.format('%.4f %.4f %.4f %.4f %.4f %.4f cm', xx, xy, yx, yy, dx, dy))
   local matrix = graphics_stack[#graphics_stack].matrix
   matrix[1], matrix[2],
   matrix[3], matrix[4],
@@ -247,6 +247,13 @@ local function update_matrix(xx, xy, yx, yy, dx, dy)
     = xx * matrix[1] + xy * matrix[3],             xx * matrix[2] + xy * matrix[4],
       yx * matrix[1] + yy * matrix[3],             yx * matrix[2] + yy * matrix[4],
       dx * matrix[1] + dy * matrix[3] + matrix[5], dx * matrix[2] + dy * matrix[4] + matrix[6]
+
+  delayed_matrix[1], delayed_matrix[2],
+  delayed_matrix[3], delayed_matrix[4],
+  delayed_matrix[5], delayed_matrix[6]
+    = xx * delayed_matrix[1] + xy * delayed_matrix[3],                     xx * delayed_matrix[2] + xy * delayed_matrix[4],
+      yx * delayed_matrix[1] + yy * delayed_matrix[3],                     yx * delayed_matrix[2] + yy * delayed_matrix[4],
+      dx * delayed_matrix[1] + dy * delayed_matrix[3] + delayed_matrix[5], dx * delayed_matrix[2] + dy * delayed_matrix[4] + delayed_matrix[6]
 
   local current_path = graphics_stack[#graphics_stack].current_path
   if not current_path then return end
@@ -268,6 +275,24 @@ local function update_matrix(xx, xy, yx, yy, dx, dy)
   local current_point = graphics_stack[#graphics_stack].current_point
   local x, y = current_point[1], current_point[2]
   current_point[1], current_point[2] = xx * x + yx * y + dx, xy * x + yy * y + dy
+end
+
+local function delayed_print(str)
+  pdfprint(str)
+end
+
+local function reset_delayed(str)
+  delayed_matrix[1], delayed_matrix[2],
+  delayed_matrix[3], delayed_matrix[4],
+  delayed_matrix[5], delayed_matrix[6] = 1, 0, 0, 1, 0, 0
+end
+
+local function flush_delayed(str)
+  local cm_string = string.format('%.4f %.4f %.4f %.4f %.4f %.4f cm', delayed_matrix[1], delayed_matrix[2], delayed_matrix[3], delayed_matrix[4], delayed_matrix[5], delayed_matrix[6])
+  if cm_string ~= "1.0000 0.0000 0.0000 1.0000 0.0000 0.0000 cm" then
+    pdfprint(cm_string)
+  end
+  return reset_delayed()
 end
 
 function drawarc(xc, yc, r, a1, a2)
@@ -1208,22 +1233,22 @@ local systemdict systemdict = {kind = 'dict', value = {
   setlinewidth = function()
     local lw = pop_num()
     graphics_stack[#graphics_stack].linewidth = lw
-    pdfprint(string.format('%.3f w', lw))
+    delayed_print(string.format('%.3f w', lw))
   end,
   setlinejoin = function()
     local linejoin = pop_int()
     graphics_stack[#graphics_stack].linejoin = linejoin
-    pdfprint(string.format('%i j', linejoin))
+    delayed_print(string.format('%i j', linejoin))
   end,
   setlinecap = function()
     local linecap = pop_int()
     graphics_stack[#graphics_stack].linecap = linecap
-    pdfprint(string.format('%i J', linecap))
+    delayed_print(string.format('%i J', linecap))
   end,
   setstrokeadjust = function()
     local sa = pop_bool()
     graphics_stack[#graphics_stack].strokeadjust = sa
-    pdfprint(ExtGState[sa and '<</SA true>>' or '<</SA false>>'])
+    delayed_print(ExtGState[sa and '<</SA true>>' or '<</SA false>>'])
   end,
   setdash = function()
     local offset = pop_num()
@@ -1233,7 +1258,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     for i=1, #patt do
       mypatt[i] = string.format('%.3f', patt[i])
     end
-    pdfprint(string.format('[%s] %.3f d', table.concat(mypatt, ' '), offset))
+    delayed_print(string.format('[%s] %.3f d', table.concat(mypatt, ' '), offset))
   end,
   currentpoint = function()
     local current_point = assert(graphics_stack[#graphics_stack].current_point, 'nocurrentpoint')
@@ -1410,6 +1435,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     local state = graphics_stack[#graphics_stack]
     local current_path = state.current_path
     if not current_path then return end
+    flush_delayed()
     for i = 1, #current_path do
       if type(current_path[i]) == 'number' then
         pdfprint(string.format('%.3f', current_path[i]))
@@ -1429,6 +1455,7 @@ local systemdict systemdict = {kind = 'dict', value = {
         current_path[i] = string.format('%.3f', current_path[i])
       end
     end
+    flush_delayed()
     pdfprint(table.concat(current_path, ' '))
     state.current_path, state.current_point = nil
   end,
@@ -1442,6 +1469,7 @@ local systemdict systemdict = {kind = 'dict', value = {
         current_path[i] = string.format('%.3f', current_path[i])
       end
     end
+    flush_delayed()
     pdfprint(table.concat(current_path, ' '))
     state.current_path, state.current_point = nil
   end,
@@ -1455,6 +1483,7 @@ local systemdict systemdict = {kind = 'dict', value = {
         current_path[i] = string.format('%.3f', current_path[i])
       end
     end
+    flush_delayed()
     pdfprint(table.concat(current_path, ' '))
     state.current_path, state.current_point = nil
   end,
@@ -1641,7 +1670,7 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
   setpdfcolor = function()
     local pdf = pop_string().value
-    pdfprint(pdf)
+    delayed_print(pdf)
     return setpdfcolor(pdf, graphics_stack[#graphics_stack].color)
   end,
   setgray = function()
@@ -1650,7 +1679,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     color.space = 'Gray'
     for i=2, #color do color[i] = nil end
     color[1] = g
-    pdfprint(string.format('%.3f g %.3f G', g, g))
+    delayed_print(string.format('%.3f g %.3f G', g, g))
   end,
   setrgbcolor = function()
     local b = pop_num()
@@ -1660,7 +1689,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     color.space = 'RGB'
     for i=4, #color do color[i] = nil end
     color[1], color[2], color[3] = r, g, b
-    pdfprint(string.format('%.3f %.3f %.3f rg %.3f %.3f %.3f RG', r, g, b, r, g, b))
+    delayed_print(string.format('%.3f %.3f %.3f rg %.3f %.3f %.3f RG', r, g, b, r, g, b))
   end,
   setcmykcolor = function()
     local k = pop_num()
@@ -1671,7 +1700,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     color.space = 'CMYK'
     for i=5, #color do color[i] = nil end
     color[1], color[2], color[3], color[3] = c, m, y, k
-    pdfprint(string.format('%.3f %.3f %.3f %.3f k %.3f %.3f %.3f %.3f K', c, m, y, k, c, m, y, k))
+    delayed_print(string.format('%.3f %.3f %.3f %.3f k %.3f %.3f %.3f %.3f K', c, m, y, k, c, m, y, k))
   end,
   ['.setopacityalpha'] = function()
     error'Unsupported, use .setfillconstantalpha instead'
@@ -1679,12 +1708,12 @@ local systemdict systemdict = {kind = 'dict', value = {
   ['.setfillconstantalpha'] = function()
     local alpha = pop_num()
     graphics_stack[#graphics_stack].fillconstantalpha = alpha
-    pdfprint(ExtGState['<</ca ' .. alpha .. '>>'])
+    delayed_print(ExtGState['<</ca ' .. alpha .. '>>'])
   end,
   ['.setstrokeconstantalpha'] = function()
     local alpha = pop_num()
     graphics_stack[#graphics_stack].strokeconstantalpha = alpha
-    pdfprint(ExtGState['<</CA ' .. alpha .. '>>'])
+    delayed_print(ExtGState['<</CA ' .. alpha .. '>>'])
   end,
   newpath = function()
     local state = graphics_stack[#graphics_stack]
@@ -1734,10 +1763,12 @@ local systemdict systemdict = {kind = 'dict', value = {
 
   gsave = function()
     graphics_stack[#graphics_stack+1] = table.copy(graphics_stack[#graphics_stack])
+    flush_delayed()
     pdfprint'q'
   end,
   grestore = function()
     graphics_stack[#graphics_stack] = nil
+    reset_delayed()
     pdfprint'Q'
   end,
 
