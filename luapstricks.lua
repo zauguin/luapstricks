@@ -2461,7 +2461,16 @@ lua.get_functions_table()[func] = function()
   if 'horizontal' ~= modes[math.abs(tex.nest.top.mode)] then
     n = node.hpack(n) -- Glyphs can only appear in hmode
   end
-  node.write(n) -- might be problematic in math
+  if tex.nest.ptr == 0 then
+    -- Main vertical list. Here we might appear before the page starts properly
+    -- and should not freeze page specifications. Since we don't have any outer dimensions,
+    -- we can ensure this by sneaking our node into the current page list whithout going though
+    -- build_page.
+    tex.triggerbuildpage() -- First ensure that everything else is contributed properly.
+    tex.lists.page_head = node.insert_after(tex.lists.page_head, nil, n)
+  else
+    node.write(n) -- might be problematic in math
+  end
 end
 -- luatexbase.add_to_callback('pre_shipout_filter', function(n)
 --   print(n)
