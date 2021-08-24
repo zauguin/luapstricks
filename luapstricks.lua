@@ -203,6 +203,7 @@ local graphics_stack = {{
   strokeadjust = nil,
   font = nil,
   dash = nil,
+  delayed_start = nil,
 }}
 
 local char_width_storage -- Non nil only at the beginning of a Type 3 glyph. Used to export the width.
@@ -238,6 +239,7 @@ local function matrix_invert(xx, xy, yx, yy, dx, dy)
   dx, dy = - dx * xx - dy * yx, - dx * xy - dy * yy
   return xx, xy, yx, yy, dx, dy
 end
+local delayed_text = {}
 local delayed_matrix = {1, 0, 0, 1, 0, 0}
 local function update_matrix(xx, xy, yx, yy, dx, dy)
   local matrix = graphics_stack[#graphics_stack].matrix
@@ -278,18 +280,33 @@ local function update_matrix(xx, xy, yx, yy, dx, dy)
 end
 
 local function delayed_print(str)
-  pdfprint(str)
+  delayed_text[#delayed_text + 1] = str
 end
 
 local function reset_delayed(str)
+  for i=1, #delayed_text do
+    delayed_text[i] = nil
+  end
   delayed_matrix[1], delayed_matrix[2],
   delayed_matrix[3], delayed_matrix[4],
   delayed_matrix[5], delayed_matrix[6] = 1, 0, 0, 1, 0, 0
 end
 
-local function flush_delayed(str)
-  local cm_string = string.format('%.4f %.4f %.4f %.4f %.4f %.4f cm', delayed_matrix[1], delayed_matrix[2], delayed_matrix[3], delayed_matrix[4], delayed_matrix[5], delayed_matrix[6])
-  if cm_string ~= "1.0000 0.0000 0.0000 1.0000 0.0000 0.0000 cm" then
+local function flush_delayed(force_start)
+  local cm_string = string.format('%.4f %.4f %.4f %.4f %.4f %.4f cm', delayed_matrix[1], delayed_matrix[2],
+                                                                      delayed_matrix[3], delayed_matrix[4],
+                                                                      delayed_matrix[5], delayed_matrix[6])
+  if cm_string == "1.0000 0.0000 0.0000 1.0000 0.0000 0.0000 cm" then
+    cm_string = nil
+  end
+  if (cm_string or delayed_text[1] or force_start) and graphics_stack[#graphics_stack].delayed_start then
+    graphics_stack[#graphics_stack].delayed_start = nil
+    pdfprint'q'
+  end
+  for i=1, #delayed_text do
+    pdfprint(delayed_text[i])
+  end
+  if cm_string then
     pdfprint(cm_string)
   end
   return reset_delayed()
@@ -1435,7 +1452,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     local state = graphics_stack[#graphics_stack]
     local current_path = state.current_path
     if not current_path then return end
-    flush_delayed()
+    flush_delayed(true)
     for i = 1, #current_path do
       if type(current_path[i]) == 'number' then
         pdfprint(string.format('%.3f', current_path[i]))
@@ -1762,14 +1779,16 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
 
   gsave = function()
-    graphics_stack[#graphics_stack+1] = table.copy(graphics_stack[#graphics_stack])
     flush_delayed()
-    pdfprint'q'
+    graphics_stack[#graphics_stack+1] = table.copy(graphics_stack[#graphics_stack])
+    graphics_stack[#graphics_stack].delayed_start = true
   end,
   grestore = function()
+    if not graphics_stack[#graphics_stack].delayed_start then
+      pdfprint'Q'
+    end
     graphics_stack[#graphics_stack] = nil
     reset_delayed()
-    pdfprint'Q'
   end,
 
   setglobal = pop_bool,
@@ -1832,6 +1851,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     local w = 0
     if fonttype == 0x1CA then
       local characters = assert(font.getfont(fid)).characters
+      flush_delayed()
       vf.push()
       vf.fontid(fid)
       for b in string.bytes(str) do
@@ -2458,6 +2478,7 @@ local fid = font.define{
           local tokens = ps_tokens
           ps_tokens = nil
           execute_ps(tokens)
+          flush_delayed()
         end}
       }
     },
