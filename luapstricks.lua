@@ -599,16 +599,14 @@ local systemdict systemdict = {kind = 'dict', value = {
     local limit = pop_num()
     local step = pop_num()
     local initial = pop_num()
-    local coro = coroutine.wrap(function()
+    local success, err = pcall(function()
       for i=initial, limit, step do
         push(i)
         execute_ps(proc)
       end
     end)
-    local result = coro(proc)
-    if result == 'exit' or not result then
-    else
-      coroutine.yield(result)
+    if not success and err ~= 'exit' then
+      error(err)
     end
   end,
   forall = function()
@@ -619,7 +617,7 @@ local systemdict systemdict = {kind = 'dict', value = {
       obj = obj.value
       if type(obj) ~= 'table' then error'typecheck' end
     end
-    local coro = coroutine.wrap(
+    local success, err = pcall(
          obj.kind == 'array' and function()
            for i=1, #obj.value do
              push(obj.value[i])
@@ -640,37 +638,31 @@ local systemdict systemdict = {kind = 'dict', value = {
            end
          end
       or error'typecheck')
-    local result = coro(proc)
-    if result == 'exit' or not result then
-    else
-      coroutine.yield(result)
+    if not success and err ~= 'exit' then
+      error(err)
     end
   end,
   ['repeat'] = function()
     local proc = pop_proc()
     local count = pop_num()
-    local coro = coroutine.wrap(function()
+    local success, err = pcall(function()
       for i=1, count do
         execute_ps(proc)
       end
     end)
-    local result = coro(proc)
-    if result == 'exit' or not result then
-    else
-      coroutine.yield(result)
+    if not success and err ~= 'exit' then
+      error(err)
     end
   end,
   loop = function()
     local proc = pop_proc()
-    local coro = coroutine.wrap(function()
+    local success, err = pcall(function()
       while true do
         execute_ps(proc)
       end
     end)
-    local result = coro(proc)
-    if result == 'exit' or not result then
-    else
-      coroutine.yield(result)
+    if not success and err ~= 'exit' then
+      error(err)
     end
   end,
 
@@ -683,7 +675,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     local path = state.current_path
     if not path then return end
     path = table.move(path, 1, #path, 1, {}) -- We don't want to be affected by modifications
-    local coro = coroutine.wrap( function()
+    local success, err = pcall( function()
       local i = 1
       while true do
         local entry = path[i]
@@ -697,10 +689,8 @@ local systemdict systemdict = {kind = 'dict', value = {
         i = i + 1
       end
     end)
-    local result = coro(proc)
-    if result == 'exit' or not result then
-    else
-      coroutine.yield(result)
+    if not success and err ~= 'exit' then
+      error(err)
     end
   end,
   pathbbox = function()
@@ -2094,23 +2084,20 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
   stopped = function()
     local proc = pop()
-    local coro = coroutine.wrap(execute_tok)
-    local result = coro(proc)
-    if result == 'stop' then
-      push(true)
-    elseif result == nil then
+    local success, err = pcall(execute_tok, proc)
+    if success then
       push(false)
-    elseif result == 'exit' then
+    elseif err == 'exit' then
       error'exit outside of loop'
-    else
-      error'???'
+    elseif err == 'stop' or true then -- Since we don implement error handlers, all errors act like their error handler included "stop"
+      push(true)
     end
   end,
   stop = function()
-    coroutine.yield'stop'
+    error'stop'
   end,
   exit = function()
-    coroutine.yield'exit'
+    error'exit'
   end,
 
   revision = 1000,
