@@ -661,6 +661,29 @@ local systemdict systemdict = {kind = 'dict', value = {
       coroutine.yield(result)
     end
   end,
+  pathbbox = function()
+    local current_path = assert(graphics_stack[#graphics_stack].current_path, 'nocurrentpoint')
+    local i=1
+    local llx, llyx, urx, ury
+    while current_path[i] do
+      local entry = current_path[i]
+      if type(entry) == 'number' then
+        local after = current_path[i+1]
+        assert(type(after) == 'number')
+        llx = llx and llx < entry and llx or entry
+        lly = lly and lly < after and lly or after
+        urx = urx and urx > entry and urx or entry
+        ury = ury and ury > after and ury or after
+        i = i+2
+      else
+        i = i+1
+      end
+    end
+    push(llx)
+    push(lly)
+    push(urx)
+    push(ury)
+  end,
 
   ['not'] = function()
     local val = pop()
