@@ -190,7 +190,7 @@ local execute_ps, execute_tok
 
 local dictionary_stack
 local graphics_stack = {{
-  matrix = {72, 0, 0, 72, 0, 0},
+  matrix = {10, 0, 0, 10, 0, 0}, -- Chosen for consistency with GhostScript's pdfwrite
   linewidth = nil,
   current_path = nil,
   current_point = nil,
