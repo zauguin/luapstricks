@@ -1551,6 +1551,36 @@ local systemdict systemdict = {kind = 'dict', value = {
     push(x)
     push(y)
   end,
+  dtransform = function()
+    local m = pop()
+    if type(m) == 'table' and m.kind == 'array' then
+      m = m.value
+      if #m ~= 6 then error'Unexpected size of matrix' end
+    else
+      push(m)
+      m = graphics_stack[#graphics_stack].matrix
+    end
+    local y = pop_num()
+    local x = pop_num()
+    x, y = matrix_transform(x, y, m[1], m[2], m[3], m[4], 0, 0)
+    push(x)
+    push(y)
+  end,
+  idtransform = function()
+    local m = pop()
+    if type(m) == 'table' and m.kind == 'array' then
+      m = m.value
+      if #m ~= 6 then error'Unexpected size of matrix' end
+    else
+      push(m)
+      m = graphics_stack[#graphics_stack].matrix
+    end
+    local y = pop_num()
+    local x = pop_num()
+    x, y = matrix_transform(x, y, matrix_invert(m[1], m[2], m[3], m[4], 0, 0))
+    push(x)
+    push(y)
+  end,
   concatmatrix = function()
     local m3a = pop_array()
     local m3 = m3a.value
