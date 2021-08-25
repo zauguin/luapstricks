@@ -147,6 +147,7 @@ local function pop_num()
     n = n.value
   end
   if type(n) ~= 'number' then
+    push(n)
     error'typecheck'
   end
   return n
@@ -155,19 +156,30 @@ local pop_int = pop_num
 local function pop_proc()
   local v = pop()
   if type(v) ~= 'table' or v.kind ~= 'executable' or type(v.value) ~= 'table' or v.value.kind ~= 'array' then
+    push(v)
     error'typecheck'
   end
   return v.value.value
 end
 local pop_bool = pop
 local function pop_dict()
-  local dict = pop()
-  if type(dict) ~= 'table' then error'typecheck' end
+  local orig = pop()
+  local dict = orig
+  if type(dict) ~= 'table' then
+    push(orig)
+    error'typecheck'
+  end
   if dict.kind == 'executable' then
     dict = dict.value
-    if type(dict) ~= 'table' then error'typecheck' end
+    if type(dict) ~= 'table' then
+      push(orig)
+      error'typecheck'
+    end
   end
-  if dict.kind ~= 'dict' then error'typecheck' end
+  if dict.kind ~= 'dict' then
+    push(orig)
+    error'typecheck'
+  end
   return dict
 end
 local pop_array = pop
@@ -1291,10 +1303,10 @@ local systemdict systemdict = {kind = 'dict', value = {
     end
   end,
   rmoveto = function()
-    local y = pop_num()
-    local x = pop_num()
     local state = graphics_stack[#graphics_stack]
     local current_path = assert(state.current_path, 'nocurrentpoint')
+    local y = pop_num()
+    local x = pop_num()
     local current_point = state.current_point
     x, y = current_point[1] + x, current_point[2] + y
     local i = #current_path + 1
@@ -1302,20 +1314,20 @@ local systemdict systemdict = {kind = 'dict', value = {
     current_point[1], current_point[2] = x, y
   end,
   lineto = function()
-    local y = pop_num()
-    local x = pop_num()
     local state = graphics_stack[#graphics_stack]
     local current_path = assert(state.current_path, 'nocurrentpoint')
+    local y = pop_num()
+    local x = pop_num()
     local i = #current_path + 1
     current_path[i], current_path[i+1], current_path[i+2] = x, y, 'l'
     local current_point = state.current_point
     current_point[1], current_point[2] = x, y
   end,
   rlineto = function()
-    local y = pop_num()
-    local x = pop_num()
     local state = graphics_stack[#graphics_stack]
     local current_path = assert(state.current_path, 'nocurrentpoint')
+    local y = pop_num()
+    local x = pop_num()
     local current_point = state.current_point
     x, y = x + current_point[1], y + current_point[2]
     local i = #current_path + 1
@@ -1323,14 +1335,14 @@ local systemdict systemdict = {kind = 'dict', value = {
     current_point[1], current_point[2] = x, y
   end,
   curveto = function()
+    local state = graphics_stack[#graphics_stack]
+    local current_path = assert(state.current_path, 'nocurrentpoint')
     local y3 = pop_num()
     local x3 = pop_num()
     local y2 = pop_num()
     local x2 = pop_num()
     local y1 = pop_num()
     local x1 = pop_num()
-    local state = graphics_stack[#graphics_stack]
-    local current_path = assert(state.current_path, 'nocurrentpoint')
     local i = #current_path + 1
     current_path[i], current_path[i+1], current_path[i+2], current_path[i+3], current_path[i+4], current_path[i+5], current_path[i+6] = x1, y1, x2, y2, x3, y3, 'c'
     local current_point = state.current_point
@@ -1374,16 +1386,16 @@ local systemdict systemdict = {kind = 'dict', value = {
     drawarc(xc, yc, r, a1, a2)
   end,
   arcto = function()
+    local state = graphics_stack[#graphics_stack]
+    local current_path = assert(state.current_path, 'nocurrentpoint')
+    local current_point = state.current_point
+    local x0, y0 = current_point[1], current_point[2]
+
     local r = pop_num()
     local y2 = pop_num()
     local x2 = pop_num()
     local y1 = pop_num()
     local x1 = pop_num()
-
-    local state = graphics_stack[#graphics_stack]
-    local current_path = assert(state.current_path, 'nocurrentpoint')
-    local current_point = state.current_point
-    local x0, y0 = current_point[1], current_point[2]
 
     local dx1, dy1 = x1 - x0, y1 - y0
     local dx2, dy2 = x2 - x1, y2 - y1
@@ -1801,7 +1813,7 @@ local systemdict systemdict = {kind = 'dict', value = {
 
   stringwidth = function()
     local str = pop_string().value
-      local state = graphics_stack[#graphics_stack]
+    local state = graphics_stack[#graphics_stack]
     local psfont = assert(state.font, 'invalidfont').value
     local fid = psfont.FID
     local matrix = psfont.FontMatrix.value
@@ -1824,10 +1836,10 @@ local systemdict systemdict = {kind = 'dict', value = {
     push(y)
   end,
   show = function()
-    local str = pop_string().value
     local state = graphics_stack[#graphics_stack]
     local current_point = assert(state.current_point, 'nocurrentpoint')
     local rawpsfont = assert(state.font, 'invalidfont')
+    local str = pop_string().value
     local psfont = rawpsfont.value
     local fid = psfont.FID
     local matrix = psfont.FontMatrix.value
