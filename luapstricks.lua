@@ -11,6 +11,8 @@ local whitespace = (l.S'\0\t\n\r\f ' + '%' * (1-l.P'\n')^0 * (l.P'\n' + -1))^1
 
 local regular = 1 - l.S'\0\t\n\r\f %()<>[]{}/'
 
+local exitmarker = {}
+
 -- local integer = l.S'+-'^-1 * l.R'09'^1 / tonumber
 local real = l.S'+-'^-1 * (l.R'09'^1 * ('.' * l.R'09'^0)^-1 + '.' * l.R'09'^1) * (l.S'Ee' * l.S'+-'^-1 * l.R'09'^1)^-1 / tonumber
 local radix_scanner = setmetatable({}, {__index = function(t, b)
@@ -605,7 +607,7 @@ local systemdict systemdict = {kind = 'dict', value = {
         execute_ps(proc)
       end
     end)
-    if not success and err ~= 'exit' then
+    if not success and err ~= exitmarker then
       error(err)
     end
   end,
@@ -638,7 +640,7 @@ local systemdict systemdict = {kind = 'dict', value = {
            end
          end
       or error'typecheck')
-    if not success and err ~= 'exit' then
+    if not success and err ~= exitmarker then
       error(err)
     end
   end,
@@ -650,7 +652,7 @@ local systemdict systemdict = {kind = 'dict', value = {
         execute_ps(proc)
       end
     end)
-    if not success and err ~= 'exit' then
+    if not success and err ~= exitmarker then
       error(err)
     end
   end,
@@ -661,7 +663,7 @@ local systemdict systemdict = {kind = 'dict', value = {
         execute_ps(proc)
       end
     end)
-    if not success and err ~= 'exit' then
+    if not success and err ~= exitmarker then
       error(err)
     end
   end,
@@ -689,7 +691,7 @@ local systemdict systemdict = {kind = 'dict', value = {
         i = i + 1
       end
     end)
-    if not success and err ~= 'exit' then
+    if not success and err ~= exitmarker then
       error(err)
     end
   end,
@@ -2087,8 +2089,6 @@ local systemdict systemdict = {kind = 'dict', value = {
     local success, err = pcall(execute_tok, proc)
     if success then
       push(false)
-    elseif err == 'exit' then
-      error'exit outside of loop'
     elseif err == 'stop' or true then -- Since we don implement error handlers, all errors act like their error handler included "stop"
       push(true)
     end
@@ -2097,7 +2097,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     error'stop'
   end,
   exit = function()
-    error'exit'
+    error(exitmarker)
   end,
 
   revision = 1000,
