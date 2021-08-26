@@ -293,7 +293,8 @@ local graphics_stack = {{
   color = {},
   fillconstantalpha = 1,
   strokeconstantalpha = 1,
-  alphaisshape = false,
+  alphaisshape = nil,
+  blendmode = nil,
   linejoin = nil,
   linecap = nil,
   strokeadjust = nil,
@@ -1817,6 +1818,33 @@ local systemdict systemdict = {kind = 'dict', value = {
     local alpha = pop_num()
     graphics_stack[#graphics_stack].strokeconstantalpha = alpha
     delayed_print(ExtGState['<</CA ' .. alpha .. '>>'])
+  end,
+  ['.currentalphaisshape'] = function()
+    local ais = graphics_stack[#graphics_stack].alphaisshape
+    if ais == nil then error'alphaisshape has to be set before it is queried' end
+    push(ais)
+  end,
+  ['.setalphaisshape'] = function()
+    local ais = pop_bool()
+    graphics_stack[#graphics_stack].alphaisshape = ais
+    delayed_print(ExtGState['<</AIS ' .. (ais and 'true' or 'false') .. '>>'])
+  end,
+  ['.currentblendmode'] = function()
+    local blendmode = graphics_stack[#graphics_stack].blendmode
+    if blendmode == nil then error'blendmode has to be set before it is queried' end
+    push{kind = 'name', value = blendmode}
+  end,
+  ['.setblendmode'] = function()
+    local blendmode = pop()
+    if type(blendmode) == 'string' then
+    elseif type(blendmode) == 'table' and blendmode.kind == 'name' then
+      blendmode = blendmode.value
+    else
+      push(blendmode)
+      error'typecheck'
+    end
+    graphics_stack[#graphics_stack].blendmode = blendmode
+    delayed_print(ExtGState['<</BM /' .. blendmode .. '>>'])
   end,
   newpath = function()
     local state = graphics_stack[#graphics_stack]
