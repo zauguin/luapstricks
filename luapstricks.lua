@@ -2066,6 +2066,22 @@ local systemdict systemdict = {kind = 'dict', value = {
     local state = graphics_stack[#graphics_stack]
     state.font = fontdict
   end,
+  ['.findfontid'] = function()
+    local fid = pop_int()
+
+    if font.frozen(fid) == nil then
+      push(fid)
+      error'invalidfont'
+    end
+    local fontsize_inv = 65782/pdf.getfontsize(fid)
+    local fontname = tex.fontname(fid)
+    return push{kind = 'dict', value = {
+      FID = fid,
+      FontMatrix = {kind = 'array', value = {fontsize_inv, 0, 0, fontsize_inv, 0, 0}},
+      FontName = {kind = 'name', value = fontname},
+      FontType = 0x1CA,
+    }}
+  end,
   findfont = function()
     local fontname = pop_key()
     local fontdict = FontDirectory[fontname]
