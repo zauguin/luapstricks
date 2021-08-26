@@ -120,12 +120,94 @@ local function parse_ps(s)
 end
 
 local font_aliases = {
+  -- First add some help to find the TeX Gyre names under the corresponding URW font names
+  ['URWGothic-Book'] = 'kpse:texgyreadventor-regular.otf',
+  ['URWGothic-BookOblique'] = 'kpse:texgyreadventor-italic.otf',
+  ['URWGothic-Demi'] = 'kpse:texgyreadventor-bold.otf',
+  ['URWGothic-DemiOblique'] = 'kpse:texgyreadventor-bolditalic.otf',
+
+  ['URWBookman-Light'] = 'kpse:texgyrebonum-regular.otf',
+  ['URWBookman-LightItalic'] = 'kpse:texgyrebonum-italic.otf',
+  ['URWBookman-Demi'] = 'kpse:texgyrebonum-bold.otf',
+  ['URWBookman-DemiItalic'] = 'kpse:texgyrebonum-bolditalic.otf',
+
+  ['NimbusMonoPS-Regular'] = 'kpse:texgyrecursor-regular.otf',
+  ['NimbusMonoPS-Italic'] = 'kpse:texgyrecursor-italic.otf',
+  ['NimbusMonoPS-Bold'] = 'kpse:texgyrecursor-bold.otf',
+  ['NimbusMonoPS-BoldItalic'] = 'kpse:texgyrecursor-bolditalic.otf',
+
+  ['NimbusSans-Regular'] = 'kpse:texgyreheros-regular.otf',
+  ['NimbusSans-Italic'] = 'kpse:texgyreheros-italic.otf',
+  ['NimbusSans-Bold'] = 'kpse:texgyreheros-bold.otf',
+  ['NimbusSans-BoldItalic'] = 'kpse:texgyreheros-bolditalic.otf',
+
+  ['NimbusSansNarrow-Regular'] = 'kpse:texgyreheroscn-regular.otf',
+  ['NimbusSansNarrow-Oblique'] = 'kpse:texgyreheroscn-italic.otf',
+  ['NimbusSansNarrow-Bold'] = 'kpse:texgyreheroscn-bold.otf',
+  ['NimbusSansNarrow-BoldOblique'] = 'kpse:texgyreheroscn-bolditalic.otf',
+
+  ['NewCenturySchlbk-Roman'] = 'kpse:texgyreschola-regular.otf',
+  ['NewCenturySchlbk-Italic'] = 'kpse:texgyreschola-italic.otf',
+  ['NewCenturySchlbk-Bold'] = 'kpse:texgyreschola-bold.otf',
+  ['NewCenturySchlbk-BoldItalic'] = 'kpse:texgyreschola-bolditalic.otf',
+
+  ['Palatino-Roman'] = 'kpse:texgyrepagella-regular.otf',
+  ['Palatino-Italic'] = 'kpse:texgyrepagella-italic.otf',
+  ['Palatino-Bold'] = 'kpse:texgyrepagella-bold.otf',
+  ['Palatino-BoldItalic'] = 'kpse:texgyrepagella-bolditalic.otf',
+
+  ['NimbusRoman-Regular'] = 'kpse:texgyretermes-regular.otf',
+  ['NimbusRoman-Italic'] = 'kpse:texgyretermes-italic.otf',
+  ['NimbusRoman-Bold'] = 'kpse:texgyretermes-bold.otf',
+  ['NimbusRoman-BoldItalic'] = 'kpse:texgyretermes-bolditalic.otf',
+
+  ['ZapfChancery-MediumItalic'] = 'kpse:texgyrechorus-mediumitalic.otf',
+
+  -- The two symbol fonts don't have OpenType equivalents in TeX Live
+  -- so we use TFM based fonts instead
+  ['StandardSymbolsPS'] = 'usyr',
+  ['Dingbats'] = 'uzdr',
+}
+-- Then map the standard 35 font names to the URW names as done by GhostScript
+-- (Except for New Century Schoolbook which got mapped directly before.
+for psname, remapped in next, {
+  ['AvantGarde-BookOblique'] = 'URWGothic-BookOblique',
+  ['AvantGarde-Book'] = 'URWGothic-Book',
+  ['AvantGarde-DemiOblique'] = 'URWGothic-DemiOblique',
+  ['AvantGarde-Demi'] = 'URWGothic-Demi',
+  ['Bookman-DemiItalic'] = 'URWBookman-DemiItalic',
+  ['Bookman-Demi'] = 'URWBookman-Demi',
+  ['Bookman-LightItalic'] = 'URWBookman-LightItalic',
+  ['Bookman-Light'] = 'URWBookman-Light',
+  ['Courier-Bold'] = 'NimbusMonoPS-Bold',
+  ['Courier-BoldOblique'] = 'NimbusMonoPS-BoldItalic',
+  ['Courier'] = 'NimbusMonoPS-Regular',
+  ['Courier-Oblique'] = 'NimbusMonoPS-Italic',
+  ['Helvetica-Bold'] = 'NimbusSans-Bold',
+  ['Helvetica-BoldOblique'] = 'NimbusSans-BoldItalic',
+  ['Helvetica-Narrow-Bold'] = 'NimbusSansNarrow-Bold',
+  ['Helvetica-Narrow-BoldOblique'] = 'NimbusSansNarrow-BoldOblique',
+  ['Helvetica-Narrow'] = 'NimbusSansNarrow-Regular',
+  ['Helvetica-Narrow-Oblique'] = 'NimbusSansNarrow-Oblique',
+  ['Helvetica'] = 'NimbusSans-Regular',
+  ['Helvetica-Oblique'] = 'NimbusSans-Italic',
+  ['Times-BoldItalic'] = 'NimbusRoman-BoldItalic',
+  ['Times-Bold'] = 'NimbusRoman-Bold',
+  ['Times-Italic'] = 'NimbusRoman-Italic',
+  ['Times-Roman'] = 'NimbusRoman-Regular',
+
+  ['Symbol'] = 'StandardSymbolsPS',
+  ['StandardSymL'] = 'StandardSymbolsPS',
+  ['ZapfDingbats'] = 'Dingbats',
+
+  -- Some additional names needed for PSTricks
   ['NimbusSanL-Regu'] = 'zhvreg',
   ['NimbusRomNo9L-Regu'] = 'nimbusromanregular',
   ['NimbusRomNo9L-Bold'] = 'nimbusromanbold',
   ['NimbusMonL-Regu'] = 'zcolight',
-  ['StandardSymL'] = 'StandardSymbolsPS',
-}
+} do
+  font_aliases[psname] = font_aliases[remapped] or remapped
+end
 
 local operand_stack = {}
 
