@@ -1,7 +1,7 @@
 \RequirePackage{pdfmanagement-testphase}
 \DeclareDocumentMetadata{uncompress}
 \documentclass{article}
-\usepackage{luapstricks}
+\usepackage{pstricks}
 \pagestyle{empty}
 \begin{document}
 \section*{Dots}

@@ -2,7 +2,7 @@
 \DeclareDocumentMetadata{uncompress}
 % https://tex.stackexchange.com/a/183048
 \documentclass{article}
-\usepackage{luapstricks}
+\usepackage{pstricks}
 \def\Frames{%
 \psframe*[linecolor=red](0,1)(3,4)
 \psframe[fillcolor=blue,fillstyle=shape](2,2)(5,5)
