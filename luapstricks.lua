@@ -202,6 +202,7 @@ for psname, remapped in next, {
 
   -- Some additional names needed for PSTricks
   ['NimbusSanL-Regu'] = 'NimbusSans-Regular',
+  ['NimbusSanL-Bold'] = 'NimbusSans-Bold',
   ['NimbusRomNo9L-Regu'] = 'NimbusRoman-Regular',
   ['NimbusRomNo9L-Bold'] = 'NimbusRoman-Bold',
   ['NimbusMonL-Regu'] = 'NimbusMonoPS-Regular',
