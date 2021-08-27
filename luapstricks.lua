@@ -201,10 +201,10 @@ for psname, remapped in next, {
   ['ZapfDingbats'] = 'Dingbats',
 
   -- Some additional names needed for PSTricks
-  ['NimbusSanL-Regu'] = 'zhvreg',
-  ['NimbusRomNo9L-Regu'] = 'nimbusromanregular',
-  ['NimbusRomNo9L-Bold'] = 'nimbusromanbold',
-  ['NimbusMonL-Regu'] = 'zcolight',
+  ['NimbusSanL-Regu'] = 'NimbusSans-Regular',
+  ['NimbusRomNo9L-Regu'] = 'NimbusRoman-Regular',
+  ['NimbusRomNo9L-Bold'] = 'NimbusRoman-Bold',
+  ['NimbusMonL-Regu'] = 'NimbusMonoPS-Regular',
 } do
   font_aliases[psname] = font_aliases[remapped] or remapped
 end
