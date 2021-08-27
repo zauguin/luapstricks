@@ -1,0 +1,346 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{uncompress}
+\documentclass{article}
+\usepackage{luapstricks}
+\usepackage{pstricks-add}
+\pagestyle{empty}
+% short
+\newcommand{\BSS}[1]{\textbf{\textbackslash{#1}}}
+\newcommand{\AC}[1]{\{#1\}}
+\newcommand{\BS}[1]{$\backslash$#1}
+\begin{document}
+\section{Commands without asterik}
+
+\psset{llx=-.5cm,lly=-.5cm,urx=.2cm,ury=.2cm,xAxisLabel={}, yAxisLabel={}}
+\psset{linecolor=blue,linewidth=2pt}
+
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psline(0, 0)(1, 1)(2, 1)(3, 3)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psdots(1, 0.5)(2, 2.5)(3, 1.5)
+\end{psgraph}
+ &
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \pspolygon(1, 0.5)(2, 3)(3, 1.5)(2.5,1)
+\end{psgraph} \\
+\hline
+\BSS{psline}    & \BSS{psdots}  & \BSS{pspolygon} \\
+(0, 0)(1,1)(2,1)(3,3)   & (1,0.5)(2,2.5)(3,1.5) & (1,0.5)(2,3)(3,1.5)(2.5,1) \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psframe(1, 1)(3, 3)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psdiamond(2,2)(1,1)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+ \pstriangle(2,1)(2,2)
+\end{psgraph} \\
+\hline
+\BSS{psframe} & \BSS{psdiamond} & \BSS{pstriangle} \\
+(1, 1)(3, 3)  & (2,2)(1,1)      & (2,1)(2,2) \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \pscircle(2,2){1}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psarc(2,2){1}{-30}{60}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psarcn(2,2){1}{-30}{60}
+\end{psgraph} \\
+\hline
+\BSS{pscircle} & \BSS{psarc}                & \BSS{psarcn} \\
+(2,2)\AC{1}    & (2,2)\AC{1}\AC{-30}\AC{60} & (2,2)\AC{1}\AC{-30}\AC{60} \\
+\hline
+\end{tabular}
+
+\bigskip
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psellipse(2, 2)(1.5,1)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psellipticarc(2, 2)(1.5,1){150}{30}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psellipticarcn(2, 2)(1.5,1){150}{30}
+\end{psgraph} \\
+\hline
+\BSS{psellipse} & \BSS{psellipticarc}          & \BSS{psellipticarcn} \\
+(2, 2)(1.5,1)   & (2, 2)(1.5,1)\AC{150}\AC{30} & (2, 2)(1.5,1)\AC{150}\AC{30} \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \pscurve[showpoints=true](1,1)(2,3)(3,2)(2,1)(3,1)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psccurve[showpoints=true](1,1)(2,3)(3,2)(2,1)(3,1)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psecurve[showpoints=true](1,1)(2,3)(3,2)(2,1)(3,1)
+\end{psgraph} \\
+\hline
+\BSS{pscurve}[\textcolor{red}{showpoints}=true] & \BSS{psccurve}[showpoints=true] & \BSS{psecurve}[showpoints=true] \\
+(1,1)(2,3)(3,2)(2,1)(3,1)                       & (1,1)(2,3)(3,2)(2,1)(3,1)       & (1,1)(2,3)(3,2)(2,1)(3,1) \\
+\hline
+\end{tabular}
+
+\bigskip
+\begin{tabular}{|c|c|c|}
+\hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \pswedge(1,2){2}{-30}{60}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psarc[showpoints=true](1,2){2}{-30}{60}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psbezier[showpoints=true](1,0)(4,4)(0,4)(3,0)
+\end{psgraph} \\
+\hline
+\BSS{pswedge}              & \BSS{psarc}[showpoints=true] & \BSS{psbezier}[showpoints=true] \\
+(1,2)\AC{2}\AC{-30}\AC{60} &(1,2)\AC{2}\AC{-30}\AC{60}    & (1,0)(4,4)(0,4)(3,0) \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \qline(1,1)(3,3)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \qdisk(2,2){20pt}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psparabola(1,1)(2,3)
+\end{psgraph} \\
+\hline
+\BSS{qline}(1,1)(3,3) & \BSS{qdisk}(2,2)\AC{20pt} & \BSS{psparabola} \\
+                      &                           &  (1,1)(2,3) \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|c|}
+\hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psRing(2,2){1}{2}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psRing(2,2)[180,60]{1}{2}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \pscspline[showpoints](0,4)(1,1)(3,3)(4,0)
+\end{psgraph} \\
+\hline
+\BSS{psRing} (2,2)\AC{1}\AC{2}  & \BSS{psRing} (2,2) [180,60] \AC{1}\AC{2}  & \BSS{pscspline}[showpoints](0,4)(1,1)(3,3)  \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|}
+\hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0,shift=*](0,0)(4,2){4cm}{4cm}
+  \psellipseAB(0,0)(4,2){1}
+  \pscircle[linestyle=dotted](2,1){1}
+  \psdots[linecolor=red](0,0)(4,2)
+\end{psgraph}
+&
+\parbox[c]{8cm}{
+\BSS{psellipseAB}(0,0)(4,2)\AC{1} \\
+\BS{pscircle}[linestyle=dotted](2,1)\AC{1} \\
+\BS{psdots}[linecolor=red](0,0)(4,2) } \\
+\hline
+\end{tabular}
+
+\section{Commands with asterik}
+
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psline*(0, 0)(1, 1)(2, 1)(3, 3)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psdots*(1, 0.5)(2, 2.5)(3, 1.5)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \pspolygon*(1, 0.5)(2, 3)(3, 1.5)(2.5,1)
+\end{psgraph} \\
+\hline
+\BSS{psline*}         & \BSS{psdots*}         & \BSS{pspolygon*} \\
+(0, 0)(1,1)(2,1)(3,3) & (1,0.5)(2,2.5)(3,1.5) & (1,0.5)(2,3)(3,1.5)(2.5,1) \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|c|}
+\hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psframe*(1, 1)(3, 3)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psdiamond*(2,2)(1,1)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \pstriangle*(2,1)(2,2)
+\end{psgraph} \\
+\hline
+\BSS{psframe*} & \BSS{psdiamond*} & \BSS{pstriangle*} \\
+(1, 1)(3, 3)   & (2,2)(1,1)       & (2,1)(2,2) \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \pscircle*(2,2){1}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psarc*(2,2){1}{-30}{60}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psarcn*(2,2){1}{-30}{60}
+\end{psgraph} \\
+\hline
+\BSS{pscircle*} & \BSS{psarc*}               & \BSS{psarcn*} \\
+(2,2)\AC{1}     & (2,2)\AC{1}\AC{-30}\AC{60} & (2,2)\AC{1}\AC{-30}\AC{60} \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psellipse*(2, 2)(1.5,1)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psellipticarc*(2, 2)(1.5,1){150}{30}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psellipticarcn*(2, 2)(1.5,1){150}{30}
+\end{psgraph} \\
+\hline
+\BSS{psellipse*} & \BSS{psellipticarc*}         & \BSS{psellipticarcn*} \\
+(2, 2)(1.5,1)    & (2, 2)(1.5,1)\AC{150}\AC{30} & (2, 2)(1.5,1)\AC{150}\AC{30} \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \pscurve*[showpoints=true](1,1)(2,3)(3,2)(2,1)(3,1)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psccurve*[showpoints=true](1,1)(2,3)(3,2)(2,1)(3,1)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psecurve*[showpoints=true](1,1)(2,3)(3,2)(2,1)(3,1)
+\end{psgraph} \\
+\hline
+\BSS{pscurve*}[\textcolor{red}{showpoints}=true] & \BSS{psccurve*}[showpoints=true] & \BSS{psecurve*}[showpoints=true] \\
+(1,1)(2,3)(3,2)(2,1)(3,1)                        & (1,1)(2,3)(3,2)(2,1)(3,1)        & (1,1)(2,3)(3,2)(2,1)(3,1) \\
+\hline
+\end{tabular}
+
+\bigskip
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \pswedge*(1,2){2}{-30}{60}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psarc*[showpoints=true](1,2){2}{-30}{60}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psbezier*[showpoints=true](1,0)(4,4)(0,4)(3,0)
+\end{psgraph} \\
+\hline
+\BSS{pswedge*}             & \BSS{psarc*}[showpoints=true] & \BSS{psbezier*}[showpoints=true] \\
+(1,2)\AC{2}\AC{-30}\AC{60} & (1,2)\AC{2}\AC{-30}\AC{60}    & (1,0)(4,4)(0,4)(3,0) \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psparabola*(1,1)(2,3)
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psRing*(2,2){1}{2}
+\end{psgraph}
+&
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0](0,0)(4,4){4cm}{4cm}
+  \psRing*(2,2)[180,60]{1}{2}
+\end{psgraph} \\
+\hline
+\BSS{psparabola*} & \BSS{psRing*} (2,2)\AC{1}\AC{2} & \BSS{psRing*} (2,2) [180,60] \AC{1}\AC{2} \\
+(1,1)(2,3)       &                                & \\
+\hline
+\end{tabular}
+
+\bigskip
+
+\begin{tabular}{|c|c|} \hline
+\begin{psgraph}[axesstyle=none,xticksize=0 4cm,yticksize=0 4cm,subticks=0,shift=*](0,0)(4,2){4cm}{4cm}
+  \psellipseAB*(0,0)(4,2){1}
+  \pscircle[linestyle=dotted](2,1){1}
+  \psdots[linecolor=red](0,0)(4,2)
+\end{psgraph}
+&
+\parbox[c]{8cm}{
+\BSS{psellipseAB*}(0,0)(4,2)\AC{1} \\
+\BS{pscircle}[linestyle=dotted](2,1)\AC{1} \\
+\BS{psdots}[linecolor=red](0,0)(4,2) } \\
+\hline
+\end{tabular}
+\end{document}

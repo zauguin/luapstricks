@@ -1,0 +1,27 @@
+% arara: latex
+% arara: dvips
+% arara: ps2pdf: { options : [ -dALLOWPSTRANSPARENCY ] }
+% arara: clean: { extensions : [ aux, log, dvi, ps ] }
+\documentclass{article}
+\usepackage{luapstricks}
+\pagestyle{empty}
+\begin{document}
+% liftpen=0
+\begin{pspicture}[showgrid](4,3)
+  \pscustom[linewidth=2pt,fillstyle=solid,fillcolor=gray]{%
+    \pscurve(0,2)(1,2.5)(2,1.5)(4,3)
+    \pscurve(4,1)(3,0.5)(2,1)(1,0)(0,.5)}
+\end{pspicture}\hspace*{1em}
+% liftpen=1
+\begin{pspicture}[showgrid](4,3)
+  \pscustom[linewidth=2pt,fillstyle=solid,fillcolor=gray]{%
+    \pscurve(0,2)(1,2.5)(2,1.5)(4,3)
+    \pscurve[liftpen=1](4,1)(3,0.5)(2,1)(1,0)(0,.5)}
+\end{pspicture}\hspace*{1em}
+% liftpen=2
+\begin{pspicture}[showgrid](4,3)
+  \pscustom[linewidth=2pt,fillstyle=solid,fillcolor=gray]{%
+    \pscurve(0,2)(1,2.5)(2,1.5)(4,3)
+    \pscurve[liftpen=2](4,1)(3,0.5)(2,1)(1,0)(0,.5)}
+\end{pspicture}
+\end{document}
