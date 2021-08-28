@@ -1615,7 +1615,7 @@ local systemdict systemdict = {kind = 'dict', value = {
       if type(entry) == 'string' then
         if entry == 'c' then
           assert(i - last_op == 6)
-          flatten(new_path, 1, saved_x, saved_y, table.unpack(old_path, last_op, i-1))-- TODO Replace 1 with flatten graphic state parameter
+          flatten(new_path, .1, saved_x, saved_y, table.unpack(old_path, last_op, i-1))-- TODO Replace 1 with flatness graphic state parameter
           table.move(old_path, last_op + 4, last_op + 5, #new_path + 1, new_path)
           new_path[#new_path+1] = 'l'
         else
