@@ -1,3 +1,9 @@
+# usage: 
+# runTests.sh        runs all files
+# runTests.sh 03     runs files >= 03
+# runTests.sh 03 06  runs files >= 03 && <= 06
+# runTests.sh 03 03  runs only file test03
+
 test00.tex     # blendmode and transparency 
 test01.tex     # grids
 test02.tex     # liftpen
@@ -5,3 +11,5 @@ test03.tex     # transparency
 test04.tex     # gridfont
 test05.tex     # dot list with \psdot
 test06.tex     # arrows
+
+
