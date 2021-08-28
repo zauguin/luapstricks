@@ -1,3 +1,6 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{uncompress}
+
 \documentclass{standalone}
 \usepackage{pstricks}
 \pagestyle{empty}

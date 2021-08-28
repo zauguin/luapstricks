@@ -1,3 +1,6 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{uncompress}
+
 \documentclass[parskip=half-,DIV=13]{scrartcl}
 %\usepackage{luapstricks}
 \usepackage{pstricks-add}
