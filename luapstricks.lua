@@ -302,6 +302,7 @@ local graphics_stack = {{
   font = nil,
   dash = nil,
   delayed_start = nil,
+  flatness = 1,
 }}
 
 local char_width_storage -- Non nil only at the beginning of a Type 3 glyph. Used to export the width.
@@ -1335,6 +1336,9 @@ local systemdict systemdict = {kind = 'dict', value = {
   currentlinewidth = function()
     push(assert(graphics_stack[#graphics_stack].linewidth, 'linewidth has to be set before it is queried'))
   end,
+  currentflat = function()
+    push(graphics_stack[#graphics_stack].flatness)
+  end,
   setlinewidth = function()
     local lw = pop_num()
     graphics_stack[#graphics_stack].linewidth = lw
@@ -1364,6 +1368,11 @@ local systemdict systemdict = {kind = 'dict', value = {
       mypatt[i] = string.format('%.3f', patt[i])
     end
     delayed_print(string.format('[%s] %.3f d', table.concat(mypatt, ' '), offset))
+  end,
+  setflat = function()
+    local flatness = pop_num()
+    graphics_stack[#graphics_stack].flatness = flatness
+    delayed_print(string.format('%.3f i', flatness))
   end,
   currentpoint = function()
     local current_point = assert(graphics_stack[#graphics_stack].current_point, 'nocurrentpoint')
