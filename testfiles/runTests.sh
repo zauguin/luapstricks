@@ -24,6 +24,7 @@ runFile test02.tex     # liftpen
 runFile test03.tex     # transparency
 runFile test04.tex     # gridfont
 runFile test05.tex     # psdot
+runFile test06.tex     # arrows
 
 
 

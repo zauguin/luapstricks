@@ -4,3 +4,4 @@ test02.tex     # liftpen
 test03.tex     # transparency
 test04.tex     # gridfont
 test05.tex     # dot list with \psdot
+test06.tex     # arrows

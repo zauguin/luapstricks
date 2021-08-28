@@ -1,0 +1,73 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\documentclass[parskip=half-,DIV=13]{scrartcl}
+\usepackage{pstricks}
+\usepackage{libertinus}
+\usepackage{multido,array,listings}
+\pagestyle{empty}
+\begin{document}
+\section*{Arrows}
+
+
+\subsection*{Available arrow types}
+
+  \def\myline#1{\psline[linecolor=red,linewidth=0.5pt,arrowscale=1.5]{#1}(0,1ex)(1.3,1ex)}%
+  \def\mylineA#1{\psline[linecolor=red,linewidth=0.5pt,arrowscale=4.5]{#1}(0,1ex)(2,1ex)}%
+  \psset{arrowscale=1.5}
+  \begin{tabular}{@{} c @{\qquad} p{3cm} l @{}}%
+    Value & Example & Name \\[2pt]\hline
+    \texttt{-}      & \myline{-}      & None\\
+    \texttt{<->}    & \myline{<->}    & Arrowheads.\\
+    \texttt{>-<}    & \myline{>-<}    & Reverse arrowheads.\\
+    \texttt{<{<}-{>}>}  & \myline{<<->>}  & Double arrowheads.\\
+    \texttt{{>}>-{<}<}  & \myline{>>-<<}  & Double reverse arrowheads.\\
+    \texttt{{|}-{|}}    & \myline{|-|}    & T-bars, flush to endpoints.\\
+    \texttt{{|}*-{|}*}  & \myline{|*-|*}  & T-bars, centered on endpoints.\\
+    \texttt{[-]}    & \myline{[-]}    & Square brackets.\\
+    \texttt{]-[}    & \myline{]-[}    & Reversed square brackets.\\
+    \texttt{(-)}    & \myline{(-)}    & Rounded brackets.\\
+    \texttt{)-(}    & \myline{)-(}    & Reversed rounded brackets.\\
+    \texttt{o-o}    & \myline{o-o}    & Circles, centered on endpoints.\\
+    \texttt{*-*}    & \myline{*-*}    & Disks, centered on endpoints.\\
+    \texttt{oo-oo}  & \myline{oo-oo}  & Circles, flush to endpoints.\\
+    \texttt{**-**}  & \myline{**-**}  & Disks, flush to endpoints.\\
+    \texttt{{|}<->{|}}  & \myline{|<->|}  & T-bars and arrows.\\
+    \texttt{{|}>-<{|}}  & \myline{|>-<|}  & T-bars and reverse arrows.\\
+    \texttt{h-h{}}   & \myline{h-h}    & left/right hook arrows.\\
+    \texttt{H-H{}}   & \myline{H-H}    & left/right hook arrows.\\
+    \texttt{v-v}   & \myline{v-v}    & left/right inside vee arrows.\\
+    \texttt{V-V}   & \myline{V-V}    & left/right outside vee arrows.\\
+    \texttt{f-f}   & \myline{f-f}    & left/right inside filled arrows.\\
+    \texttt{F-F}   & \myline{F-F}    & left/right outside filled arrows.\\
+    \texttt{t-t}   & \myline{t-t}    & left/right inside slash arrows.\\[5pt]
+    \texttt{T-T}   & \myline{T-T}    & left/right outside slash arrows.\\
+%
+    \texttt{<D-D>}   & \mylineA{<D-D>}    & curved  arrows.\\
+    \texttt{<D<D-D>D>}   & \mylineA{<D<D-D>D>}    & curved doubled arrows.\\
+    \texttt{D>-<D}   & \mylineA{D>-<D}    & curved  arrows, tip inside.\\
+    \texttt{<T-T>}   & \myline{<T-T>}    & curved lines.\\
+%    \texttt{>T-T<}   & \mylineA{>T-T<}    & \TikZ\ like arrows.\\
+    \hline
+  \end{tabular}
+
+
+\subsection*{\texttt{tippcolor}}
+\minipage{0.3\linewidth}
+\begin{pspicture}[showgrid](4.2,3.25)
+\psline[tipcolor=red,linecolor=green,arrowscale=2]{<T-}(0,3)(4,3)
+\psline[arrowscale=2,tipcolor=blue]{<T-T>}(0,2)(4,2)
+\psline{-T>}(0,1)(4,1)
+\end{pspicture}
+\endminipage
+\minipage{0.68\linewidth}
+\begin{lstlisting}[basicstyle=\ttfamily\small,language={[LaTeX]TeX}]
+\begin{pspicture}[showgrid](4.2,3.25)
+\psline[tipcolor=red,linecolor=green,arrowscale=2]{<T-}(0,3)(4,3)
+\psline[arrowscale=2,tipcolor=blue]{<T-T>}(0,2)(4,2)
+\psline{-T>}(0,1)(4,1)
+\end{pspicture}
+\end{lstlisting}
+\endminipage
+
+
+\end{document}
