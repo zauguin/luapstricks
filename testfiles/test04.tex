@@ -1,0 +1,21 @@
+\documentclass{standalone}
+\usepackage{libertinus}
+\usepackage{pstricks}
+\pagestyle{empty}
+\begin{document}
+
+\begin{pspicture}(-.5,-.5)(2.5,2.5)
+  \psgrid[gridwidth=2pt](2,2)%       default is Helvetica
+\end{pspicture}
+\qquad\sffamily
+\begin{pspicture}(-.5,-.5)(2.5,2.5)
+  \psgrid[gridcolor=red,griddots=10,subgriddots=5,gridfont={}](2,2)% current font
+\end{pspicture}
+\qquad
+\begin{pspicture}(-.5,-.5)(2.5,2.5)
+  \psgrid[gridcolor=red,gridfont=Courier](2,2) % Courier
+\end{pspicture}
+
+\end{document}
+
+

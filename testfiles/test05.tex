@@ -1,0 +1,85 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+\documentclass{article}
+\usepackage{pstricks}
+\usepackage{multido,array,longtable}
+\pagestyle{empty}
+\begin{document}
+\section*{Dots}
+% from pst-news2006
+\psset{dotscale=1.5}
+\def\multiDot#1{\multido{\nA=0+1}{3}{\psdot[dotstyle=#1,dotscale=2]\kern1em}}
+\def\cmultiDot#1{\multido{\nA=0+1}{3}{\psdot*[dotstyle=#1,dotscale=2]\kern1em}}
+
+\begin{longtable}{@{} l @{\kern2em} >{\ttfamily}c >{\ttfamily}c |
+                      l @{\kern2em} >{\ttfamily}c >{\ttfamily}c @{}}
+\emph{Name}            & \texttt{psdot}           & \texttt{psdot*} &
+\emph{Name}            & \texttt{psdot}           & \texttt{psdot*} \\
+\hline
+\endhead
+\texttt{*}             & \multiDot{*}             & \cmultiDot{*} &%\\
+\texttt{o}             & \multiDot{o}             & \cmultiDot{o}\\
+\texttt{Bo}            & \multiDot{Bo}            & \cmultiDot{Bo}&%\\
+\texttt{x}             & \multiDot{x}             & \cmultiDot{x}\\
+\texttt{+}             & \multiDot{+}             & \cmultiDot{+}&%\\
+\texttt{B+}            & \multiDot{B+}            & \cmultiDot{B+}\\
+\texttt{Add}           & \multiDot{Add}           & \cmultiDot{Add}&%\\
+\texttt{BoldAdd}       & \multiDot{BoldAdd}       & \cmultiDot{BoldAdd}\\
+\texttt{Oplus}         & \multiDot{Oplus}         & \cmultiDot{Oplus}&%\\
+\texttt{BoldOplus}     & \multiDot{BoldOplus}     & \cmultiDot{BoldOplus}\\
+\texttt{SolidOplus}    & \multiDot{SolidOplus}    & \cmultiDot{SolidOplus} &
+\texttt{Hexagon}       & \multiDot{Hexagon}       & \cmultiDot{Hexagon}\\
+\texttt{BoldHexagon}   & \multiDot{BoldHexagon}   & \cmultiDot{BoldHexagon}&
+\texttt{SolidHexagon}  & \multiDot{SolidHexagon}  & \cmultiDot{SolidHexagon}\\
+\texttt{asterisk}      & \multiDot{asterisk}      & \cmultiDot{asterisk}&%\\
+\texttt{Basterisk}     & \multiDot{Basterisk}     & \cmultiDot{Basterisk}\\
+\texttt{Asterisk}      & \multiDot{Asterisk}      & \cmultiDot{Asterisk}&%\\
+\texttt{BoldAsterisk}  & \multiDot{BoldAsterisk}  & \cmultiDot{BoldAsterisk}\\
+\texttt{SolidAsterisk} & \multiDot{SolidAsterisk} & \cmultiDot{SolidAsterisk}&
+\texttt{oplus}         & \multiDot{oplus}         & \cmultiDot{oplus}\\
+\texttt{otimes}        & \multiDot{otimes}        & \cmultiDot{otimes}&
+\texttt{Otimes}        & \multiDot{Otimes}        & \cmultiDot{Otimes}\\
+\texttt{BoldOtimes}    & \multiDot{BoldOtimes}    & \cmultiDot{BoldOtimes}&
+\texttt{SolidOtimes}   & \multiDot{SolidOtimes}   & \cmultiDot{SolidOtimes}\\
+\texttt{Mul}           & \multiDot{Mul}           & \cmultiDot{Mul}&%\\
+\texttt{BoldMul}       & \multiDot{BoldMul}       & \cmultiDot{BoldMul}\\
+\texttt{|}             & \multiDot{|}             & \cmultiDot{|}&%\\
+\texttt{B|}            & \multiDot{B|}            & \cmultiDot{B|}\\
+\texttt{Bar}           & \multiDot{Bar}           & \cmultiDot{Bar}&%\\
+\texttt{BoldBar}       & \multiDot{BoldBar}       & \cmultiDot{BoldBar}\\
+\texttt{Bullet}        & \multiDot{Bullet}        & \cmultiDot{Bullet}&%\\
+\texttt{Circle}        & \multiDot{Circle}        & \cmultiDot{Circle}\\
+\texttt{BoldCircle}    & \multiDot{BoldCircle}    & \cmultiDot{BoldCircle}&%\\
+\texttt{square}        & \multiDot{square}        & \cmultiDot{square}\\
+\texttt{Bsquare}       & \multiDot{Bsquare}       & \cmultiDot{Bsquare} &
+\texttt{square*}       & \multiDot{square*}       & \cmultiDot{square*}\\
+\texttt{Square}        & \multiDot{Square}        & \cmultiDot{Square}&%\\
+\texttt{BoldSquare}    & \multiDot{BoldSquare}    & \cmultiDot{BoldSquare}\\
+\texttt{SolidSquare}   & \multiDot{SolidSquare}   & \cmultiDot{SolidSquare}&
+\texttt{diamond}       & \multiDot{diamond}       & \cmultiDot{diamond}\\
+\texttt{Bdiamond}      & \multiDot{Bdiamond}      & \cmultiDot{Bdiamond}&%\\
+\texttt{diamond*}      & \multiDot{diamond*}      & \cmultiDot{diamond}\\
+\texttt{Diamond}       & \multiDot{Diamond}       & \cmultiDot{Diamond}&%\\
+\texttt{BoldDiamond}   & \multiDot{BoldDiamond}   & \cmultiDot{BoldDiamond}\\
+\texttt{SolidDiamond}  & \multiDot{SolidDiamond}  & \cmultiDot{SolidDiamond}&
+\texttt{triangle}      & \multiDot{triangle}      & \cmultiDot{triangle}\\
+\texttt{Btriangle}     & \multiDot{Btriangle}     & \cmultiDot{Btriangle}&
+\texttt{triangle*}     & \multiDot{triangle*}     & \cmultiDot{triangle*}\\
+\texttt{Triangle}      & \multiDot{Triangle}      & \cmultiDot{Triangle}&%\\
+\texttt{BoldTriangle}  & \multiDot{BoldTriangle}  & \cmultiDot{BoldTriangle}\\
+\texttt{SolidTriangle} & \multiDot{SolidTriangle} & \cmultiDot{SolidTriangle}&
+\texttt{pentagon}      & \multiDot{pentagon}      & \cmultiDot{pentagon}\\
+\texttt{Bpentagon}     & \multiDot{Bpentagon}     & \cmultiDot{Bpentagon}&%\\
+\texttt{pentagon*}     & \multiDot{pentagon*}     & \cmultiDot{pentagon*}\\
+\texttt{Pentagon}      & \multiDot{Pentagon}      & \cmultiDot{Pentagon}&%\\
+\texttt{BoldPentagon}  & \multiDot{BoldPentagon}  & \cmultiDot{BoldPentagon}\\
+\texttt{SolidPentagon} & \multiDot{SolidPentagon} & \cmultiDot{SolidPentagon}&
+\texttt{Hexagon}       & \multiDot{Hexagon}       & \cmultiDot{Hexagon}\\
+\texttt{BoldHexagon}   & \multiDot{BoldHexagon}   & \cmultiDot{BoldHexagon}&
+\texttt{SolidHexagon}  & \multiDot{SolidHexagon}  & \cmultiDot{SolidHexagon}\\
+\texttt{Octogon}       & \multiDot{Octogon}       & \cmultiDot{Octogon}      &
+\texttt{BoldOctogon}   & \multiDot{BoldOctogon}   & \cmultiDot{BoldOctogon}\\
+\texttt{SolidOctogon}  & \multiDot{SolidOctogon}  & \cmultiDot{SolidOctogon}
+\end{longtable}
+
+\end{document}

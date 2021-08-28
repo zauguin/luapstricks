@@ -1,0 +1,6 @@
+test00.tex     # blendmode and transparency 
+test01.tex     # grids
+test02.tex     # liftpen
+test03.tex     # transparency
+test04.tex     # gridfont
+test05.tex     # dot list with \psdot

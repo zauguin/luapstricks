@@ -1,0 +1,34 @@
+\RequirePackage{pdfmanagement-testphase}
+\DeclareDocumentMetadata{}
+
+\documentclass{article}
+%\usepackage{luapstricks}
+\usepackage{pstricks}
+
+\def\Frames{%
+  \psframe*[linecolor=red](0,1)(3,4)
+  \psframe[fillcolor=blue,fillstyle=shape](2,2)(5,5)
+  \psframe[fillcolor=green,fillstyle=shape](1,0)(4,3)
+  \pscircle[fillcolor=cyan,fillstyle=shape,shapealpha=0.3](1.5,3.5){1.25}}
+
+\begin{document}
+
+\begin{pspicture}(5,5)% default blendmode
+  \Frames\rput(1.5,3.5){\huge\textbf{0}}
+\end{pspicture}
+\hfill
+\begin{pspicture}(5,5)
+  \psset{blendmode=1}% type /Compatible
+  \Frames\rput(1.5,3.5){\huge\textbf{1}}
+\end{pspicture}
+\begin{pspicture}(5,5)
+  \psset{blendmode=2}% type /Screen
+  \Frames\rput(1.5,3.5){\huge\textbf{2}}
+\end{pspicture}
+\hfill
+\begin{pspicture}(5,5)
+  \psset{blendmode=3}% type /Multiply
+  \Frames\rput(1.5,3.5){\huge\textbf{3}}
+\end{pspicture}
+
+\end{document}
