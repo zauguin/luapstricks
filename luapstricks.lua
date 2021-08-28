@@ -81,7 +81,7 @@ local string_patt do
         + '\\' * l.Cc'\\'
         + '(' * l.Cc'('
         + ')' * l.Cc')'
-        + l.R'07' * l.R'07'^-2 / function(s) return string.char(tostring(s, 8) % 0x100) end
+        + l.R'07' * l.R'07'^-2 / function(s) return string.char(tonumber(s, 8) % 0x100) end
         + ('\r' * l.P'\n'^-1 + '\n') * l.Cc''
       ))
     + l.Cg('\r' * l.P'\n'^-1 * l.Cc'\n')
