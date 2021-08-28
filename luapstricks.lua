@@ -4,6 +4,7 @@
 --  - Access properties are not enforced
 
 local pdfprint = vf.pdf -- Set later to have the right mode
+local function gobble() end
 
 local l = lpeg
 
@@ -1932,23 +1933,56 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
 
   stringwidth = function()
-    local str = pop_string().value
     local state = graphics_stack[#graphics_stack]
-    local psfont = assert(state.font, 'invalidfont').value
+    local rawpsfont = assert(state.font, 'invalidfont')
+    local str = pop_string().value
+    local psfont = rawpsfont.value
     local fid = psfont.FID
     local matrix = psfont.FontMatrix.value
     local fonttype = psfont.FontType
-    if fonttype ~= 0x1CA then
+    if fonttype ~= 0x1CA and fonttype ~= 3 then
       texio.write_nl'Font support is not implemented'
       return
     end
-    local characters = assert(font.getfont(fid)).characters
     local w = 0
-    for b in string.bytes(str) do
-      local char = characters[b]
-      w = w + (char and char.width or 0)
+    if fonttype == 0x1CA then
+      local characters = assert(font.getfont(fid)).characters
+      for b in string.bytes(str) do
+        local char = characters[b]
+        w = w + (char and char.width or 0)
+      end
+      w = w/65781.76
+    elseif fonttype == 3 then
+      local saved_delayed_text = delayed_text
+      delayed_text = {}
+      local saved_delayed_matrix = delayed_matrix
+      delayed_matrix = {1, 0, 0, 1, 0, 0}
+      local saved_delayed_start = state.delayed_start
+      state.delayed_start = nil
+      local saved_pdfprint = pdfprint
+      pdfprint = gobble
+      for b in string.bytes(str) do
+        systemdict.value.gsave()
+        local state = graphics_stack[#graphics_stack]
+        state.current_point, state.current_path = nil
+        push(rawpsfont)
+        push(b)
+        local this_w
+        char_width_storage = function(width)
+          this_w = width
+        end
+        execute_tok(psfont.BuildChar) -- FIXME(maybe): Switch to BuildGlyph?
+        systemdict.value.grestore()
+        w = w + assert(this_w, 'Type 3 character failed to set width')
+        update_matrix(1, 0, 0, 1, this_w, 0)
+      end
+      update_matrix(1, 0, 0, 1, -w, 0)
+      pdfprint = saved_pdfprint
+      state.delayed_start = saved_delayed_start
+      delayed_matrix = saved_delayed_matrix
+      delayed_text = saved_delayed_text
     end
-    local x, y = matrix_transform(w/65781.76, 0,
+    local x, y = matrix_transform(w, 0,
       matrix[1], matrix[2],
       matrix[3], matrix[4],
       0, 0)
@@ -1976,16 +2010,22 @@ local systemdict systemdict = {kind = 'dict', value = {
     if fonttype == 0x1CA then
       local characters = assert(font.getfont(fid)).characters
       flush_delayed()
-      vf.push()
-      vf.fontid(fid)
+      if pdfprint ~= gobble then
+        vf.push()
+        vf.fontid(fid)
+      end
       for b in string.bytes(str) do
-        vf.char(b)
+        if pdfprint ~= gobble then
+          vf.char(b)
+        end
         local char = characters[b]
         w = w + (char and char.width or 0)
       end
-      vf.pop()
+      if pdfprint ~= gobble then
+        vf.pop()
+      end
+      w = w/65781.76
     elseif fonttype == 3 then
-      local w = 0
       for b in string.bytes(str) do
         systemdict.value.gsave()
         local state = graphics_stack[#graphics_stack]
@@ -2005,7 +2045,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     else
       assert(false)
     end
-    push(w/65781.76)
+    push(w)
     push(0)
     systemdict.value.rmoveto()
     update_matrix(matrix_invert(
