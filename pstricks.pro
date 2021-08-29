@@ -1,7 +1,7 @@
-% $Id: pstricks.pro 167 2021-08-27 12:15:28Z herbert $
+% $Id: pstricks.pro 166 2021-08-26 19:52:16Z herbert $
 %
 %% PostScript prologue for pstricks.tex.
-%% Version 1.37, 2021/08/26
+%% Version 1.38, 2021/08/29
 %%
 %% This program can be redistributed and/or modified under the terms
 %% of the LaTeX Project Public License Distributed from CTAN archives
@@ -121,6 +121,23 @@ tx@Dict begin
 %
 /startGlobal { true setglobal globaldict begin } bind def
 /endGlobal { end false setglobal } bind def
+
+/setpdfcolor where {
+  /setpdfcolor get /pssetPDFcolor exch def
+  /setpdfcolor {
+    pssetPDFcolor
+    mark
+      currentcolor
+      currentcolorspace 0 get
+      dup /DeviceRGB eq { pop setrgbcolor } {
+        dup /DeviceCMYK eq { pop setcmykcolor } {
+          /DeviceGray eq { setgray } if
+        } ifelse
+      } ifelse
+    cleartomark
+  } def
+} if 
+
 /pssetRGBcolor /setrgbcolor load def
 /pssetCMYKcolor /setcmykcolor load def
 /pssetGraycolor /setgray load def

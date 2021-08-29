@@ -4399,6 +4399,7 @@ pop
   \ifshowgrid\ifnum\showgridp@s=0\psgrid[style=gridstyle]\fi\fi
 % ----------- 1.10/12 end hv -------------------
   \ignorespaces%			% 2008-12-07
+  \pstVerb{\number\pslinewidth\space setlinewidth}%
   \ifPst@pgffunctions\pstVerb{ pgffunctions }\fi% hv 2013-04-17
 }
 \def\pic@coor{(0,0)(0,0)(10,10)}
