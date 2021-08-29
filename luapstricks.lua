@@ -1049,6 +1049,9 @@ local systemdict systemdict = {kind = 'dict', value = {
   floor = function()
     return push(math.floor(pop_num()))
   end,
+  ln = function()
+    push(math.log(pop_num()))
+  end,
   cvn = function()
     local a = pop()
     if type(a) == 'table' and a.kind == 'executable' then
