@@ -883,7 +883,13 @@ local systemdict systemdict = {kind = 'dict', value = {
     if type(a) == 'table' and (a.kind == 'executable' or a.kind == 'name' or a.kind == 'operator') then
       a = a.value
     end
+    if type(a) == 'table' and a.kind == 'string' then
+      a = a.value
+    end
     if type(b) == 'table' and (b.kind == 'executable' or b.kind == 'name' or b.kind == 'operator') then
+      b = b.value
+    end
+    if type(b) == 'table' and b.kind == 'string' then
       b = b.value
     end
     push(a==b)
