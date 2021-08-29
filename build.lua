@@ -5,7 +5,7 @@ stdengine = "luatex"
 checkengines = {"luatex"}
 
 installfiles = {"luapstricks.lua"}
-sourcefiles = {"luapstricks.lua"}
+sourcefiles = {"luapstricks.lua", "pstricks.tex", "pstricks.pro"}
 -- typesetfiles = {"luapstricks.tex"}
 
 tdsroot = "luatex"
