@@ -801,7 +801,7 @@ local systemdict systemdict = {kind = 'dict', value = {
   pathbbox = function()
     local current_path = assert(graphics_stack[#graphics_stack].current_path, 'nocurrentpoint')
     local i=1
-    local llx, llyx, urx, ury
+    local llx, lly, urx, ury
     while current_path[i] do
       local entry = current_path[i]
       if type(entry) == 'number' then
