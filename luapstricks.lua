@@ -489,23 +489,23 @@ local setpdfcolor do
     for i=1, #color do color[i] = nil end
     local r, g, b, R, G, B = pdf_rgb:match(pdf)
     if r and r == R and g == G and b == B then
-      color.space = 'RGB'
+      color.space = {kind = 'array', value = {{kind = 'name', value = 'DeviceRGB'}}}
       color[1], color[2], color[3] = R, G, B
       return
     end
     local c, m, y, k, C, M, Y, K = pdf_cmyk:match(pdf)
     if c and c == C and m == M and y == Y and k == K then
-      color.space = 'CMYK'
+      color.space = {kind = 'array', value = {{kind = 'name', value = 'DeviceCMYK'}}}
       color[1], color[2], color[3], color[4] = C, M, Y, K
       return
     end
     g, G = pdf_gray:match(pdf)
     if g and g == G then
-      color.space = 'Gray'
+      color.space = {kind = 'array', value = {{kind = 'name', value = 'DeviceGray'}}}
       color[1] = G
       return
     end
-    color.space = 'PDF'
+    color.space = {kind = 'array', value = {{kind = 'name', value = 'PDF'}}}
     color[1] = pdf
   end
 end
@@ -1793,6 +1793,7 @@ local systemdict systemdict = {kind = 'dict', value = {
   setgray = function()
     local g = pop_num()
     local color = graphics_stack[#graphics_stack].color
+    color.space = {kind = 'array', value = {{kind = 'name', value = 'DeviceGray'}}}
     color.space = 'Gray'
     for i=2, #color do color[i] = nil end
     color[1] = g
@@ -1803,7 +1804,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     local g = pop_num()
     local r = pop_num()
     local color = graphics_stack[#graphics_stack].color
-    color.space = 'RGB'
+    color.space = {kind = 'array', value = {{kind = 'name', value = 'DeviceRGB'}}}
     for i=4, #color do color[i] = nil end
     color[1], color[2], color[3] = r, g, b
     delayed_print(string.format('%.3f %.3f %.3f rg %.3f %.3f %.3f RG', r, g, b, r, g, b))
@@ -1814,9 +1815,9 @@ local systemdict systemdict = {kind = 'dict', value = {
     local m = pop_num()
     local c = pop_num()
     local color = graphics_stack[#graphics_stack].color
-    color.space = 'CMYK'
+    color.space = {kind = 'array', value = {{kind = 'name', value = 'DeviceCMYK'}}}
     for i=5, #color do color[i] = nil end
-    color[1], color[2], color[3], color[3] = c, m, y, k
+    color[1], color[2], color[3], color[4] = c, m, y, k
     delayed_print(string.format('%.3f %.3f %.3f %.3f k %.3f %.3f %.3f %.3f K', c, m, y, k, c, m, y, k))
   end,
   ['.setopacityalpha'] = function()
@@ -1865,19 +1866,79 @@ local systemdict systemdict = {kind = 'dict', value = {
     state.current_path = nil
   end,
 
-  currentrgbcolor = function()
-    local r
-    local g
-    local b
+  currentcolorspace = function()
     local color = graphics_stack[#graphics_stack].color
     if not color then error'Color has to be set before it is queried' end
-    local space = color.space
-    if space == 'RGB' then
+    push(color.space)
+  end,
+  currentcolor = function()
+    local color = graphics_stack[#graphics_stack].color
+    if not color then error'Color has to be set before it is queried' end
+    for i = 1, #color do
+      push(color[i])
+    end
+  end,
+  currentcmykcolor = function()
+    local c, m, y, k
+    local color = graphics_stack[#graphics_stack].color
+    if not color then error'Color has to be set before it is queried' end
+    local space = color.space.value[1]
+    if type(space) == 'table' and space.kind == 'name' then space = space.value end
+    if space == 'DeviceRGB' then
+      c, m, y = 1 - color[1], 1 - color[2], 1 - color[3]
+      -- k = math.min(c, m, y)
+      -- TODO: Undercolor removal/black generation
+      -- local undercolor = undercolorremoval(k)
+      -- local undercolor = 0
+      -- k = blackgeneration(k)
+      k = 0
+      -- c, m, y = c - undercolor, y - undercolor, k - undercolor
+    elseif space == 'DeviceGray' then
+      c, m, y, k = 0, 0, 0, 1 - color[1]
+    elseif space == 'DeviceCMYK' then
+      c, m, y, k = color[1], color[2], color[3], color[4]
+    elseif space == 'PDF' then
+      c, m, y, k = 0, 0, 0, 1
+      print('???', 'tocmyk', color[1])
+    else
+      r, g, b, k = 0, 0, 0, 1
+    end
+    push(r)
+    push(g)
+    push(b)
+  end,
+  currentgraycolor = function()
+    local g
+    local color = graphics_stack[#graphics_stack].color
+    if not color then error'Color has to be set before it is queried' end
+    local space = color.space.value[1]
+    if type(space) == 'table' and space.kind == 'name' then space = space.value end
+    if space == 'DeviceRGB' then
+      g = 0.3 * color[1] + 0.59 * color[2], 0.11 * color[3]
+    elseif space == 'DeviceGray' then
+      g = color[1]
+    elseif space == 'DeviceCMYK' then
+      g = math.min(1, math.max(0, 0.3 * color[1] + 0.59 * color[2] + 0.11 * color[3] + color[4]))
+    elseif space == 'PDF' then
+      g = 1
+      print('???', 'togray', color[1])
+    else
+      g = 1
+    end
+    push(g)
+  end,
+  currentrgbcolor = function()
+    local r, r, g
+    local color = graphics_stack[#graphics_stack].color
+    if not color then error'Color has to be set before it is queried' end
+    local space = color.space.value[1]
+    if type(space) == 'table' and space.kind == 'name' then space = space.value end
+    if space == 'DeviceRGB' then
       r, g, b = color[1], color[2], color[3]
-    elseif space == 'Gray' then
+    elseif space == 'DeviceGray' then
       r = color[1]
       g, b = r, r
-    elseif space == 'CMYK' then
+    elseif space == 'DeviceCMYK' then
       local c, m, y, k = color[1], color[2], color[3], color[4]
       c, m, y = c+k, m+k, y+k
       r, g, b = c >= 1 and 0 or 1-c, m >= 1 and 0 or 1-m, y >= 1 and 0 or 1-y
