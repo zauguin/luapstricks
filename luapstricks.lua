@@ -6,6 +6,11 @@
 local pdfprint = vf.pdf -- Set later to have the right mode
 local function gobble() end
 
+local pi = math.pi
+local two_pi = 2*pi
+local pi2_inv = 2/pi
+local pi3_inv = 3/pi
+
 local l = lpeg
 
 local whitespace = (l.S'\0\t\n\r\f ' + '%' * (1-l.P'\n')^0 * (l.P'\n' + -1))^1
@@ -416,7 +421,7 @@ function drawarc(xc, yc, r, a1, a2)
   a1, a2 = math.rad(a1), math.rad(a2)
   local dx, dy = r*math.cos(a1), r*math.sin(a1)
   local x, y = xc + dx, yc + dy
-  local segments = math.ceil(math.abs(a2-a1)/(math.pi*.5))
+  local segments = math.ceil(math.abs(a2-a1)*pi2_inv)
   local da = (a2-a1)/segments
   local state = graphics_stack[#graphics_stack]
   local current_path = state.current_path
@@ -1506,10 +1511,10 @@ local systemdict systemdict = {kind = 'dict', value = {
     local a1 = math.atan(dy1, dx1)
     local a2 = math.atan(dy2, dx2)
 
-    if a1 - math.pi > a2 then
-      a1 = a1 - 2*math.pi
-    elseif a2 - math.pi > a1 then
-      a2 = a2 - 2*math.pi
+    if a1 - pi > a2 then
+      a1 = a1 - two_pi
+    elseif a2 - pi > a1 then
+      a2 = a2 - two_pi
     end
 
     if a1 > a2 then
@@ -1540,7 +1545,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     local t1 = (ox1 - ox2) * dy2/det + (oy2 - oy1) * dx2/det
     local cx, cy = x1 - ox1 + t1 * dx1, y1 - oy1 + t1 * dy1
     -- local ccx, ccy = x1 - ox2 - t2 * dx2, y1 - oy2 + t2 * dy2
-    drawarc(cx, cy, r, a1*180/math.pi, a2*180/math.pi)
+    drawarc(cx, cy, r, a1*180/pi, a2*180/pi)
 
     push(cx + ox1)
     push(cy + oy1)
@@ -1818,6 +1823,31 @@ local systemdict systemdict = {kind = 'dict', value = {
     color[1], color[2], color[3] = r, g, b
     delayed_print(string.format('%.3f %.3f %.3f rg %.3f %.3f %.3f RG', r, g, b, r, g, b))
   end,
+  -- Conversion based on Wikipedia article about HSB colorspace
+  sethsbcolor = function()
+    local b = pop_num()
+    local s = pop_num()
+    local h = pop_num()
+    if b < 0 then b = 0 elseif b > 1 then b = 1 end
+    if s < 0 then s = 0 elseif s > 1 then s = 1 end
+    if h < 0 then h = 0 elseif h > 1 then h = 1 end
+    local hi, hf = math.modf(6 * h)
+    local p, q, t = b * (1 - s), b * (1 - s*hf), b * (1 - s * (1-hf))
+    if hi == 0 or hi == 6 then
+      push(b) push(t) push(p)
+    elseif hi == 1 then
+      push(q) push(b) push(p)
+    elseif hi == 2 then
+      push(p) push(b) push(t)
+    elseif hi == 3 then
+      push(p) push(q) push(b)
+    elseif hi == 4 then
+      push(t) push(p) push(b)
+    elseif hi == 5 then
+      push(b) push(p) push(q)
+    end
+    return systemdict.value.setrgbcolor()
+  end,
   setcmykcolor = function()
     local k = pop_num()
     local y = pop_num()
@@ -1937,7 +1967,7 @@ local systemdict systemdict = {kind = 'dict', value = {
     push(g)
   end,
   currentrgbcolor = function()
-    local r, r, g
+    local r, g, b
     local color = graphics_stack[#graphics_stack].color
     if not color then error'Color has to be set before it is queried' end
     local space = color.space.value[1]
@@ -1960,6 +1990,29 @@ local systemdict systemdict = {kind = 'dict', value = {
     push(r)
     push(g)
     push(b)
+  end,
+  currenthsbcolor = function()
+    systemdict.value.currentrgbcolor()
+    local b = pop_num()
+    local g = pop_num()
+    local r = pop_num()
+    local M, m = math.max(r, g, b), math.min(r, g, b)
+    local H
+    if M == m then
+      H = 0
+    elseif M == r then
+      H = (g-b)/(M-m) / 6
+      if H < 0 then H = H + 1 end
+    elseif M == g then
+      H = (b-r)/(M-m) / 6 + 1/3
+    elseif assert(M == b) then
+      H = (r-g)/(M-m) / 6 + 2/3
+    end
+    local S = M == 0 and 0 or (M-m)/M
+    local B = M
+    push(H)
+    push(S)
+    push(B)
   end,
   currentfont = function()
     local f = graphics_stack[#graphics_stack].font
