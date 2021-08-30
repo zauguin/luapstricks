@@ -1780,9 +1780,19 @@ local systemdict systemdict = {kind = 'dict', value = {
         m1[5] * m2[1] + m1[6] * m2[3] + m2[5], m1[5] * m2[2] + m1[6] * m2[4] + m2[6]
     push(m3a)
   end,
+  invertmatrix = function()
+    local target = pop_array()
+    local T = target.value
+    assert(#T == 6)
+    local M = pop_array().value
+    assert(#M == 6)
+    T[1], T[2], T[3], T[4], T[5], T[6]
+      = matrix_invert(M[1], M[2], M[3], M[4], M[5], M[6])
+    push(target)
+  end,
   concat = function()
-    local m = pop_array()
-    if #m3 ~= 6 then error'Unexpected size of matrix' end
+    local m = pop_array().value
+    if #m ~= 6 then error'Unexpected size of matrix' end
     update_matrix(m[1], m[2], m[3], m[4], m[5], m[6])
   end,
   -- setmatrix is not supported in PDF, so we invert the old matrix first
