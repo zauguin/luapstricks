@@ -125,6 +125,29 @@ local function parse_ps(s)
   return tokens
 end
 
+local srand, rrand, rand do
+  local state
+  function srand(s)
+    state = s//1
+    if state < 1 then
+      state = -(state % 0x7ffffffe) + 1
+    elseif state > 0x7ffffffe then
+      state = 0x7ffffffe
+    end
+  end
+  function rrand()
+    return state
+  end
+  function rand()
+    state = (16807 * state) % 0x7fffffff
+    -- if state <= 0 then
+    --   state = state + 0x7fffffff
+    -- end
+    return state
+  end
+  srand(math.random(1, 0x7ffffffe))
+end
+
 local font_aliases = {
   -- First add some help to find the TeX Gyre names under the corresponding URW font names
   ['URWGothic-Book'] = 'kpse:texgyreadventor-regular.otf',
@@ -2342,13 +2365,13 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
 
   rrand = function()
-    error'Not supported'
+    push(rrand())
   end,
   srand = function()
-    math.randomseed(pop_int())
+    srand(pop_int())
   end,
   rand = function()
-    push(math.random(0, 0xFFFFFFFF))
+    push(rand())
   end,
 
   type = function()
