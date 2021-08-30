@@ -5,3 +5,4 @@
 
 --- pstricks.pro
 1.38a 2021-08-30  -added comment
+1.38b 2021-08-30  -remove empty lines to prevent a \par output for pst-eps

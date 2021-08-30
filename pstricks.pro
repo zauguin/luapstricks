@@ -1,7 +1,7 @@
 % $Id: pstricks.pro 166 2021-08-26 19:52:16Z herbert $
 %
 %% PostScript prologue for pstricks.tex.
-%% Version 1.38, 2021/08/29
+%% Version 1.38b, 2021/08/30
 %%
 %% This program can be redistributed and/or modified under the terms
 %% of the LaTeX Project Public License Distributed from CTAN archives
@@ -10,7 +10,6 @@
 %
 % Define the follwing gs-functions if not known, eg when using distiller
 %
-
 revision 952 gt 
 {
     systemdict /.setopacityalpha known not 
@@ -33,10 +32,10 @@ revision 952 gt
     /.setshapealpha { pop } bind def 
   } if
 } ifelse
-
+%
 %%<bool> .setalphaisshape -
 %%    If true, the values set by setstrokeconstantalpha and setfillconstantalpha are interpreted as shape values. The initial value of the AIS flag is false. 
-
+%
 %
 /tx@Dict 200 dict def 				% the main PSTricks dictionary
 tx@Dict begin
