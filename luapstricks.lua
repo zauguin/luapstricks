@@ -1656,6 +1656,23 @@ local systemdict systemdict = {kind = 'dict', value = {
     state.current_path = new_path
   end,
 
+  rectfill = function()
+    flush_delayed()
+    local top = pop()
+    if type(top) == 'table' and top.kind == 'executable' then
+      top = top.value
+    end
+    if type(top) == 'number' then
+      local h = top
+      local w = pop_num()
+      local y = pop_num()
+      local x = pop_num()
+      pdfprint(string.format('%.3f %.3f %.3f %.3f re f', x, y, w, h))
+    else
+      error'Unsupported rectfill variant'
+    end
+  end,
+
   scale = function()
     local m = pop()
     if type(m) == 'table' and m.kind == 'array' then
@@ -1818,7 +1835,6 @@ local systemdict systemdict = {kind = 'dict', value = {
     local g = pop_num()
     local color = graphics_stack[#graphics_stack].color
     color.space = {kind = 'array', value = {{kind = 'name', value = 'DeviceGray'}}}
-    color.space = 'Gray'
     for i=2, #color do color[i] = nil end
     color[1] = g
     delayed_print(string.format('%.3f g %.3f G', g, g))
