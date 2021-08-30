@@ -120,7 +120,7 @@ tx@Dict begin
 %
 /startGlobal { true setglobal globaldict begin } bind def
 /endGlobal { end false setglobal } bind def
-
+%
 /setpdfcolor where {                            % luapstricks specific code
   /setpdfcolor get /pssetPDFcolor exch def
   /setpdfcolor {
@@ -136,7 +136,7 @@ tx@Dict begin
     cleartomark
   } def
 } if 
-
+%
 /pssetRGBcolor /setrgbcolor load def
 /pssetCMYKcolor /setcmykcolor load def
 /pssetGraycolor /setgray load def
