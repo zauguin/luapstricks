@@ -81,8 +81,8 @@
 \fi
 \let\pgfforeach\foreach
 %
-\def\fileversion{3.06}
-\def\filedate{2021/08/27}
+\def\fileversion{3.06a}
+\def\filedate{2021/08/30}
 \pst@addfams{pstricks}
 %
 %\define@boolkey[psset]{pstricks}[Pst@]{useURWfonts}[true]{}
@@ -4399,7 +4399,7 @@ pop
   \ifshowgrid\ifnum\showgridp@s=0\psgrid[style=gridstyle]\fi\fi
 % ----------- 1.10/12 end hv -------------------
   \ignorespaces%			% 2008-12-07
-  \pstVerb{\number\pslinewidth\space setlinewidth}%
+  \pstVerb{\pst@number\pslinewidth setlinewidth 0 setgray}%    default setting
   \ifPst@pgffunctions\pstVerb{ pgffunctions }\fi% hv 2013-04-17
 }
 \def\pic@coor{(0,0)(0,0)(10,10)}

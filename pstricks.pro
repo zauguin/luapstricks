@@ -122,7 +122,7 @@ tx@Dict begin
 /startGlobal { true setglobal globaldict begin } bind def
 /endGlobal { end false setglobal } bind def
 
-/setpdfcolor where {
+/setpdfcolor where {                            % luapstricks specific code
   /setpdfcolor get /pssetPDFcolor exch def
   /setpdfcolor {
     pssetPDFcolor
