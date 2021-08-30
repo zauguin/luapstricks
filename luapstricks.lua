@@ -1329,6 +1329,8 @@ local systemdict systemdict = {kind = 'dict', value = {
     local val = obj.value
     if obj.kind == 'string' then
       push(#val)
+    elseif obj.kind == 'name' then
+      push(#val)
     elseif obj.kind == 'array' then
       push(#val)
     elseif obj.kind == 'dict' then
