@@ -645,6 +645,9 @@ local systemdict systemdict = {kind = 'dict', value = {
     if i < 0 or height <= i then error'Invalid index' end
     push(operand_stack[height - i])
   end,
+  null = function()
+    push(null)
+  end,
   mark = function()
     push(mark)
   end,
