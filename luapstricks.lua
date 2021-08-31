@@ -2868,13 +2868,14 @@ lua.get_functions_table()[func] = function()
   nn.font, nn.char = fid, 0x1F3A8
   n.next = nn
   local modename = modes[math.abs(tex.nest.top.mode)]
-  if 'vertical' == modename then
+  if 'horizontal' ~= modename then
     n = node.hpack(n) -- Glyphs can only appear in hmode
-  elseif 'math' == modename then
-    local d = node.new'disc'
-    d.penalty = 10000
-    d.replace = n
-    n = d
+    if 'math' == modename then
+      local d = node.new'disc'
+      d.penalty = 10000
+      d.replace = n
+      n = d
+    end
   end
   if tex.nest.ptr == 0 then
     -- Main vertical list. Here we might appear before the page starts properly
