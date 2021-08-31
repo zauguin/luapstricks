@@ -268,10 +268,20 @@ for psname, remapped in next, {
 
   -- Some additional names needed for PSTricks
   ['NimbusSanL-Regu'] = 'NimbusSans-Regular',
+  ['NimbusSanL-ReguItal'] = 'NimbusSans-Italic',
   ['NimbusSanL-Bold'] = 'NimbusSans-Bold',
+  ['NimbusSanL-BoldItal'] = 'NimbusSans-BoldItalic',
+
   ['NimbusRomNo9L-Regu'] = 'NimbusRoman-Regular',
+  ['NimbusRomNo9L-ReguItal'] = 'NimbusRoman-Italic',
+  ['NimbusRomNo9L-Medi'] = 'NimbusRoman-Bold',
+  ['NimbusRomNo9L-MediItal'] = 'NimbusRoman-BoldItalic',
   ['NimbusRomNo9L-Bold'] = 'NimbusRoman-Bold',
+
   ['NimbusMonL-Regu'] = 'NimbusMonoPS-Regular',
+  ['NimbusMonL-ReguObli'] = 'NimbusMonoPS-Italic',
+  ['NimbusMonL-Bold'] = 'NimbusMonoPS-Bold',
+  ['NimbusMonL-BoldObli'] = 'NimbusMonoPS-BoldItalic',
 } do
   font_aliases[psname] = font_aliases[remapped] or remapped
 end
