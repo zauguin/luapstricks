@@ -1708,7 +1708,8 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
   flattenpath = function()
     local state = graphics_stack[#graphics_stack]
-    local old_path = assert(state.current_path, 'nocurrentpoint')
+    local old_path = state.current_path
+    if not old_path then return end
     local new_path = {}
     local last_x, last_y = nil, 0
     local saved_x, saved_y
