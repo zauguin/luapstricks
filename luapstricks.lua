@@ -369,6 +369,7 @@ local graphics_stack = {{
   dash = nil,
   delayed_start = nil,
   flatness = 1,
+  miterlimit = nil,
 }}
 
 local char_width_storage -- Non nil only at the beginning of a Type 3 glyph. Used to export the width.
@@ -1422,6 +1423,9 @@ local systemdict systemdict = {kind = 'dict', value = {
   currentlinewidth = function()
     push(assert(graphics_stack[#graphics_stack].linewidth, 'linewidth has to be set before it is queried'))
   end,
+  currentmiterlimit = function()
+    push(assert(graphics_stack[#graphics_stack].miterlimit, 'miterlimit has to be set before it is queried'))
+  end,
   currentflat = function()
     push(graphics_stack[#graphics_stack].flatness)
   end,
@@ -1439,6 +1443,11 @@ local systemdict systemdict = {kind = 'dict', value = {
     local linecap = pop_int()
     graphics_stack[#graphics_stack].linecap = linecap
     delayed_print(string.format('%i J', linecap))
+  end,
+  setmiterlimit = function()
+    local ml = pop_int()
+    graphics_stack[#graphics_stack].miterlimit = ml
+    delayed_print(string.format('%.3f M', ml))
   end,
   setstrokeadjust = function()
     local sa = pop_bool()
