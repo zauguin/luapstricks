@@ -2867,8 +2867,14 @@ lua.get_functions_table()[func] = function()
   nn.subtype = 256
   nn.font, nn.char = fid, 0x1F3A8
   n.next = nn
-  if 'horizontal' ~= modes[math.abs(tex.nest.top.mode)] then
+  local modename = modes[math.abs(tex.nest.top.mode)]
+  if 'vertical' == modename then
     n = node.hpack(n) -- Glyphs can only appear in hmode
+  elseif 'math' == modename then
+    local d = node.new'disc'
+    d.penalty = 10000
+    d.replace = n
+    n = d
   end
   if tex.nest.ptr == 0 then
     -- Main vertical list. Here we might appear before the page starts properly
@@ -2878,7 +2884,7 @@ lua.get_functions_table()[func] = function()
     tex.triggerbuildpage() -- First ensure that everything else is contributed properly.
     tex.lists.page_head = node.insert_after(tex.lists.page_head, nil, n)
   else
-    node.write(n) -- might be problematic in math
+    node.write(n)
   end
 end
 -- luatexbase.add_to_callback('pre_shipout_filter', function(n)
