@@ -1,4 +1,9 @@
 --- pstricks.tex
+3.06b 2021-08-31  -with optional argument "gsfonts" for PSTricks, one
+                   can use GS fonts from URW, like StandardSymL, NimbusRomNo9L-Regu,
+                   NimbusRomNo9L-Bold, ...                  
+                   Default is using the PS fontnames, like Symbol, Times-Roman, Times-Bold,
+                   Helvetica, Helvetica-Bold, ...
 3.06a 2021-08-30  -fixed default setting for linewidth and color
 
 
