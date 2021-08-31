@@ -148,6 +148,43 @@ local srand, rrand, rand do
   srand(math.random(1, 0x7ffffffe))
 end
 
+local compressed_pattern = '%!PS\n\z
+  currentfile<</Predictor 1' * l.R'05' * '/Columns ' * (l.R'09'^1/tonumber) * '>>/FlateDecode filter cvx exec\n'
+  * l.C(l.P(1)^1)
+
+local function maybe_decompress(data)
+  local columns, compressed = compressed_pattern:match(data)
+  if not columns then return data end
+
+  data = zlib.decompress(compressed)
+  local bytes = {data:byte(1, -1)}
+  local new_data = {}
+  local start_row = 1
+  local out_row = 1
+  while true do
+    local control = bytes[start_row]
+    if not control then break end
+    if control == 0 or (control == 2 and start_row == 1) then
+      table.move(bytes, start_row + 1, start_row + 24, out_row, new_data)
+    elseif control == 1 then
+      local last = bytes[start_row + 1]
+      new_data[out_row] = last
+      for i = 2, 24 do
+        last = (bytes[start_row + i] + last) & 0xFF
+        new_data[out_row + i - 1] = last
+      end
+    elseif control == 2 then
+      for i = 1, 24 do
+        new_data[out_row + i - 1] = (bytes[start_row + i] + new_data[out_row - 25 + i]) & 0xFF
+      end
+    else
+      error'Unimplemented'
+    end
+    start_row = start_row + 24 + 1
+    out_row = out_row + 24
+  end
+  return string.char(table.unpack(new_data))
+end
 local font_aliases = {
   -- First add some help to find the TeX Gyre names under the corresponding URW font names
   ['URWGothic-Book'] = 'kpse:texgyreadventor-regular.otf',
@@ -2468,6 +2505,13 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
   exit = function()
     error(exitmarker)
+  end,
+  run = function()
+    local filename = pop_string().value
+    local f = assert(io.open(kpse.find_file(filename, 'PostScript header'), 'rb'))
+    local data = maybe_decompress(f:read'a')
+    f:close()
+    return execute_tok{kind = 'executable', value = {kind = 'string', value = data}}
   end,
 
   revision = 1000,
