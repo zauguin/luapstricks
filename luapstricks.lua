@@ -2549,7 +2549,11 @@ local systemdict systemdict = {kind = 'dict', value = {
   end,
   run = function()
     local filename = pop_string().value
-    local f = assert(io.open(kpse.find_file(filename, 'PostScript header'), 'rb'))
+    local resolved = kpse.find_file(filename, 'PostScript header')
+    if not resolved then
+      error(string.format('Unable to find file %q.', filename))
+    end
+    local f = assert(io.open(resolved, 'rb'))
     local data = maybe_decompress(f:read'a')
     f:close()
     return execute_tok{kind = 'executable', value = {kind = 'string', value = data}}
