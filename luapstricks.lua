@@ -165,23 +165,23 @@ local function maybe_decompress(data)
     local control = bytes[start_row]
     if not control then break end
     if control == 0 or (control == 2 and start_row == 1) then
-      table.move(bytes, start_row + 1, start_row + 24, out_row, new_data)
+      table.move(bytes, start_row + 1, start_row + columns, out_row, new_data)
     elseif control == 1 then
       local last = bytes[start_row + 1]
       new_data[out_row] = last
-      for i = 2, 24 do
+      for i = 2, columns do
         last = (bytes[start_row + i] + last) & 0xFF
         new_data[out_row + i - 1] = last
       end
     elseif control == 2 then
-      for i = 1, 24 do
-        new_data[out_row + i - 1] = (bytes[start_row + i] + new_data[out_row - 25 + i]) & 0xFF
+      for i = 1, columns do
+        new_data[out_row + i - 1] = (bytes[start_row + i] + new_data[out_row - columns - 1 + i]) & 0xFF
       end
     else
       error'Unimplemented'
     end
-    start_row = start_row + 24 + 1
-    out_row = out_row + 24
+    start_row = start_row + columns + 1
+    out_row = out_row + columns
   end
   return string.char(table.unpack(new_data))
 end
