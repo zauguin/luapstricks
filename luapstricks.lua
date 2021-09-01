@@ -1226,7 +1226,8 @@ local systemdict systemdict = {kind = 'dict', value = {
     elseif ta == 'boolean' then
       a = a and 'true' or 'false'
     elseif ta == 'number' then
-      a = tostring(a)
+      a = string.format(math.type(a) == 'float' and '%.6g' or '%i', a)
+      -- a = tostring(a)
     elseif ta == 'function' then
       texio.write_nl'Warning: cvs on operators is unsupported. Replaced by dummy.'
       a = '--nostringval--'
