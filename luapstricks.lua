@@ -152,12 +152,25 @@ local compressed_pattern = '%!PS\n\z
   currentfile<</Predictor 1' * l.R'05' * '/Columns ' * (l.R'09'^1/tonumber) * '>>/FlateDecode filter cvx exec\n'
   * l.C(l.P(1)^1)
 
+local stacklimit = 999000
+
 local function maybe_decompress(data)
   local columns, compressed = compressed_pattern:match(data)
   if not columns then return data end
 
   data = zlib.decompress(compressed)
-  local bytes = {data:byte(1, -1)}
+  local bytes do
+    local size = #data
+    if size < stacklimit then
+      bytes = {data:byte(1, -1)}
+    else
+      bytes = {}
+      local off = 1
+      for i = 1, size, stacklimit do
+        table.move({data:byte(i, i+stacklimit-1)}, 1, stacklimit, i, bytes)
+      end
+    end
+  end
   local new_data = {}
   local start_row = 1
   local out_row = 1
@@ -183,7 +196,12 @@ local function maybe_decompress(data)
     start_row = start_row + columns + 1
     out_row = out_row + columns
   end
-  return string.char(table.unpack(new_data))
+  local result = ''
+  local size = #new_data
+  for i = 1, size, stacklimit do
+    result = result .. string.char(table.unpack(new_data, i, i + stacklimit > size and size or i + stacklimit - 1))
+  end
+  return result
 end
 local font_aliases = {
   -- First add some help to find the TeX Gyre names under the corresponding URW font names
