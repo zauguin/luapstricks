@@ -1240,6 +1240,8 @@ local systemdict systemdict = {kind = 'dict', value = {
       else
         a = '--nostringval--'
       end
+    elseif ta == 'userdata' and a.read then
+      a = 'file'
     else
       assert(false)
     end
@@ -2574,6 +2576,47 @@ local systemdict systemdict = {kind = 'dict', value = {
     local data = maybe_decompress(f:read'a')
     f:close()
     return execute_tok{kind = 'executable', value = {kind = 'string', value = data}}
+  end,
+
+  closefile = function()
+    local f = pop()
+    f:close()
+  end,
+  file = function()
+    local access = pop_string()
+    local orig_filename = pop_string()
+    local filename = orig_filename.value
+    if access.value:sub(1, 1) == 'a' then
+      filename = kpse.find_file(filename)
+      if not filename then
+        push(orig_filename)
+        push(access)
+        error'undefinedfilename'
+      end
+    end
+    if access.value == '' then
+      push(orig_filename)
+      push(access)
+      error'invalidfileaccess'
+    end
+    local f = io.open(filename, access.value)
+    if not f then
+      push(orig_filename)
+      push(access)
+      error'invalidfileaccess'
+    end
+    push(f)
+  end,
+  write = function()
+    local data = pop_num()
+    local f = pop()
+    data = data % 256
+    f:write(string.byte(data))
+  end,
+  writestring = function()
+    local data = pop_string().value
+    local f = pop()
+    f:write(data)
   end,
 
   revision = 1000,
