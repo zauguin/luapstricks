@@ -11,6 +11,8 @@ local two_pi = 2*pi
 local pi2_inv = 2/pi
 local pi3_inv = 3/pi
 
+local sin_table = {0, 1, 0, -1}
+
 local l = lpeg
 
 local whitespace = (l.S'\0\t\n\r\f ' + '%' * (1-l.P'\n')^0 * (l.P'\n' + -1))^1
@@ -1137,10 +1139,22 @@ local systemdict systemdict = {kind = 'dict', value = {
     push(math.sqrt(pop_num()))
   end,
   sin = function()
-    push(math.sin(math.rad(pop_num())))
+    local x = pop_num()
+    local i, f = math.modf(x/90)
+    if f == 0 then
+      push(sin_table[i % 4 + 1])
+    else
+      push(math.sin(math.rad(x)))
+    end
   end,
   cos = function()
-    push(math.cos(math.rad(pop_num())))
+    local x = pop_num()
+    local i, f = math.modf(x/90)
+    if f == 0 then
+      push(sin_table[(i+1) % 4 + 1])
+    else
+      push(math.cos(math.rad(x)))
+    end
   end,
   atan = function()
     local b, a = pop_num() a = pop_num()
