@@ -81,8 +81,8 @@
 \fi
 \let\pgfforeach\foreach
 %
-\def\fileversion{3.06b}
-\def\filedate{2021/08/31}
+\def\fileversion{3.06c}
+\def\filedate{2021/09/01}
 \pst@addfams{pstricks}
 %
 %\define@boolkey[psset]{pstricks}[Pst@]{useURWfonts}[true]{}
@@ -4050,8 +4050,9 @@ pop
 \def\tx@RotEnd{RotEnd }
 \def\pst@rotate#1#2{%
   \ifx#1\@empty\else
-  \setbox#2=\hbox{\pst@Verb{#1 \tx@RotBegin}\box#2\pst@Verb{\tx@RotEnd}}%
-  \fi%
+      \setbox#2=\hbox{\pst@Verb{#1 \ifPSTlualatex neg \fi\space \tx@RotBegin}\box#2\pst@Verb{\tx@RotEnd}}%
+      % luatex doesn't have the coordinate system of dvips, so we need negative angles
+  \fi
 }
 \def\psput@cartesian#1{%
 \hbox to \z@{\kern\pst@dimg{\vbox to \z@{\vss\box#1\vskip\pst@dimh}\hss}}%
