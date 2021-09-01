@@ -359,7 +359,18 @@ local function pop_dict()
   end
   return dict
 end
-local pop_array = pop
+local function pop_array()
+  local orig = pop()
+  local arr = orig
+  if type(arr) == 'table' and arr.kind == 'executable' then
+    arr = arr.value
+  end
+  if type(arr) ~= 'table' or arr.kind ~= 'array' then
+    push(orig)
+    error'typecheck'
+  end
+  return arr
+end
 local pop_string = pop
 local function pop_key()
   local key = pop()
