@@ -662,7 +662,94 @@ local userdict = {kind = 'dict', value = {
   }},
 }}
 local FontDirectory = {kind = 'dict', value = {}}
-local systemdict systemdict = {kind = 'dict', value = {
+
+local systemdict
+local function generic_show(str, ax, ay)
+  local state = graphics_stack[#graphics_stack]
+  local current_point = state.current_point
+  if not current_point then return nil, 'nocurrentpoint' end
+  local rawpsfont = state.font
+  if not rawpsfont then return nil, 'invalidfont' end
+  local str = str.value
+  local psfont = rawpsfont.value
+  local fid = psfont.FID
+  local matrix = psfont.FontMatrix.value
+  local fonttype = psfont.FontType
+  if fonttype ~= 0x1CA and fonttype ~= 3 then
+    texio.write_nl'Font support is not implemented'
+    return true
+  end
+  update_matrix(
+    matrix[1],                    matrix[2],
+    matrix[3],                    matrix[4],
+    matrix[5] + current_point[1], matrix[6] + current_point[2])
+  local w = 0
+  if fonttype == 0x1CA then
+    local characters = assert(font.getfont(fid)).characters
+    flush_delayed()
+    if pdfprint ~= gobble then
+      vf.push()
+      vf.fontid(fid)
+    end
+    for b in string.bytes(str) do
+      if pdfprint ~= gobble then
+        vf.char(b)
+        if ax then
+          vf.right(ax)
+          vf.down(-ay)
+        end
+      end
+      local char = characters[b]
+      w = w + (char and char.width or 0)
+    end
+    if pdfprint ~= gobble then
+      vf.pop()
+    end
+    w = w/65781.76
+  elseif fonttype == 3 then
+    for b in string.bytes(str) do
+      systemdict.value.gsave()
+      local state = graphics_stack[#graphics_stack]
+      state.current_point, state.current_path = nil
+      push(rawpsfont)
+      push(b)
+      local this_w
+      char_width_storage = function(width)
+        this_w = width
+      end
+      execute_tok(psfont.BuildChar) -- FIXME(maybe): Switch to BuildGlyph?
+      systemdict.value.grestore()
+      w = w + assert(this_w, 'Type 3 character failed to set width')
+      update_matrix(1, 0, 0, 1, this_w, 0)
+      if ax then
+        update_matrix(1, 0, 0, 1, ax, ay)
+      end
+    end
+    update_matrix(1, 0, 0, 1, -w, 0)
+    if ax then
+      local count = #str
+      update_matrix(1, 0, 0, 1, count * -ax, count * -ay)
+    end
+  else
+    assert(false)
+  end
+  if ax then
+    local count = #str
+    push(w + count * ax)
+    push(count * ay)
+  else
+    push(w)
+    push(0)
+  end
+  systemdict.value.rmoveto()
+  update_matrix(matrix_invert(
+    matrix[1],                    matrix[2],
+    matrix[3],                    matrix[4],
+    matrix[5] + current_point[1], matrix[6] + current_point[2]))
+  return true
+end
+
+systemdict = {kind = 'dict', value = {
   dup = function()
     local v = pop()
     push(v)
@@ -2283,69 +2370,25 @@ local systemdict systemdict = {kind = 'dict', value = {
     push(x)
     push(y)
   end,
+  ashow = function()
+    local str = pop_string()
+    local ay = pop_num()
+    local ax = pop_num()
+    local res, err = generic_show(str, ax, ay)
+    if not res then
+      push(ax)
+      push(ay)
+      push(str)
+      error(err)
+    end
+  end,
   show = function()
-    local state = graphics_stack[#graphics_stack]
-    local current_point = assert(state.current_point, 'nocurrentpoint')
-    local rawpsfont = assert(state.font, 'invalidfont')
-    local str = pop_string().value
-    local psfont = rawpsfont.value
-    local fid = psfont.FID
-    local matrix = psfont.FontMatrix.value
-    local fonttype = psfont.FontType
-    if fonttype ~= 0x1CA and fonttype ~= 3 then
-      texio.write_nl'Font support is not implemented'
-      return
+    local str = pop_string()
+    local res, err = generic_show(str)
+    if not res then
+      push(str)
+      error(err)
     end
-    update_matrix(
-      matrix[1],                    matrix[2],
-      matrix[3],                    matrix[4],
-      matrix[5] + current_point[1], matrix[6] + current_point[2])
-    local w = 0
-    if fonttype == 0x1CA then
-      local characters = assert(font.getfont(fid)).characters
-      flush_delayed()
-      if pdfprint ~= gobble then
-        vf.push()
-        vf.fontid(fid)
-      end
-      for b in string.bytes(str) do
-        if pdfprint ~= gobble then
-          vf.char(b)
-        end
-        local char = characters[b]
-        w = w + (char and char.width or 0)
-      end
-      if pdfprint ~= gobble then
-        vf.pop()
-      end
-      w = w/65781.76
-    elseif fonttype == 3 then
-      for b in string.bytes(str) do
-        systemdict.value.gsave()
-        local state = graphics_stack[#graphics_stack]
-        state.current_point, state.current_path = nil
-        push(rawpsfont)
-        push(b)
-        local this_w
-        char_width_storage = function(width)
-          this_w = width
-        end
-        execute_tok(psfont.BuildChar) -- FIXME(maybe): Switch to BuildGlyph?
-        systemdict.value.grestore()
-        w = w + assert(this_w, 'Type 3 character failed to set width')
-        update_matrix(1, 0, 0, 1, this_w, 0)
-      end
-      update_matrix(1, 0, 0, 1, -w, 0)
-    else
-      assert(false)
-    end
-    push(w)
-    push(0)
-    systemdict.value.rmoveto()
-    update_matrix(matrix_invert(
-      matrix[1],                    matrix[2],
-      matrix[3],                    matrix[4],
-      matrix[5] + current_point[1], matrix[6] + current_point[2]))
   end,
   definefont = function()
     local fontdict = pop_dict()
