@@ -1137,6 +1137,12 @@ local systemdict systemdict = {kind = 'dict', value = {
     if res < 0 then res = res + 360 end
     push(res)
   end,
+  arccos = function()
+    push(math.acos(pop_num()))
+  end,
+  arcsin = function()
+    push(math.asin(pop_num()))
+  end,
   abs = function()
     push(math.abs(pop_num()))
   end,
