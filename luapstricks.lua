@@ -1894,6 +1894,38 @@ systemdict = {kind = 'dict', value = {
     state.current_path = new_path
   end,
 
+  rectclip = function()
+    flush_delayed()
+    local top = pop()
+    if type(top) == 'table' and top.kind == 'executable' then
+      top = top.value
+    end
+    if type(top) == 'number' then
+      local h = top
+      local w = pop_num()
+      local y = pop_num()
+      local x = pop_num()
+      pdfprint(string.format('%.3f %.3f %.3f %.3f re W n', x, y, w, h))
+    else
+      error'Unsupported rectclip variant'
+    end
+  end,
+  rectstroke = function()
+    flush_delayed()
+    local top = pop()
+    if type(top) == 'table' and top.kind == 'executable' then
+      top = top.value
+    end
+    if type(top) == 'number' then
+      local h = top
+      local w = pop_num()
+      local y = pop_num()
+      local x = pop_num()
+      pdfprint(string.format('%.3f %.3f %.3f %.3f re S', x, y, w, h))
+    else
+      error'Unsupported rectstroke variant'
+    end
+  end,
   rectfill = function()
     flush_delayed()
     local top = pop()
