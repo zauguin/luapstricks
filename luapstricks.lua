@@ -660,6 +660,9 @@ local userdict = {kind = 'dict', value = {
   SDict = {kind = 'dict', value = {
     normalscale = {kind = 'executable', value = {kind = 'array', value = {}}},
   }},
+  ['@beginspecial'] = {kind = 'executable', value = {kind = 'array', value = {}}},
+  ['@setspecial'] = {kind = 'executable', value = {kind = 'array', value = {}}},
+  ['@endspecial'] = {kind = 'executable', value = {kind = 'array', value = {}}},
 }}
 local FontDirectory = {kind = 'dict', value = {}}
 
