@@ -763,6 +763,11 @@ systemdict = {kind = 'dict', value = {
   pop = function()
     pop()
   end,
+  clear = function()
+    for i = 1, #operand_stack do
+      operand_stack[i] = nil
+    end
+  end,
   copy = function()
     local arg = pop()
     local exec
