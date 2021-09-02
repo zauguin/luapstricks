@@ -1797,6 +1797,20 @@ systemdict = {kind = 'dict', value = {
     pop()
   end,
 
+  eoclip = function()
+    local state = graphics_stack[#graphics_stack]
+    local current_path = state.current_path
+    if not current_path then return end
+    flush_delayed(true)
+    for i = 1, #current_path do
+      if type(current_path[i]) == 'number' then
+        pdfprint(string.format('%.3f', current_path[i]))
+      else
+        pdfprint(current_path[i])
+      end
+    end
+    pdfprint'W* n'
+  end,
   clip = function()
     local state = graphics_stack[#graphics_stack]
     local current_path = state.current_path
