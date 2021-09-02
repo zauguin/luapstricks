@@ -1258,10 +1258,10 @@ systemdict = {kind = 'dict', value = {
     push(res)
   end,
   arccos = function()
-    push(math.acos(pop_num()))
+    push(math.deg(math.acos(pop_num())))
   end,
   arcsin = function()
-    push(math.asin(pop_num()))
+    push(math.deg(math.asin(pop_num())))
   end,
   abs = function()
     push(math.abs(pop_num()))
