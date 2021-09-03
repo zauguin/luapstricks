@@ -1693,6 +1693,21 @@ systemdict = {kind = 'dict', value = {
     local current_point = state.current_point
     current_point[1], current_point[2] = x3, y3
   end,
+  rcurveto = function()
+    local state = graphics_stack[#graphics_stack]
+    local current_path = assert(state.current_path, 'nocurrentpoint')
+    local x0, y0 = current_point[1], current_point[2]
+    local y3 = pop_num() + y0
+    local x3 = pop_num() + x0
+    local y2 = pop_num() + y0
+    local x2 = pop_num() + x0
+    local y1 = pop_num() + y0
+    local x1 = pop_num() + x0
+    local i = #current_path + 1
+    current_path[i], current_path[i+1], current_path[i+2], current_path[i+3], current_path[i+4], current_path[i+5], current_path[i+6] = x1, y1, x2, y2, x3, y3, 'c'
+    local current_point = state.current_point
+    current_point[1], current_point[2] = x3, y3
+  end,
   closepath = function()
     local state = graphics_stack[#graphics_stack]
     local current_path = state.current_path
