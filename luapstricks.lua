@@ -682,10 +682,11 @@ local function generic_show(str, ax, ay)
     texio.write_nl'Font support is not implemented'
     return true
   end
+  local x0, y0 = current_point[1], current_point[2]
   update_matrix(
-    matrix[1],                    matrix[2],
-    matrix[3],                    matrix[4],
-    matrix[5] + current_point[1], matrix[6] + current_point[2])
+    matrix[1],      matrix[2],
+    matrix[3],      matrix[4],
+    matrix[5] + x0, matrix[6] + y0)
   local w = 0
   if fonttype == 0x1CA then
     local characters = assert(font.getfont(fid)).characters
@@ -746,9 +747,9 @@ local function generic_show(str, ax, ay)
   end
   systemdict.value.rmoveto()
   update_matrix(matrix_invert(
-    matrix[1],                    matrix[2],
-    matrix[3],                    matrix[4],
-    matrix[5] + current_point[1], matrix[6] + current_point[2]))
+    matrix[1],      matrix[2],
+    matrix[3],      matrix[4],
+    matrix[5] + x0, matrix[6] + y0))
   return true
 end
 
