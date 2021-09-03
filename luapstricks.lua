@@ -2638,7 +2638,7 @@ systemdict = {kind = 'dict', value = {
     else
       assert(false, 'Unexpected type')
     end
-    push{kind = 'name', value = tname}
+    push(tname)
     -- filetype
     -- fonttype
     -- gstatetype (LanguageLevel 2)
