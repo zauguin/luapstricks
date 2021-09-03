@@ -7,3 +7,10 @@
   5. Wait for a fix.
   6. Go back to step 2 and try again.
   7. It worked? That's great. Feel free to inform the author anyway and share the awesome images you created.
+
+
+Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
+
+  1. https://hvoss.org/PSTexa/pst-node-doc.pdf
+  2. https://hvoss.org/PSTexa/pst-plot-doc.pdf
+  
