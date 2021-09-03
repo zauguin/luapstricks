@@ -23,7 +23,7 @@
 \ifx\PSTFPloaded\endinput\else   \input pst-fp.tex  \fi
 \ifx\MultidoLoaded\endinput\else \input multido.tex \fi
 %
-\def\fileversion{1.93}
+\def\fileversion{1.93a}
 \def\filedate{2021/09/03}
 \message{ v\fileversion, \filedate\space (tvz,hv)}
 %
@@ -378,11 +378,13 @@ D\space##1%
   } repeat
   /u xiSquare fi mul xi xifi mul sub n xiSquare mul xi dup mul sub div def
   /v n xifi mul xi fi mul sub n xiSquare mul xi dup mul sub div def
+  gsave
   \Pst@Debug\space 0 gt { 			% print the equation
-    /NimbusSanL-Regu findfont 12 scalefont setfont	
+    /Helvetica findfont 12 scalefont setfont	
     0 -50 moveto (y=) show 			% print y=
     v \pst@number\psyunit \pst@number\psxunit div div 20 string cvs show ( x+) show		% m*x+
     u \pst@number\psyunit div 20 string cvs show } if
+  grestore
   newpath
   (\psk@xStart) length 0 gt 			% special start value?
     { \psk@xStart\space \pst@number\psxunit mul }
