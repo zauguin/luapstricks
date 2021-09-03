@@ -23,7 +23,7 @@
 \ifx\PSTFPloaded\endinput\else   \input pst-fp.tex  \fi
 \ifx\MultidoLoaded\endinput\else \input multido.tex \fi
 %
-\def\fileversion{1.93a}
+\def\fileversion{1.93b}
 \def\filedate{2021/09/03}
 \message{ v\fileversion, \filedate\space (tvz,hv)}
 %
@@ -380,7 +380,8 @@ D\space##1%
   /v n xifi mul xi fi mul sub n xiSquare mul xi dup mul sub div def
   gsave
   \Pst@Debug\space 0 gt { 			% print the equation
-    /Helvetica findfont 12 scalefont setfont	
+    \ifpstGSfonts /NimbusSanL-Regu \else /Helvetica \fi
+    findfont 12 scalefont setfont	
     0 -50 moveto (y=) show 			% print y=
     v \pst@number\psyunit \pst@number\psxunit div div 20 string cvs show ( x+) show		% m*x+
     u \pst@number\psyunit div 20 string cvs show } if
@@ -1084,11 +1085,12 @@ D\space##1%
 \def\parametricplot@i#1#2{\@ifnextchar[{\parametricplot@x{#1}{#2}}{\parametricplot@x{#1}{#2}[]}}
 \def\parametricplot@x#1#2[#3]{\@ifnextchar[{\parametricplot@xi{#1}{#2}[#3]}{\parametricplot@xi{#1}{#2}[#3][]}}
 \def\parametricplot@xi#1#2[#3][#4]#5{%
-  \pst@killglue%
+  \pst@killglue
   \begingroup%
-    \use@par%
+    \use@par
     \@nameuse{beginplot@\psplotstyle}%
     \addto@pscode{%
+      20 dict begin
       #3 %prefix PS code
       \psplot@init
       /t #1 def
@@ -1128,7 +1130,7 @@ D\space##1%
     \@pstfalse
     \@nameuse{testqp@\psplotstyle}%
     \if@pst\parametricplot@ii{#4}\else\parametricplot@iii{#4}\fi
-  \endgroup%
+  \endgroup
   \ignorespaces}
 %
 \def\parametricplot@ii#1{% para is the post code
@@ -1140,7 +1142,8 @@ D\space##1%
         /t 3 -1 roll def 2 copy gt { exch } if pop
         /t t 3 -1 roll add dup t1 gt {pop t1} if def
         xy \@nameuse{doqp@\psplotstyle}
-        t t1 eq { exit } if } loop}%
+        t t1 eq { exit } if } loop
+     }%
   \else\pst@killglue%
     \addto@pscode{%
       /ps@Exit false def
@@ -1156,7 +1159,7 @@ D\space##1%
       } if 
     }%
   \fi%
-  \addto@pscode{ #1 }%
+  \addto@pscode{ #1 end }%  also end of userdict
   \@nameuse{endqp@\psplotstyle}}
 %
 \def\parametricplot@iii#1{%
@@ -1172,7 +1175,8 @@ D\space##1%
         t t1 eq { exit } if } loop
       xy 
       2 copy \tx@UserCoor 2 array astore /FinalState ED
-      n 2 roll}%
+      n 2 roll
+    }%
   \else\pst@killglue%
     \addto@pscode{
       mark
@@ -1185,9 +1189,10 @@ D\space##1%
       } repeat
       /t t1 def
       xy
-      n 2 roll}%
-  \fi%
-  \addto@pscode{ #1 }%
+      n 2 roll
+     }%
+  \fi
+  \addto@pscode{ #1 end}%     also end of userdict
   \@nameuse{endplot@\psplotstyle}}
 %
 %

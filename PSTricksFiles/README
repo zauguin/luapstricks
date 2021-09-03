@@ -10,12 +10,13 @@
 
 
 --- pstricks.pro
-1.38a 2021-08-30  -added comment
 1.38b 2021-08-30  -remove empty lines to prevent a \par output for pst-eps
+1.38a 2021-08-30  -added comment
 
 
 
 ---pst-plot.tex
+1.93b  2021-09-03  - fix for lualatex and \psparametricplot -> use a userdict
 1.93a  2021-09-03  - fix for LSM plots; needs gsave .. grestore    
 1.93   2021-09-03  - dont't use function names from pstricks.pro
                     for own use  NArray->NArray@i
