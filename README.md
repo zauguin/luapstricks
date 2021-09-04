@@ -19,5 +19,6 @@ Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
    [pst-poly](https://hvoss.org/PSTexa/pst-poly-doc.pdf)
    [pst-stru](https://hvoss.org/PSTexa/pst-stru-doc.pdf)  
    [pst-tools](https://hvoss.org/PSTexa/pst-tools-doc.pdf)  
+   [pst-tree](https://hvoss.org/PSTexa/pst-tree-doc.pdf)
    [pst-turtle](https://hvoss.org/PSTexa/pst-turtle-doc.pdf)  
    [pst-venn](https://hvoss.org/PSTexa/pst-venn-doc.pdf)  
