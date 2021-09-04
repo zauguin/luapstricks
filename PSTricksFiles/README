@@ -21,3 +21,7 @@
 1.93a  2021-09-03  - fix for LSM plots; needs gsave .. grestore    
 1.93   2021-09-03  - dont't use function names from pstricks.pro
                     for own use  NArray->NArray@i
+
+
+----- pst-tree.tex
+1.14   2021-09-04  - set default linewidth and color for lualatex
