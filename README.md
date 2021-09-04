@@ -11,7 +11,7 @@
 
 Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
 
-  1. https://hvoss.org/PSTexa/pst-knot-doc.pdf
-  2. https://hvoss.org/PSTexa/pst-node-doc.pdf
-  3. https://hvoss.org/PSTexa/pst-plot-doc.pdf
+  1. [pst-knot](https://hvoss.org/PSTexa/pst-knot-doc.pdf)
+  2. [pst-node](https://hvoss.org/PSTexa/pst-node-doc.pdf)
+  3. [pst-plot](https://hvoss.org/PSTexa/pst-plot-doc.pdf)
   
