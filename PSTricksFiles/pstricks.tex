@@ -81,8 +81,8 @@
 \fi
 \let\pgfforeach\foreach
 %
-\def\fileversion{3.06c}
-\def\filedate{2021/09/01}
+\def\fileversion{3.06d}
+\def\filedate{2021/09/04}
 \pst@addfams{pstricks}
 %
 %\define@boolkey[psset]{pstricks}[Pst@]{useURWfonts}[true]{}
@@ -2214,6 +2214,9 @@
 }}
 %
 \pstheader{pst-dots.pro}
+
+\pstGSfontsfalse
+
 \newpsfontdot{*}[1.0 0.0 0.0 1.0 0.0 0.0]{PSTricksDotFont}{(b)}
 \newpsfontdotH{o}[1.0 0.0 0.0 1.0 0.0 0.0]{PSTricksDotFont}{(c)}{(b)}
 \newpsfontdotH{Bo}[1.0 0.0 0.0 1.0 0.0 0.0]{PSTricksDotFont}{(C)}{(b)}
@@ -4011,6 +4014,29 @@ pop
 \psset[pstricks]{ref=c}
 %
 \def\pst@rotlist{ mark RAngle /ps@a ED cleartomark ps@a neg }
+%
+%  U Up 0 
+%  L Left 90 
+%  D Down 180 
+%  R Right 270
+%  
+%  N North *0 
+%  W West *90 
+%  S South *180 
+%  E East *270
+%
+\ifPSTlualatex
+\def\pst@rottable{%
+@0=%
+@U=%
+@L=90 %
+@D=180 %
+@R=-90 %
+@N=\pst@rotlist neg
+@W=\pst@rotlist 90 add neg %
+@S=\pst@rotlist 180 add neg %
+@E=\pst@rotlist 90 sub neg }
+\else
 \def\pst@rottable{%
 @0=%
 @U=%
@@ -4021,6 +4047,7 @@ pop
 @W=\pst@rotlist 90 add %
 @S=\pst@rotlist 180 add %
 @E=\pst@rotlist 90 sub }
+\fi
 %
 \define@key[psset]{pstricks}{rot}[0]{%
   \pst@expandafter{\@ifnextchar*{\psset@@@rot}{\psset@@rot}}{#1}\@nil}
@@ -4048,12 +4075,21 @@ pop
 %
 \def\tx@RotBegin{RotBegin }
 \def\tx@RotEnd{RotEnd }
-\def\pst@rotate#1#2{%
-  \ifx#1\@empty\else
-      \setbox#2=\hbox{\pst@Verb{#1 \ifPSTlualatex neg \fi\space \tx@RotBegin}\box#2\pst@Verb{\tx@RotEnd}}%
-      % luatex doesn't have the coordinate system of dvips, so we need negative angles
-  \fi
-}
+\ifPSTlualatex
+  \def\pst@rotate#1#2{%
+    \ifx#1\@empty\else
+        \setbox#2=\hbox{\pst@Verb{#1 \ifPSTlualatex neg \fi\space \tx@RotBegin}\box#2\pst@Verb{\tx@RotEnd}}%
+        % luatex doesn't have the coordinate system of dvips, so we need negative angles
+    \fi
+ }%
+ \else
+  \def\pst@rotate#1#2{%
+    \ifx#1\@empty\else
+        \setbox#2=\hbox{\pst@Verb{#1 \ifPSTlualatex \fi\space \tx@RotBegin}\box#2\pst@Verb{\tx@RotEnd}}%
+        % luatex doesn't have the coordinate system of dvips, so we need negative angles
+    \fi
+ }%
+ \fi
 \def\psput@cartesian#1{%
 \hbox to \z@{\kern\pst@dimg{\vbox to \z@{\vss\box#1\vskip\pst@dimh}\hss}}%
 }
