@@ -2706,6 +2706,14 @@ systemdict = {kind = 'dict', value = {
     return execute_tok{kind = 'executable', value = {kind = 'string', value = data}}
   end,
 
+  -- We don't implement local/global separation, so we ignore setglobal and always report currentglobal as true
+  setglobal = function()
+    pop()
+  end,
+  currentglobal = function()
+    push(true)
+  end,
+
   closefile = function()
     local f = pop()
     f:close()
