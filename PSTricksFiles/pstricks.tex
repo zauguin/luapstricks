@@ -81,8 +81,8 @@
 \fi
 \let\pgfforeach\foreach
 %
-\def\fileversion{3.06d}
-\def\filedate{2021/09/04}
+\def\fileversion{3.06e}
+\def\filedate{2021/09/05}
 \pst@addfams{pstricks}
 %
 %\define@boolkey[psset]{pstricks}[Pst@]{useURWfonts}[true]{}
@@ -4013,7 +4013,6 @@ pop
 \def\getref@r{\def\psk@xref{1}}
 \psset[pstricks]{ref=c}
 %
-\def\pst@rotlist{ mark RAngle /ps@a ED cleartomark ps@a neg }
 %
 %  U Up 0 
 %  L Left 90 
@@ -4026,17 +4025,11 @@ pop
 %  E East *270
 %
 \ifPSTlualatex
-\def\pst@rottable{%
-@0=%
-@U=%
-@L=90 %
-@D=180 %
-@R=-90 %
-@N=\pst@rotlist neg
-@W=\pst@rotlist 90 add neg %
-@S=\pst@rotlist 180 add neg %
-@E=\pst@rotlist 90 sub neg }
+  \def\pst@rotlist{ mark RAngle /ps@a ED cleartomark ps@a }%
 \else
+  \def\pst@rotlist{ mark RAngle /ps@a ED cleartomark ps@a neg }%
+\fi
+
 \def\pst@rottable{%
 @0=%
 @U=%
@@ -4047,7 +4040,6 @@ pop
 @W=\pst@rotlist 90 add %
 @S=\pst@rotlist 180 add %
 @E=\pst@rotlist 90 sub }
-\fi
 %
 \define@key[psset]{pstricks}{rot}[0]{%
   \pst@expandafter{\@ifnextchar*{\psset@@@rot}{\psset@@rot}}{#1}\@nil}
