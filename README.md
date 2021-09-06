@@ -18,6 +18,7 @@ Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
 - [pst-platon](https://hvoss.org/PSTexa/pst-platon-doc.pdf)
 - [pst-plot](https://hvoss.org/PSTexa/pst-plot-doc.pdf)
 - [pst-poly](https://hvoss.org/PSTexa/pst-poly-doc.pdf)
+- [pst-solarsystem](https://hvoss.org/PSTexa/pst-solarsystem-doc.pdf)  
 - [pst-spinner](https://hvoss.org/PSTexa/pst-spinner-doc.pdf)  
 - [pst-stru](https://hvoss.org/PSTexa/pst-stru-doc.pdf)  
 - [pst-tools](https://hvoss.org/PSTexa/pst-tools-doc.pdf)  
