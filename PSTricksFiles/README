@@ -26,3 +26,7 @@
 
 ----- pst-tree.tex
 1.14   2021-09-04  - set default linewidth and color for lualatex
+
+
+----- psvectorian.pro
+suggested change   - Limit clipping using groups instead of resetting clip path
