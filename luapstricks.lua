@@ -665,6 +665,7 @@ local userdict = {kind = 'dict', value = {
   ['@endspecial'] = {kind = 'executable', value = {kind = 'array', value = {}}},
 }}
 local FontDirectory = {kind = 'dict', value = {}}
+local ResourceCategories = {kind = 'dict', value = {}}
 
 local systemdict
 local function generic_show(str, ax, ay)
@@ -2605,6 +2606,87 @@ systemdict = {kind = 'dict', value = {
     systemdict.value.setcachedevice()
   end,
 
+  findresource = function()
+    local category = pop_key()
+    local catdict = ResourceCategories.value[category]
+    if not catdict then
+      push(category)
+      print('undefined resource category', category)
+      error'undefined'
+    end
+    local dict_height = #dictionary_stack + 1
+    dictionary_stack[dict_height] = catdict
+    execute_tok'FindResource'
+    if #dictionary_stack ~= dict_height or dictionary_stack[dict_height] ~= catdict then
+      error'Messed up dictionary stack in custom resource'
+    end
+    dictionary_stack[dict_height] = nil
+  end,
+  resourcestatus = function()
+    local category = pop_key()
+    local catdict = ResourceCategories.value[category]
+    if not catdict then
+      push(category)
+      print('undefined resource category', category)
+      error'undefined'
+    end
+    local dict_height = #dictionary_stack + 1
+    dictionary_stack[dict_height] = catdict
+    execute_tok'ResourceStatus'
+    if #dictionary_stack ~= dict_height or dictionary_stack[dict_height] ~= catdict then
+      error'Messed up dictionary stack in custom resource'
+    end
+    dictionary_stack[dict_height] = nil
+  end,
+  resourceforall = function()
+    local category = pop_key()
+    local catdict = ResourceCategories.value[category]
+    if not catdict then
+      push(category)
+      print('undefined resource category', category)
+      error'undefined'
+    end
+    local dict_height = #dictionary_stack + 1
+    dictionary_stack[dict_height] = catdict
+    execute_tok'ResourceForAll'
+    if #dictionary_stack ~= dict_height or dictionary_stack[dict_height] ~= catdict then
+      error'Messed up dictionary stack in custom resource'
+    end
+    dictionary_stack[dict_height] = nil
+  end,
+  defineresource = function()
+    local category = pop_key()
+    local catdict = ResourceCategories.value[category]
+    if not catdict then
+      push(category)
+      print('undefined resource category', category)
+      error'undefined'
+    end
+    local dict_height = #dictionary_stack + 1
+    dictionary_stack[dict_height] = catdict
+    execute_tok'DefineResource'
+    if #dictionary_stack ~= dict_height or dictionary_stack[dict_height] ~= catdict then
+      error'Messed up dictionary stack in custom resource'
+    end
+    dictionary_stack[dict_height] = nil
+  end,
+  undefineresource = function()
+    local category = pop_key()
+    local catdict = ResourceCategories.value[category]
+    if not catdict then
+      push(category)
+      print('undefined resource category', category)
+      error'undefined'
+    end
+    local dict_height = #dictionary_stack + 1
+    dictionary_stack[dict_height] = catdict
+    execute_tok'UndefineResource'
+    if #dictionary_stack ~= dict_height or dictionary_stack[dict_height] ~= catdict then
+      error'Messed up dictionary stack in custom resource'
+    end
+    dictionary_stack[dict_height] = nil
+  end,
+
   realtime = function()
     push(os.gettimeofday() * 1000 // 1)
   end,
@@ -3044,6 +3126,118 @@ systemdict = {kind = 'dict', value = {
 systemdict.value.systemdict = systemdict
 dictionary_stack = {systemdict, globaldict, userdict}
 -- local execution_stack = {} -- Currently not implemented
+
+-- Quite some stuff is missing here since these aren't implemented yet. Anyway mostly useful for testing.
+ResourceCategories.value.Font = {kind = 'dict', value = {
+  Category = {kind = 'name', value = 'Font'},
+  InstanceType = 'dicttype',
+  DefineResource = systemdict.value.definefont,
+  FindResource = systemdict.value.findfont,
+}}
+
+ResourceCategories.value.Generic = {kind = 'dict', value = {
+  Category = {kind = 'name', value = 'Generic'},
+  DefineResource = function()
+    local instance = pop()
+    local key = pop_key()
+    execute_tok'.Instances'
+    local instances = pop_dict().value
+    instances[key] = instance
+    push(instance)
+  end,
+  UndefineResource = function()
+    local key = pop_key()
+    execute_tok'.Instances'
+    local instances = pop_dict().value
+    instances[key] = nil
+  end,
+  FindResource = function()
+    local key = pop_key()
+    execute_tok'.Instances'
+    local instances = pop_dict().value
+    local instance = instances[key]
+    if instance then
+      push(instance)
+      return
+    end
+    push(key)
+    error'undefinedresource'
+  end,
+  -- ResourceStatus = function()
+  --   local key = pop_key()
+  --   execute_tok'.Instances'
+  --   local instances = pop_dict()
+  --   local instance = instances[key]
+  --   if instance then
+  --     push(instance)
+  --     return
+  --   end
+  --   push(key)
+  --   error'undefinedresource'
+  -- end,
+  -- ResourceForAll = function()
+  --   local key = pop_key()
+  --   execute_tok'.Instances'
+  --   local instances = pop_dict()
+  --   local instance = instances[key]
+  --   if instance then
+  --     push(instance)
+  --     return
+  --   end
+  --   push(key)
+  --   error'undefinedresource'
+  -- end,
+  ['.Instances'] = {kind = 'dict', value = {}},
+}}
+
+ResourceCategories.value.Category = {kind = 'dict', value = {
+  Category = {kind = 'name', value = 'Generic'},
+  InstanceType = 'dicttype',
+  DefineResource = function()
+    local instance = pop()
+    local key = pop_key()
+    ResourceCategories.value[key] = instance
+    push(instance)
+  end,
+  UndefineResource = function()
+    local key = pop_key()
+    ResourceCategories.value[key] = nil
+  end,
+  FindResource = function()
+    local key = pop_key()
+    local instance = ResourceCategories.value[key]
+    if instance then
+      push(instance)
+      return
+    end
+    push(key)
+    error'undefinedresource'
+  end,
+  -- ResourceStatus = function()
+  --   local key = pop_key()
+  --   execute_tok'.Instances'
+  --   local instances = pop_dict().value
+  --   local instance = instances[key]
+  --   if instance then
+  --     push(instance)
+  --     return
+  --   end
+  --   push(key)
+  --   error'undefinedresource'
+  -- end,
+  -- ResourceForAll = function()
+  --   local key = pop_key()
+  --   execute_tok'.Instances'
+  --   local instances = pop_dict().value
+  --   local instance = instances[key]
+  --   if instance then
+  --     push(instance)
+  --     return
+  --   end
+  --   push(key)
+  --   error'undefinedresource'
+  -- end,
+}}
 
 function execute_tok(tok, suppress_proc)
   local ttok = type(tok)
