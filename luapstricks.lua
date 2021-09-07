@@ -1385,6 +1385,20 @@ systemdict = {kind = 'dict', value = {
   string = function()
     push{kind = 'string', value = string.rep('\0', pop_int())}
   end,
+  search = function()
+    local seek = pop_string()
+    local str = pop_string()
+    local start, stop = string.find(str.value, seek.value, 1, true)
+    if start then
+      push(str_view(str, stop + 1, #str - stop))
+      push(str_view(str, start, stop - start + 1))
+      push(str_view(str, 1, start - 1))
+      push(true)
+    else
+      push(str)
+      push(false)
+    end
+  end,
 
   array = function()
     local size = pop_int()
