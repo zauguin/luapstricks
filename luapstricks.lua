@@ -862,6 +862,26 @@ systemdict = {kind = 'dict', value = {
   ['<<'] = function()
     push(mark)
   end,
+  ['>>'] = function()
+    local mark_pos
+    for i = #operand_stack, 1, -1 do
+      if operand_stack[i] == mark then
+        mark_pos = i
+        break
+      end
+    end
+    if not mark_pos then error'Unmatched mark' end
+    local dict = lua.newtable(0, (#operand_stack-mark_pos) // 2)
+    for i = mark_pos + 1, #operand_stack - 1, 2 do
+      push(operand_stack[i])
+      local key = pop_key()
+      dict[key] = operand_stack[i+1]
+    end
+    for i = mark_pos, #operand_stack do
+      operand_stack[i] = nil
+    end
+    push{kind = 'dict', value = dict}
+  end,
   count = function()
     push(#operand_stack)
   end,
