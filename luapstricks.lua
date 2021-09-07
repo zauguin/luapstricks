@@ -394,7 +394,7 @@ local execute_ps, execute_tok
 
 local dictionary_stack
 local graphics_stack = {{
-  matrix = {10, 0, 0, 10, 0, 0}, -- Chosen for consistency with GhostScript's pdfwrite
+  matrix = {10, 0, 0, 10, 0, 0}, -- Chosen for consistency with GhostScript's pdfwrite. Must be the same as defaultmatrix
   linewidth = nil,
   current_path = nil,
   current_point = nil,
@@ -1592,6 +1592,13 @@ systemdict = {kind = 'dict', value = {
 
   matrix = function()
     push{kind = 'array', value = {1, 0, 0, 1, 0, 0}}
+  end,
+  defaultmatrix = function()
+    local m = pop_array()
+    local mm = m.value
+    assert(#mm == 6)
+    mm[1], mm[2], mm[3], mm[4], mm[5], mm[6] = 10, 0, 0, 10, 0, 0
+    push(m)
   end,
   currentmatrix = function()
     local m = pop_array()
