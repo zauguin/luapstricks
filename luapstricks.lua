@@ -2864,6 +2864,32 @@ systemdict = {kind = 'dict', value = {
     f:write(data)
   end,
 
+  token = function()
+    local arg = pop()
+    if type(arg) ~= 'table' or arg.kind ~= 'string' then
+      push(arg)
+      if type(arg) == 'userdata' and arg.read then
+        error'token applied to file arguments is no yet implemented'
+      else
+        error'typecheck'
+      end
+    end
+    local str = arg.value
+    local tok, after = l.match(any_object * l.Cp(), str)
+    if after == nil then
+      if l.match(whitespace^-1 * -1, str) then
+        push(false)
+      else
+        push(arg)
+        error'syntaxerror'
+      end
+    else
+      push(str_view(arg, after, #str - after - 1))
+      push(tok)
+      push(true)
+    end
+  end,
+
   revision = 1000,
   ['true'] = true,
   ['false'] = false,
