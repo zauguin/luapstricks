@@ -11,6 +11,9 @@
 
 Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
 
+- [pst-user](https://hvoss.org/PSTexa/pst-user.pdf) Main (historical) documentation without overlay stuff
+
+
 - [pst-antiprism](https://hvoss.org/PSTexa/pst-antiprism-doc.pdf)
 - [pst-bezier](https://hvoss.org/PSTexa/pst-bezier-doc.pdf)
 - [pst-eucl](https://hvoss.org/PSTexa/pst-eucl-doc.pdf)
