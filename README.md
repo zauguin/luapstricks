@@ -12,6 +12,8 @@
 Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
 
 - [pst-antiprism](https://hvoss.org/PSTexa/pst-antiprism-doc.pdf)
+- [pst-bezier](https://hvoss.org/PSTexa/pst-bezier-doc.pdf)
+- [pst-eucl](https://hvoss.org/PSTexa/pst-eucl-doc.pdf)
 - [pst-func](https://hvoss.org/PSTexa/pst-func-doc.pdf)
 - [pst-knot](https://hvoss.org/PSTexa/pst-knot-doc.pdf)
 - [pst-node](https://hvoss.org/PSTexa/pst-node-doc.pdf)
@@ -19,6 +21,7 @@ Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
 - [pst-plot](https://hvoss.org/PSTexa/pst-plot-doc.pdf)
 - [pst-poly](https://hvoss.org/PSTexa/pst-poly-doc.pdf)
 - [pst-solarsystem](https://hvoss.org/PSTexa/pst-solarsystem-doc.pdf)  
+- [pst-soroban](https://hvoss.org/PSTexa/pst-soroban-doc.pdf)  
 - [pst-spinner](https://hvoss.org/PSTexa/pst-spinner-doc.pdf)  
 - [pst-stru](https://hvoss.org/PSTexa/pst-stru-doc.pdf)  
 - [pst-tools](https://hvoss.org/PSTexa/pst-tools-doc.pdf)  
