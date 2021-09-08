@@ -2618,6 +2618,17 @@ systemdict = {kind = 'dict', value = {
       FontType = 0x1CA,
     }}
   end,
+  selectfont = function()
+    systemdict.value.exch()
+    systemdict.value.findfont()
+    systemdict.value.exch()
+    if type(operand_stack[#operand_stack]) == 'number' then
+      systemdict.value.scalefont()
+    else
+      systemdict.value.makefont()
+    end
+    systemdict.value.setfont()
+  end,
 
   setcharwidth = function()
     -- Pop and ignore the advance height -- FIXME(maybe)
