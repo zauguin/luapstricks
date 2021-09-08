@@ -1150,6 +1150,15 @@ systemdict = {kind = 'dict', value = {
       error'typecheck'
     end
   end,
+  bitshift = function()
+    local shift = pop_num()
+    local val = pop_num()
+    if shift >= 0 then
+      push(val << shift)
+    else
+      push(val >> shift)
+    end
+  end,
 
   eq = function()
     local b, a = pop() a = pop()
@@ -2939,6 +2948,23 @@ systemdict = {kind = 'dict', value = {
     local data = pop_string().value
     local f = pop()
     f:write(data)
+  end,
+  readstring = function()
+    local target = pop_string()
+    local f = pop()
+    local data = f:read(#target.value)
+    if #target.value == #data then
+      target.value = data
+      push(target)
+      push(true)
+      systemdict.value.stack()
+    else
+      target = str_view(target, 1, #data)
+      target.value = data
+      push(target)
+      push(false)
+      systemdict.value.stack()
+    end
   end,
 
   token = function()
