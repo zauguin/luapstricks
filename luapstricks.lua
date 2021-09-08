@@ -1153,11 +1153,7 @@ systemdict = {kind = 'dict', value = {
   bitshift = function()
     local shift = pop_num()
     local val = pop_num()
-    if shift >= 0 then
-      push(val << shift)
-    else
-      push(val >> shift)
-    end
+    push(val << shift)
   end,
 
   eq = function()
