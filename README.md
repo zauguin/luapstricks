@@ -11,7 +11,7 @@
 
 Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
 
-- [pst-user](https://hvoss.org/PSTexa/pst-user.pdf) Main (historical) documentation without overlay stuff
+- [pst-user](https://hvoss.org/PSTexa/pst-user.pdf) Main (historical) documentation without overlay stuff (is now in pst-ovl)
 
 
 - [pst-antiprism](https://hvoss.org/PSTexa/pst-antiprism-doc.pdf)
@@ -20,6 +20,7 @@ Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
 - [pst-func](https://hvoss.org/PSTexa/pst-func-doc.pdf)
 - [pst-knot](https://hvoss.org/PSTexa/pst-knot-doc.pdf)
 - [pst-node](https://hvoss.org/PSTexa/pst-node-doc.pdf)
+- [pst-ovl](https://hvoss.org/PSTexa/pst-ovl-doc.pdf)
 - [pst-platon](https://hvoss.org/PSTexa/pst-platon-doc.pdf)
 - [pst-plot](https://hvoss.org/PSTexa/pst-plot-doc.pdf)
 - [pst-poly](https://hvoss.org/PSTexa/pst-poly-doc.pdf)
