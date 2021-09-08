@@ -20,6 +20,7 @@ local whitespace = (l.S'\0\t\n\r\f ' + '%' * (1-l.P'\n')^0 * (l.P'\n' + -1))^1
 local regular = 1 - l.S'\0\t\n\r\f %()<>[]{}/'
 
 local exitmarker = {}
+local lookup
 
 -- local integer = l.S'+-'^-1 * l.R'09'^1 / tonumber
 local real = l.S'+-'^-1 * (l.R'09'^1 * ('.' * l.R'09'^0)^-1 + '.' * l.R'09'^1) * (l.S'Ee' * l.S'+-'^-1 * l.R'09'^1)^-1 / tonumber
@@ -112,9 +113,9 @@ local imm_name = '//' * l.C(regular^0)
 local any_object = l.P{whitespace^-1 * (
     number * -regular
   + l.Ct(l.Cg(string_patt, 'value') * l.Cg(l.Cc'string', 'kind'))
-  + name
+  + imm_name / function(name) return lookup(name) end
   + l.Ct(l.Cg(literal_name, 'value') * l.Cg(l.Cc'name', 'kind'))
-  -- + imm_name * l.Cc'immediate_name' -- TODO???
+  + name
   + l.Ct(l.Cg(l.Ct(l.Cg('{' * l.Ct(l.V(1)^0) * whitespace^-1 * '}', 'value') * l.Cg(l.Cc'array', 'kind')), 'value') * l.Cg(l.Cc'executable', 'kind'))
 )}
 local object_list = l.Ct(any_object^0) * whitespace^-1 * (-1 + l.Cp())
@@ -563,7 +564,7 @@ local function try_lookup(name)
     end
   end
 end
-local function lookup(name)
+function lookup(name)
   local result = try_lookup(name)
   if result == nil then
     return error(string.format('Unknown name %q', name))
@@ -651,6 +652,39 @@ local subdivide, flatten do
     flatten(out, target, x0, y0, a, b, c, d, e, f)
     return flatten(out, target, e, f, g, h, i, j, k, l)
   end
+end
+
+local function ps_to_string(a)
+  local ta = type(a)
+  if ta == 'table' and a.kind == 'executable' then
+    a = a.value
+    ta = type(a)
+  end
+  if ta == 'string' then
+  elseif ta == 'boolean' then
+    a = a and 'true' or 'false'
+  elseif ta == 'number' then
+    a = string.format(math.type(a) == 'float' and '%.6g' or '%i', a)
+    -- a = tostring(a)
+  elseif ta == 'function' then
+    texio.write_nl'Warning: cvs on operators is unsupported. Replaced by dummy.'
+    a = '--nostringval--'
+  elseif ta == 'table' then
+    local kind = a.kind
+    if kind == 'string' or kind == 'name' then
+      a = a.value
+    elseif kind == 'operator' then
+      texio.write_nl'Warning: cvs on operators is unsupported. Replaced by dummy.'
+      a = '--nostringval--'
+    else
+      a = '--nostringval--'
+    end
+  elseif ta == 'userdata' and a.read then
+    a = 'file'
+  else
+    assert(false)
+  end
+  return a
 end
 
 local mark = {kind = 'mark'}
@@ -1354,35 +1388,7 @@ systemdict = {kind = 'dict', value = {
   cvs = function()
     local old_str = pop_string()
     local a = pop()
-    local ta = type(a)
-    if ta == 'table' and a.kind == 'executable' then
-      a = a.value
-      ta = type(a)
-    end
-    if ta == 'string' then
-    elseif ta == 'boolean' then
-      a = a and 'true' or 'false'
-    elseif ta == 'number' then
-      a = string.format(math.type(a) == 'float' and '%.6g' or '%i', a)
-      -- a = tostring(a)
-    elseif ta == 'function' then
-      texio.write_nl'Warning: cvs on operators is unsupported. Replaced by dummy.'
-      a = '--nostringval--'
-    elseif ta == 'table' then
-      local kind = a.kind
-      if kind == 'string' or kind == 'name' then
-        a = a.value
-      elseif kind == 'operator' then
-        texio.write_nl'Warning: cvs on operators is unsupported. Replaced by dummy.'
-        a = '--nostringval--'
-      else
-        a = '--nostringval--'
-      end
-    elseif ta == 'userdata' and a.read then
-      a = 'file'
-    else
-      assert(false)
-    end
+    a = ps_to_string(a)
     if #old_str.value < #a then error'rangecheck' end
     old_str.value = a .. string.sub(old_str.value, #a+1, -1)
     return push{kind = 'string', value = a}
@@ -2425,10 +2431,15 @@ systemdict = {kind = 'dict', value = {
     io.stdout:write(msg.value)
   end,
   stack = function()
-    texio.write_nl'Incompatible format for stack'
     for i=#operand_stack, 1, -1 do
-      table.print(operand_stack[i])
+      texio.write_nl('term and log', ps_to_string(operand_stack[i]))
     end
+  end,
+  ['='] = function()
+    texio.write_nl('term and log', ps_to_string(pop()))
+  end,
+  ['=='] = function() -- FIXME: Should give a better representation
+    texio.write_nl('term and log', ps_to_string(pop()))
   end,
 
   stringwidth = function()
@@ -3328,6 +3339,21 @@ function execute_ps(tokens)
     execute_tok(tokens[i], true)
   end
 end
+local any_object_or_end = any_object * l.Cp() + whitespace^-1 * -1 * l.Cc(nil) + l.Cp() * l.Cc(false)
+function execute_string(str)
+  local pos = 1
+  while true do
+    local tok
+    tok, pos = any_object_or_end:match(str, pos)
+    if pos then
+      execute_tok(tok, true)
+    elseif pos == false then
+      error'syntaxerror'
+    else
+      break
+    end
+  end
+end
 
 local func = luatexbase.new_luafunction'luaPSTheader'
 token.set_lua('luaPSTheader', func, 'protected')
@@ -3336,8 +3362,7 @@ lua.get_functions_table()[func] = function()
   local f = io.open(kpse.find_file(token.scan_argument(), 'PostScript header'), 'r')
   local src = f:read'a'
   f:close()
-  local tokens = parse_ps(src)
-  execute_ps(tokens)
+  execute_string(src)
   if #operand_stack ~= stack_depth then
     error'Unexpected values on operand stack'
   end
