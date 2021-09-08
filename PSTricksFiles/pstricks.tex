@@ -81,8 +81,8 @@
 \fi
 \let\pgfforeach\foreach
 %
-\def\fileversion{3.06e}
-\def\filedate{2021/09/05}
+\def\fileversion{3.07a}
+\def\filedate{2021/09/08}
 \pst@addfams{pstricks}
 %
 %\define@boolkey[psset]{pstricks}[Pst@]{useURWfonts}[true]{}
@@ -625,6 +625,13 @@
 \def\pst@color##1{%
   \pstVerb{gsave ##1}\aftergroup\pst@endcolor}%
 \def\pst@endcolor{\pstVerb{\pst@grestore}}}
+
+\def\psgetCMYKvalues#1#2#3#4#5;{\psgetCMYKvalues@i#5;}
+\def\psgetCMYKvalues@i#1,#2,#3,#4;{#1 #2 #3 #4}
+
+\def\psgetRGBvalues#1#2#3#4#5;{\psgetRGBvalues@i#5;}
+\def\psgetRGBvalues@i#1,#2,#3;{#1 #2 #3}
+
 \def\pssetMonochrome{%
   \pstVerb{
     /setrgbcolor { add add 0 gt {0}{1} ifelse setgray } def 
@@ -728,9 +735,9 @@
 \def\@none{none}
 \def\pst@getcolor#1#2{%
 %  \@ifundefined{color@#1}%	hv 1.14  2005-12-17
-  \@ifundefined{\string\color@#1}%
-    {\@pstrickserr{Color `#1' not defined}\@eha}%
-    {\edef#2{#1}}%
+    \@ifundefined{\string\color@#1}%
+      {\@pstrickserr{Color `#1' not defined}\@eha}%
+      {\edef#2{#1}}%
 }
 \newdimen\psunit \psunit 1cm
 \newdimen\psxunit \psxunit 1cm
@@ -1396,7 +1403,8 @@
   { \pst@usecolor\ps@kitecolor }
   { \pst@usecolor\pshatchcolor }
   \psk@psscale 
-  \tx@PenroseFillA }
+  \tx@PenroseFillA 
+}
 \def\psfs@penroseA{\pst@fill\pst@penroseFillA}
 \@namedef{psfs@penroseA*}{\psfs@solid \psfs@penroseA}
 %
@@ -2191,25 +2199,15 @@
 \def\newpsfontdot#1[#2]#3#4{%
   \@namedef{psds@#1}{%
     /#3 \psk@@dotangle [#2] \tx@FontDot
-% DG/SR modification begin - Dec. 12, 1999 - Patch 14
-%/Dot { moveto #4 show } bind def }}
     /Dot { moveto gsave \psk@dotscale #4 show grestore } bind def 
 }}
-% DG/SR modification end
 \def\newpsfontdotH#1[#2]#3#4#5{%	for filled objects
   \@namedef{psds@#1}{%
     /#3 \psk@@dotangle [#2] \tx@FontDot
     /Dot {
       moveto
-%      \iftrue
-% DG/SR modification begin - Dec. 23, 1999 - Patch 14
-%gsave \pst@usecolor\psfillcolor #5 show grestore
-%\fi
-%#4 show
       gsave \psk@dotscale \pst@usecolor\psfillcolor #5 show grestore % fill first
-%      \fi					
       gsave \psk@dotscale #4 show grestore	% show the unfilled one
-% DG/SR modification end
     } bind def 
 }}
 %
