@@ -16,6 +16,7 @@ Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
 
 - [pst-3d](https://hvoss.org/PSTexa/pst-3d-doc.pdf)
 - [pst-3dplot](https://hvoss.org/PSTexa/pst-3dplot-doc.pdf)
+- [pst-am](https://hvoss.org/PSTexa/pst-am-doc.pdf)
 - [pst-antiprism](https://hvoss.org/PSTexa/pst-antiprism-doc.pdf)
 - [pst-barcode](https://hvoss.org/PSTexa/pst-barcode-doc.pdf)
 - [pst-bezier](https://hvoss.org/PSTexa/pst-bezier-doc.pdf)
