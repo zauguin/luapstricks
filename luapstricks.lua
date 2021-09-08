@@ -3541,6 +3541,10 @@ end
 do
   func = luatexbase.new_luafunction'luaPSTcolor'
   token.set_lua('luaPSTcolor', func)
+  local ps_rgb = 'rgb ' * l.C(l.P(1)^0) * l.Cc' setrgbcolor' * l.Cc'rgb '
+  local ps_cmyk = 'cmyk ' * l.C(l.P(1)^0) * l.Cc' setcmykcolor' * l.Cc'cmyk '
+  local ps_gray = 'gray ' * l.C(l.P(1)^0) * l.Cc' setgray' * l.Cc'gray '
+  local pscolor = ps_rgb + ps_gray + ps_gray
   local pdf_rgb = l.Cmt(l.C(number * whitespace * number * whitespace * number / 0) * whitespace * 'rg'
                 * whitespace * l.C(number * whitespace * number * whitespace * number / 0) * whitespace * 'RG' * -1, function(s, p, a, b)
                   if a == b then
@@ -3567,9 +3571,10 @@ do
                 end)
   local pdf_other = l.Cs(l.Cc'(' * l.P(1)^0 * l.Cc')') * l.C' setpdfcolor' * l.C'gray '
   local pdfcolor = pdf_rgb + pdf_cmyk + pdf_gray + pdf_other
+  local anycolor = pscolor + pdfcolor
   lua.get_functions_table()[func] = function()
     local dvips_format = token.scan_keyword'dvips'
-    local result, suffix, prefix = pdfcolor:match(token.scan_argument())
+    local result, suffix, prefix = anycolor:match(token.scan_argument())
     tex.sprint(-2, dvips_format and prefix .. result or result .. suffix)
   end
 end
