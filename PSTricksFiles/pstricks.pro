@@ -121,22 +121,6 @@ tx@Dict begin
 /startGlobal { true setglobal globaldict begin } bind def
 /endGlobal { end false setglobal } bind def
 %
-/setpdfcolor where {                            % luapstricks specific code
-  /setpdfcolor get /pssetPDFcolor exch def
-  /setpdfcolor {
-    pssetPDFcolor
-    mark
-      currentcolor
-      currentcolorspace 0 get
-      dup /DeviceRGB eq { pop setrgbcolor } {
-        dup /DeviceCMYK eq { pop setcmykcolor } {
-          /DeviceGray eq { setgray } if
-        } ifelse
-      } ifelse
-    cleartomark
-  } def
-} if 
-%
 /pssetRGBcolor /setrgbcolor load def
 /pssetCMYKcolor /setcmykcolor load def
 /pssetGraycolor /setgray load def

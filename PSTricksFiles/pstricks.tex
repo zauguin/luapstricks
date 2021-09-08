@@ -461,7 +461,7 @@
   \def\pstverbscale{}%
   \def\pstnodescale{}%
   \def\pstheader{\luaPSTheader}%
-  \def\c@lor@to@ps#1\@@{(#1) setpdfcolor}
+  \def\c@lor@to@ps#1\@@{\luaPSTcolor{#1}}
 %  \AltClipMode   % now done after the definition of \AltClipMode, see below
   % Not sure if we need ``neg'' here or not
   % \def\pstrotate{CP CP translate 3 -1 roll neg rotate \tx@NET}

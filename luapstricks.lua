@@ -613,38 +613,6 @@ local function bind(proc)
   end
 end
 
-local setpdfcolor do
-  local pdf_rgb = number * whitespace * number * whitespace * number * whitespace * 'rg'
-                * whitespace * number * whitespace * number * whitespace * number * whitespace * 'RG' * -1
-  local pdf_cmyk = number * whitespace * number * whitespace * number * whitespace * number * whitespace * 'k'
-                 * whitespace * number * whitespace * number * whitespace * number * whitespace * number * whitespace * 'K' * -1
-  local pdf_gray = number * whitespace * 'g'
-                 * whitespace * number * whitespace * 'G' * -1
-  function setpdfcolor(pdf, color)
-    for i=1, #color do color[i] = nil end
-    local r, g, b, R, G, B = pdf_rgb:match(pdf)
-    if r and r == R and g == G and b == B then
-      color.space = {kind = 'array', value = {{kind = 'name', value = 'DeviceRGB'}}}
-      color[1], color[2], color[3] = R, G, B
-      return
-    end
-    local c, m, y, k, C, M, Y, K = pdf_cmyk:match(pdf)
-    if c and c == C and m == M and y == Y and k == K then
-      color.space = {kind = 'array', value = {{kind = 'name', value = 'DeviceCMYK'}}}
-      color[1], color[2], color[3], color[4] = C, M, Y, K
-      return
-    end
-    g, G = pdf_gray:match(pdf)
-    if g and g == G then
-      color.space = {kind = 'array', value = {{kind = 'name', value = 'DeviceGray'}}}
-      color[1] = G
-      return
-    end
-    color.space = {kind = 'array', value = {{kind = 'name', value = 'PDF'}}}
-    color[1] = pdf
-  end
-end
-
 local subdivide, flatten do
   function subdivide(t, x0, y0, x1, y1, x2, y2, x3, y3)
     local mt = 1-t
@@ -2249,8 +2217,11 @@ systemdict = {kind = 'dict', value = {
   end,
   setpdfcolor = function()
     local pdf = pop_string().value
+    local color = graphics_stack[#graphics_stack].color
     delayed_print(pdf)
-    return setpdfcolor(pdf, graphics_stack[#graphics_stack].color)
+    color.space = {kind = 'array', value = {{kind = 'name', value = 'PDF'}}}
+    for i=2, #color do color[i] = nil end
+    color[1] = pdf
   end,
   setgray = function()
     local g = pop_num()
@@ -3566,8 +3537,39 @@ lua.get_functions_table()[func] = function()
     node.write(n)
   end
 end
--- luatexbase.add_to_callback('pre_shipout_filter', function(n)
---   print(n)
---   return true
--- end, 'WIP')
--- font.current(fid)
+
+do
+  func = luatexbase.new_luafunction'luaPSTcolor'
+  token.set_lua('luaPSTcolor', func)
+  local pdf_rgb = l.Cmt(l.C(number * whitespace * number * whitespace * number / 0) * whitespace * 'rg'
+                * whitespace * l.C(number * whitespace * number * whitespace * number / 0) * whitespace * 'RG' * -1, function(s, p, a, b)
+                  if a == b then
+                    return true, a, ' setrgbcolor', 'rgb '
+                  else
+                    return false
+                  end
+                end)
+  local pdf_cmyk = l.Cmt(l.C(number * whitespace * number * whitespace * number * whitespace * number / 0) * whitespace * 'k'
+                 * whitespace * l.C(number * whitespace * number * whitespace * number * whitespace * number / 0) * whitespace * 'K' * -1, function(s, p, a, b)
+                  if a == b then
+                    return true, a, ' setcmykcolor', 'cmyk '
+                  else
+                    return false
+                  end
+                end)
+  local pdf_gray = l.Cmt(l.C(number / 0) * whitespace * 'g'
+                 * whitespace * l.C(number / 0) * whitespace * 'G' * -1, function(s, p, a, b)
+                  if a == b then
+                    return true, a, ' setgray', 'gray '
+                  else
+                    return false
+                  end
+                end)
+  local pdf_other = l.Cs(l.Cc'(' * l.P(1)^0 * l.Cc')') * l.C' setpdfcolor' * l.C'gray '
+  local pdfcolor = pdf_rgb + pdf_cmyk + pdf_gray + pdf_other
+  lua.get_functions_table()[func] = function()
+    local dvips_format = token.scan_keyword'dvips'
+    local result, suffix, prefix = pdfcolor:match(token.scan_argument())
+    tex.sprint(-2, dvips_format and prefix .. result or result .. suffix)
+  end
+end
