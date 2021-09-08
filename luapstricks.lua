@@ -1570,7 +1570,7 @@ systemdict = {kind = 'dict', value = {
       push(key) key = pop_int()
       if key < 0 or key >= #val then error'rangecheck' end
       push(value) value = pop_int()
-      obj.value = string.sub(val, 1, key) .. string.byte(value) .. string.sub(val, key+2, #val)
+      obj.value = string.sub(val, 1, key) .. string.char(value) .. string.sub(val, key+2, #val)
     elseif obj.kind == 'array' then
       push(key) key = pop_int()
       if key < 0 or key >= #val then error'rangecheck' end
