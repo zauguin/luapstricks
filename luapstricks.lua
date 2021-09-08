@@ -1402,7 +1402,7 @@ systemdict = {kind = 'dict', value = {
     local str = pop_string()
     local start, stop = string.find(str.value, seek.value, 1, true)
     if start then
-      push(str_view(str, stop + 1, #str - stop))
+      push(str_view(str, stop + 1, #str.value - stop))
       push(str_view(str, start, stop - start + 1))
       push(str_view(str, 1, start - 1))
       push(true)
@@ -2915,7 +2915,7 @@ systemdict = {kind = 'dict', value = {
         error'syntaxerror'
       end
     else
-      push(str_view(arg, after, #str - after - 1))
+      push(str_view(arg, after, #str - after + 1))
       push(tok)
       push(true)
     end
