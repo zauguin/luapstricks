@@ -701,6 +701,18 @@ local userdict = {kind = 'dict', value = {
 local FontDirectory = {kind = 'dict', value = {}}
 local ResourceCategories = {kind = 'dict', value = {}}
 
+local function num_to_base(num, base, ...)
+  if num == 0 then return string.char(...) end
+  local remaining = num // base
+  local digit = num - base * remaining
+  if digit < 10 then
+    digit = digit + 0x30
+  else
+    digit = digit + 0x37
+  end
+  return num_to_base(remaining, base, digit, ...)
+end
+
 local systemdict
 local function generic_show(str, ax, ay)
   local state = graphics_stack[#graphics_stack]
@@ -1392,6 +1404,29 @@ systemdict = {kind = 'dict', value = {
     if #old_str.value < #a then error'rangecheck' end
     old_str.value = a .. string.sub(old_str.value, #a+1, -1)
     return push{kind = 'string', value = a}
+  end,
+  cvrs = function()
+    local old_str = pop_string()
+    local radix = pop_num()
+    local num = pop_num()
+    if radix == 10 then
+      num = string.format(math.type(num) == 'float' and '%.6g' or '%i', num)
+    else
+      num = num//1
+      if num < 0 and num >= -0x80000000 then
+        num = num + 0x100000000
+      end
+      if num < 0 then
+        push(num)
+        push(radix)
+        push(old_str)
+        error'rangecheck'
+      end
+      num = num == 0 and '0' or num_to_base(num, radix)
+    end
+    if #old_str.value < #num then error'rangecheck' end
+    old_str.value = num .. string.sub(old_str.value, #num+1, -1)
+    return push{kind = 'string', value = num}
   end,
 
   string = function()
