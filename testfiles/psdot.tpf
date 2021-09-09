@@ -7179,7 +7179,7 @@ endobj
 << /Type /Catalog /Pages 16 0 R /Lang (en-US) >>
 endobj
 63 0 obj
-<< /Producer (LuaTeX-1.14.0) /Creator (TeX) /CreationDate (D:20160520110000+02'00') /ModDate (D:20160520110000+02'00') /Trapped /False /PTEX.FullBanner (This is LuaHBTeX, Version 1.14.0 (TeX Live 2022/dev)) >>
+<< /Producer (LuaTeX-1.13.2) /Creator (TeX) /CreationDate (D:20160520110000+02'00') /ModDate (D:20160520110000+02'00') /Trapped /False /PTEX.FullBanner (This is LuaHBTeX, Version 1.13.2 (TeX Live 2021)) >>
 endobj
 xref
 0 64
@@ -7250,5 +7250,5 @@ xref
 trailer
 << /Size 64 /Root 62 0 R /Info 63 0 R /ID [ <05A0E7F5FFB89C20AC0C9B80C62D114F> <05A0E7F5FFB89C20AC0C9B80C62D114F> ] >>
 startxref
-229484
+229480
 %%EOF
