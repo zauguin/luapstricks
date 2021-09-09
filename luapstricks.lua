@@ -409,7 +409,7 @@ local graphics_stack = {{
   strokeadjust = nil,
   font = nil,
   dash = nil,
-  delayed_start = nil,
+  saved_delayed = nil, -- nil if the `gsave` of this graphic state is not delayed
   flatness = 1,
   miterlimit = nil,
 }}
@@ -447,8 +447,10 @@ local function matrix_invert(xx, xy, yx, yy, dx, dy)
   dx, dy = - dx * xx - dy * yx, - dx * xy - dy * yy
   return xx, xy, yx, yy, dx, dy
 end
-local delayed_text = {}
-local delayed_matrix = {1, 0, 0, 1, 0, 0}
+local delayed = {
+  text = {},
+  matrix = {1, 0, 0, 1, 0, 0},
+}
 local function update_matrix(xx, xy, yx, yy, dx, dy)
   local matrix = graphics_stack[#graphics_stack].matrix
   matrix[1], matrix[2],
@@ -458,6 +460,7 @@ local function update_matrix(xx, xy, yx, yy, dx, dy)
       yx * matrix[1] + yy * matrix[3],             yx * matrix[2] + yy * matrix[4],
       dx * matrix[1] + dy * matrix[3] + matrix[5], dx * matrix[2] + dy * matrix[4] + matrix[6]
 
+  local delayed_matrix = delayed.matrix
   delayed_matrix[1], delayed_matrix[2],
   delayed_matrix[3], delayed_matrix[4],
   delayed_matrix[5], delayed_matrix[6]
@@ -488,10 +491,13 @@ local function update_matrix(xx, xy, yx, yy, dx, dy)
 end
 
 local function delayed_print(str)
+  local delayed_text = delayed.text
   delayed_text[#delayed_text + 1] = str
 end
 
-local function reset_delayed(str)
+local function reset_delayed(delayed)
+  local delayed_matrix = delayed.matrix
+  local delayed_text = delayed.text
   for i=1, #delayed_text do
     delayed_text[i] = nil
   end
@@ -500,15 +506,22 @@ local function reset_delayed(str)
   delayed_matrix[5], delayed_matrix[6] = 1, 0, 0, 1, 0, 0
 end
 
-local function flush_delayed(force_start)
+local function flush_delayed_table(delayed, state, force_start)
+  local delayed_matrix = delayed.matrix
+  local delayed_text = delayed.text
+
   local cm_string = string.format('%.4f %.4f %.4f %.4f %.4f %.4f cm', delayed_matrix[1], delayed_matrix[2],
                                                                       delayed_matrix[3], delayed_matrix[4],
                                                                       delayed_matrix[5], delayed_matrix[6])
   if cm_string == "1.0000 0.0000 0.0000 1.0000 0.0000 0.0000 cm" then
     cm_string = nil
   end
-  if (cm_string or delayed_text[1] or force_start) and graphics_stack[#graphics_stack].delayed_start then
-    graphics_stack[#graphics_stack].delayed_start = nil
+
+  -- Before flushing, make sure that the current graphics state has started.
+  graphics_stack_height = graphics_stack_height or #graphics_stack
+  local saved_delayed = state.saved_delayed
+  if saved_delayed and(cm_string or delayed_text[1] or force_start) then 
+    state.saved_delayed = nil
     pdfprint'q'
   end
   for i=1, #delayed_text do
@@ -517,7 +530,21 @@ local function flush_delayed(force_start)
   if cm_string then
     pdfprint(cm_string)
   end
-  return reset_delayed()
+  return reset_delayed(delayed)
+end
+
+local function flush_delayed(force_start)
+  local pre_first_delayed_group
+  for i = #graphics_stack, 1, -1 do
+    if not graphics_stack[i].saved_delayed then
+      pre_first_delayed_group = i
+      break
+    end
+  end
+  for i = pre_first_delayed_group, #graphics_stack-1 do
+    flush_delayed_table(graphics_stack[i+1].saved_delayed, graphics_stack[i]) -- No need for force_start here
+  end
+  return flush_delayed_table(delayed, graphics_stack[#graphics_stack], force_start)
 end
 
 function drawarc(xc, yc, r, a1, a2)
@@ -2449,16 +2476,22 @@ systemdict = {kind = 'dict', value = {
   end,
 
   gsave = function()
-    flush_delayed()
     graphics_stack[#graphics_stack+1] = table.copy(graphics_stack[#graphics_stack])
-    graphics_stack[#graphics_stack].delayed_start = true
+    graphics_stack[#graphics_stack].saved_delayed = delayed
+    delayed = {
+      text = {},
+      matrix = {1, 0, 0, 1, 0, 0},
+    }
   end,
   grestore = function()
-    if not graphics_stack[#graphics_stack].delayed_start then
+    local saved_delayed = graphics_stack[#graphics_stack].saved_delayed
+    if saved_delayed then
+      delayed = saved_delayed
+    else
       pdfprint'Q'
+      reset_delayed(delayed)
     end
     graphics_stack[#graphics_stack] = nil
-    reset_delayed()
   end,
 
   setglobal = pop_bool,
@@ -2503,12 +2536,13 @@ systemdict = {kind = 'dict', value = {
       end
       w = w/65781.76
     elseif fonttype == 3 then
-      local saved_delayed_text = delayed_text
-      delayed_text = {}
-      local saved_delayed_matrix = delayed_matrix
-      delayed_matrix = {1, 0, 0, 1, 0, 0}
-      local saved_delayed_start = state.delayed_start
-      state.delayed_start = nil
+      local saved_delayed = delayed
+      delayed = {
+        text = {},
+        matrix = {1, 0, 0, 1, 0, 0},
+      }
+      local saved_saved_delayed = state.saved_delayed
+      state.saved_delayed = nil
       local saved_pdfprint = pdfprint
       pdfprint = gobble
       for b in string.bytes(str) do
@@ -2528,9 +2562,8 @@ systemdict = {kind = 'dict', value = {
       end
       update_matrix(1, 0, 0, 1, -w, 0)
       pdfprint = saved_pdfprint
-      state.delayed_start = saved_delayed_start
-      delayed_matrix = saved_delayed_matrix
-      delayed_text = saved_delayed_text
+      state.saved_delayed = saved_saved_delayed
+      delayed = saved_delayed
     end
     local x, y = matrix_transform(w, 0,
       matrix[1], matrix[2],
