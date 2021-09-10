@@ -31,7 +31,7 @@
 \ifx\PSTXKeyLoaded\endinput\else  \input pst-xkey \fi
 \ifx\PSTmathLoaded\endinput\else  \input pst-math \fi
 %
-\def\fileversion{3.90}
+\def\fileversion{3.90a}
 \def\filedate{2021/09/10}
 \let\pstricksaddFV\fileversion
 \message{`pstricks-add' v\fileversion, \filedate\space (dr,hv)}
@@ -2193,18 +2193,18 @@ a add
 \def\ps@lympicRing(#1)#2{%
   \rput(#1){%
 	\pscircle[linewidth=0.25,linecolor=#2](0,0){1.375}%
-	\pscircle[linewidth=0.05,linecolor=white](0,0){1.425}%
-	\pscircle[linewidth=0.05,linecolor=white](0,0){1.125}}}
+	\pscircle[linewidth=0.05,linecolor=white](0,0){1.525}%
+	\pscircle[linewidth=0.05,linecolor=white](0,0){1.225}}}
 \def\ps@lympicArc(#1)#2#3#4{%
   \rput(#1){%
-	\psarc[linewidth=0.25,linecolor=#2](0,0){1.25}{#3}{#4}%
-	\psarc[linewidth=0.05,linecolor=white](0,0){1.4}{#3}{#4}%
-	\psarc[linewidth=0.05,linecolor=white](0,0){1.1}{#3}{#4}}}
+	\psarc[linewidth=0.25,linecolor=#2](0,0){1.375}{#3}{#4}%
+	\psarc[linewidth=0.05,linecolor=white](0,0){1.525}{#3}{#4}%
+	\psarc[linewidth=0.05,linecolor=white](0,0){1.225}{#3}{#4}}}
 \def\psOlympicRings{\pst@object{psOlympicRings}}
 \def\psOlympicRings@i(#1){%
   \pst@killglue
   \begingroup
-  \addbefore@par{psscale=1}%  
+  \addbefore@par{dimen=inner,psscale=1}%  
   \use@par
   \rput(#1){%
     \psscalebox{\psk@@psscale}{%
@@ -2216,7 +2216,9 @@ a add
       \ps@lympicRing(1.5,-1.375){OlympicGreen}%
       \ps@lympicArc(0,0){black}{330}{30}%
       \ps@lympicRing(3,0){OlympicRed}%
-      \ps@lympicArc(1.5,-1.375){OlympicGreen}{30}{90}}}%
+      \ps@lympicArc(1.5,-1.375){OlympicGreen}{30}{90}
+    }%
+  }%
   \endgroup
 }
 
