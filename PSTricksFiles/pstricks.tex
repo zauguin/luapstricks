@@ -81,8 +81,8 @@
 \fi
 \let\pgfforeach\foreach
 %
-\def\fileversion{3.07a}
-\def\filedate{2021/09/08}
+\def\fileversion{3.08}
+\def\filedate{2021/09/10}
 \pst@addfams{pstricks}
 %
 %\define@boolkey[psset]{pstricks}[Pst@]{useURWfonts}[true]{}
@@ -607,53 +607,10 @@
 \gdef\psrbrace[} ]
 \endgroup
 %
-\pstVerb{
-  /pssetRGBcolor  /setrgbcolor  load def
-  /pssetCMYKcolor /setcmykcolor load def
-  /pssetGraycolor /setgray      load def
-}
-\def\@newcolor#1#2{%
-  \expandafter\edef\csname #1\endcsname{\noexpand\pst@color{#2}}%
-  %\expandafter\edef\csname color@#1\endcsname{#2}%
-  \expandafter\edef\csname\string\color@#1\endcsname{#2}%    hv 1.14 2005-12-17
-  \ignorespaces}
 %
-\def\pst@color#1{\def\pst@currentcolor{#1}\pstVerb{#1}\aftergroup\pst@endcolor}%
-\def\pst@endcolor{\pstVerb{\pst@currentcolor}}
-\def\pst@currentcolor{0 setgray}
-\def\altcolormode{%
-\def\pst@color##1{%
-  \pstVerb{gsave ##1}\aftergroup\pst@endcolor}%
-\def\pst@endcolor{\pstVerb{\pst@grestore}}}
-
-\def\psgetCMYKvalues#1#2#3#4#5;{\psgetCMYKvalues@i#5;}
-\def\psgetCMYKvalues@i#1,#2,#3,#4;{#1 #2 #3 #4}
-
-\def\psgetRGBvalues#1#2#3#4#5;{\psgetRGBvalues@i#5;}
-\def\psgetRGBvalues@i#1,#2,#3;{#1 #2 #3}
-
-\def\pssetMonochrome{%
-  \pstVerb{
-    /setrgbcolor { add add 0 gt {0}{1} ifelse setgray } def 
-    /setcmykcolor{ 4 dict begin
-      /k ED /y ED /m ED /c ED 
-      1 1 k sub c mul k add sub 0.29 mul 
-      1 1 k sub m mul k add sub 0.587 mul add 
-      1 1 k sub y mul k add sub 0.114 mul add
-      end 0 gt {0}{1} ifelse setgray } def }}
-\def\pssetGrayscale{%
-  \pstVerb{
-    /setrgbcolor { 0.07 mul exch 0.71 mul add exch 0.21 mul add setgray } def 
-    /setcmykcolor{ 4 dict begin
-      /k ED /y ED /m ED /c ED 
-      1 1 k sub c mul k add sub 0.29 mul 
-      1 1 k sub m mul k add sub 0.587 mul add 
-      1 1 k sub y mul k add sub 0.114 mul add
-      end setgray } def }}
-\def\psresetColor{\pstVerb{
-    /setrgbcolor  tx@Dict begin /pssetRGBcolor  load end def 
-    /setcmykcolor tx@Dict begin /pssetCMYKcolor load end def }}
-
+\input pstricks-color
+%
+%
 \def\pst@grestore{
   currentpoint
   matrix currentmatrix
@@ -663,45 +620,6 @@
   setmatrix
   moveto
 }
-%\def\pst@usecolor#1{\csname color@#1\endcsname\space}%    hv 1.14  2005--12-17
-\def\pst@usecolor#1{\csname\string\color@#1\endcsname\space}
-%
-\def\newgray#1#2{%
-    \pst@checknum{#2}\pst@tempg
-    \@newcolor{#1}{\pst@tempg setgray}}%
-\def\newrgbcolor#1#2{%
-  \pst@expandafter\pst@getnumiii{#2} {} {} {} {}\@nil
-  \@newcolor{#1}{\pst@tempg \pst@temph \pst@tempi setrgbcolor}}
-\def\newhsbcolor#1#2{%
-  \pst@expandafter\pst@getnumiii{#2} {} {} {} {}\@nil
-  \@newcolor{#1}{\pst@tempg \pst@temph \pst@tempi sethsbcolor}}
-\def\newcmykcolor#1#2{%
-  \pst@expandafter\pst@getnumiv{#2} {} {} {} {} {}\@nil
-  \@newcolor{#1}{\pst@tempg \pst@temph \pst@tempi \pst@tempj setcmykcolor}}
-\newgray{black}{0}
-\newgray{darkgray}{.25}
-\newgray{gray}{.5}
-\newgray{lightgray}{.75}
-\newgray{white}{1}
-\newrgbcolor{red}{1 0 0}
-\newrgbcolor{green}{0 1 0}
-\newrgbcolor{blue}{0 0 1}
-\newrgbcolor{yellow}{1 1 0}
-\newrgbcolor{cyan}{0 1 1}
-\newrgbcolor{magenta}{1 0 1}
-
-\@ifundefined{xglobal}%  do we have xcolor loaded?
- {\@newcolor{randomgray}{tx@Dict begin Rand setgray end}%
-  \@newcolor{randomrgb}{tx@Dict begin Rand Rand Rand setrgbcolor end}%
-  \@newcolor{randomcmyk}{tx@Dict begin Rand Rand Rand Rand setcmykcolor end}%
-  \@newcolor{randomhsb}{tx@Dict begin Rand Rand Rand sethsbcolor end}%
- }{%
-  \definecolor[ps]{randomgray}{gray}{tx@Dict begin Rand end}%
-  \definecolor[ps]{randomrgb}{rgb}{tx@Dict begin Rand Rand Rand end}%
-  \definecolor[ps]{randomcmyk}{cmyk}{tx@Dict begin Rand Rand Rand Rand end}%
-  \definecolor[ps]{randomhsb}{hsb}{tx@Dict begin Rand Rand Rand end}%
- }
-%
 \define@boolkey[psset]{pstricks}[Pst@]{draft}[true]{}
 \define@key[psset]{pstricks}{bgcolor}{\def\pst@bgcolor{#1}}% background for pspicture
 \psset[pstricks]{bgcolor={},draft=false}% \pst@bgcolor is \@empty
@@ -733,12 +651,7 @@
 %------------ hv 1.16 end -------------------
 %
 \def\@none{none}
-\def\pst@getcolor#1#2{%
-%  \@ifundefined{color@#1}%	hv 1.14  2005-12-17
-    \@ifundefined{\string\color@#1}%
-      {\@pstrickserr{Color `#1' not defined}\@eha}%
-      {\edef#2{#1}}%
-}
+%
 \newdimen\psunit \psunit 1cm
 \newdimen\psxunit \psxunit 1cm
 \newdimen\psyunit \psyunit 1cm
@@ -925,10 +838,6 @@
   \fi}
 %
 \def\pst@@CheckCoorType#1#2;#3;#4\@nil{%
-%\typeout{====1:#1}%
-%\typeout{====2:#2}%
-%\typeout{====3:#3}%
-%\typeout{====4:#4}%
   \ifx#1>\relax%			node with special rotation for \uput
     \global\pst@C@@rType=7
   \else
@@ -1403,8 +1312,7 @@
   { \pst@usecolor\ps@kitecolor }
   { \pst@usecolor\pshatchcolor }
   \psk@psscale 
-  \tx@PenroseFillA 
-}
+  \tx@PenroseFillA }
 \def\psfs@penroseA{\pst@fill\pst@penroseFillA}
 \@namedef{psfs@penroseA*}{\psfs@solid \psfs@penroseA}
 %
@@ -1452,6 +1360,7 @@
 %
 \def\pst@flattenpath{
   /Coors [] def         % the array of all points
+  50 dict begin
   /lambda \psk@startWL\space def
   %
   /add2Values { Coors aload length 2 add array astore /Coors exch def } def
@@ -1516,6 +1425,7 @@
 %    stroke               % draw the line segment
 %    moveto
 %  } repeat
+  end
 }
 
 %
@@ -2199,15 +2109,25 @@
 \def\newpsfontdot#1[#2]#3#4{%
   \@namedef{psds@#1}{%
     /#3 \psk@@dotangle [#2] \tx@FontDot
+% DG/SR modification begin - Dec. 12, 1999 - Patch 14
+%/Dot { moveto #4 show } bind def }}
     /Dot { moveto gsave \psk@dotscale #4 show grestore } bind def 
 }}
+% DG/SR modification end
 \def\newpsfontdotH#1[#2]#3#4#5{%	for filled objects
   \@namedef{psds@#1}{%
     /#3 \psk@@dotangle [#2] \tx@FontDot
     /Dot {
       moveto
+%      \iftrue
+% DG/SR modification begin - Dec. 23, 1999 - Patch 14
+%gsave \pst@usecolor\psfillcolor #5 show grestore
+%\fi
+%#4 show
       gsave \psk@dotscale \pst@usecolor\psfillcolor #5 show grestore % fill first
+%      \fi					
       gsave \psk@dotscale #4 show grestore	% show the unfilled one
+% DG/SR modification end
     } bind def 
 }}
 %

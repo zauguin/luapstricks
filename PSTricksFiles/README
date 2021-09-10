@@ -1,4 +1,5 @@
 --- pstricks.tex
+3.08  2021-09-10  -fixes and moved color stuff to  pstricks-color.tex
 3.07a 2021-09-08  -new macros for getting color values on PS level
 3.06e 2021-09-05  -fix for \pst@rotlist
 3.06d 2021-09-04  -use ifPSTlualatex for the rotation shortcut definitions 
@@ -11,10 +12,16 @@
 3.06a 2021-08-30  -fixed default setting for linewidth and color
 
 
+--- pstricks-color
+      2021-09-10  all color definitions from PSTricks
+
 
 --- pstricks.pro
 1.38b 2021-08-30  -remove empty lines to prevent a \par output for pst-eps
 1.38a 2021-08-30  -added comment
+
+
+---pstricks-add
 
 
 

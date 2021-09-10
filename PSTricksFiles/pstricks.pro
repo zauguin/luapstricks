@@ -1,7 +1,7 @@
-% $Id: pstricks.pro 166 2021-08-26 19:52:16Z herbert $
+% $Id: pstricks.pro 207 2021-09-09 18:40:09Z herbert $
 %
 %% PostScript prologue for pstricks.tex.
-%% Version 1.38b, 2021/08/30
+%% Version 1.39, 2021/09/09
 %%
 %% This program can be redistributed and/or modified under the terms
 %% of the LaTeX Project Public License Distributed from CTAN archives
@@ -120,6 +120,22 @@ tx@Dict begin
 %
 /startGlobal { true setglobal globaldict begin } bind def
 /endGlobal { end false setglobal } bind def
+%
+/setpdfcolor where {                            % luapstricks specific code
+  /setpdfcolor get /pssetPDFcolor exch def
+  /setpdfcolor {
+    pssetPDFcolor
+    mark
+      currentcolor
+      currentcolorspace 0 get
+      dup /DeviceRGB eq { pop setrgbcolor } {
+        dup /DeviceCMYK eq { pop setcmykcolor } {
+          /DeviceGray eq { setgray } if
+        } ifelse
+      } ifelse
+    cleartomark
+  } def
+} if 
 %
 /pssetRGBcolor /setrgbcolor load def
 /pssetCMYKcolor /setcmykcolor load def
@@ -306,7 +322,7 @@ tx@Dict begin
 } def
 %
 /PenroseFill {%	 on stack: scaling factor
-  20 dict begin
+  40 dict begin
   /Scale ED
 %  1 exch div round /penroseFactor ED 
 %  a 0 dtransform round exch round exch
@@ -334,7 +350,7 @@ tx@Dict begin
 } def
 %
 /PenroseFillA {%  on stack: scaling factor, border color, kite color, dart color
-  30 dict begin
+  50 dict begin
   /Scale ED
   Scale dup scale
   /border_colour ED 
@@ -705,9 +721,11 @@ tx@Dict begin
 /EAC { x2 y2 x y ArrowB curveto pop pop } def
 %
 /OpenCurve { 
+  5 dict begin
   NArray n 3 lt 
     { n { pop pop } repeat } 
     { BOC /n n 3 sub def n { NC } repeat EOC } ifelse 
+  end
 } def
 %
 /CurvePath { 
@@ -1247,7 +1265,7 @@ dup angle0 sub dup abs 180 gt { 180 add 360 div floor 360 mul sub } { pop } ifel
 } def
 %%------------------ tvz/DG/hv (2004-05-10) end -------------------%%
 %
-/Rot { CP CP translate 3 -1 roll neg rotate NET  } def
+/Rot { CP CP translate 3 -1 roll neg rotate NET } def
 %
 /RotBegin { 
   tx@Dict /TMatrix known not { /TMatrix { } def /RAngle { 0 } def } if 
