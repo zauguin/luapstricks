@@ -12,7 +12,7 @@
 Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
 
 - [pst-user](https://hvoss.org/PSTexa/pst-user.pdf) Main (historical) documentation without overlay stuff (is now in pst-ovl)
-- [pstricks-add](https://hvoss.org/PSTexa/pstricks-add.pdf) 
+- [pstricks-add](https://hvoss.org/PSTexa/pstricks-add-doc.pdf) 
 
 
 - [pst-3d](https://hvoss.org/PSTexa/pst-3d-doc.pdf)
