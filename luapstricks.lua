@@ -3011,6 +3011,9 @@ systemdict = {kind = 'dict', value = {
   exit = function()
     error(exitmarker)
   end,
+  quit = function()
+    os.exit()
+  end,
   run = function()
     local filename = pop_string().value
     local resolved = kpse.find_file(filename, 'PostScript header')
