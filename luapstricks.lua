@@ -128,6 +128,42 @@ local function parse_ps(s)
   return tokens
 end
 
+local serialize_pdf do
+  function serialize_pdf(obj)
+    local t = type(obj)
+    if t == 'number' then
+      return string.format(math.type(obj) == 'float' and '%.3f' or '%i', obj)
+    elseif t == 'boolean' then
+      return obj and 'true' or 'false'
+    elseif t == 'string' then
+      return '/' .. obj
+    elseif t == 'table' then
+      t = obj.kind
+      if t == 'name' then
+        return '/' .. obj.value
+      elseif t == 'string' then
+        return '(' .. obj.value .. ')' -- TODO: Escaping
+      elseif t == 'dict' then
+        local helper = {}
+        for k, v in next, obj.value do
+          helper[#helper+1] = serialize_pdf(k)
+          helper[#helper+1] = serialize_pdf(v)
+        end
+        return '<<' .. table.concat(helper, ' ') .. '>>'
+      elseif t == 'array' then
+        local helper = {}
+        for i, v in ipairs(obj.value) do
+          helper[i] = serialize_pdf(v)
+        end
+        return '[' .. table.concat(helper, ' ') .. ']'
+      else
+        error'Unable to serialize object'
+      end
+    end
+    error'Unable to serialize object'
+  end
+end
+
 local srand, rrand, rand do
   local state
   function srand(s)
@@ -440,6 +476,36 @@ end or function()
   texio.write_nl"Extended graphic state modifications dropped since `pdfmanagement-testphase' is not loaded."
   return ''
 end})
+
+local write_shading do
+  local ShadingCount = 0
+  if pdfdict_gput then
+    function write_shading(attr, data)
+      local obj = pdf.obj{
+        type = 'stream',
+        immediate = false,
+        attr = attr,
+        string = data,
+      }
+      pdf.refobj(obj)
+      ShadingCount = ShadingCount + 1
+      local name = 'PSShad' .. ShadingCount
+      local k = obj .. ' 0 R'
+      tex.runtoks(function()
+        tex.write(pdfdict_gput, lbrace, 'g__pdf_Core/Page/Resources/Shading', rbrace, lbrace, name, rbrace, lbrace, k, rbrace)
+      end)
+      ltx.__pdf.Page.Resources.Shading = true
+      ltx.pdf.Page_Resources_gpush(tex.count.g_shipout_readonly_int)
+      name = '/' .. name
+      return name
+    end
+  else
+    function write_shading()
+      texio.write_nl"Extended graphic state modifications dropped since `pdfmanagement-testphase' is not loaded."
+      return ''
+    end
+  end
+end
 
 local function matrix_transform(x, y, xx, xy, yx, yy, dx, dy)
   return x * xx + y * yx + dx, x * xy + y * yy + dy
@@ -2062,6 +2128,59 @@ systemdict = {kind = 'dict', value = {
       pdfprint(string.format('%.3f %.3f %.3f %.3f re f', x, y, w, h))
     else
       error'Unsupported rectfill variant'
+    end
+  end,
+
+  shfill = function()
+    flush_delayed()
+    local shading_dict = pop_dict()
+    local data_src
+    local pdf_dict = ''
+    for k, v in next, shading_dict.value do
+      if k == 'DataSource' then
+        data_src = v
+      else
+        pdf_dict = pdf_dict .. serialize_pdf(k) .. ' ' .. serialize_pdf(v)
+      end
+    end
+    if shading_dict.value.ShadingType == 4 then
+      assert(data_src)
+      if type(data_src) ~= 'table' then
+        push(shading_dict)
+        error'typecheck'
+      end
+      if data_src.kind == 'string' then
+        data_src = data_src.value
+      elseif data_src.kind == 'array' then
+        data_src = data_src.value
+        local color_model = shading_dict.value.ColorSpace.value[1]
+        if type(color_model) == 'table' and color_model.kind == 'name' then
+          color_model = color_model.value
+        end
+        if color_model == 'DeviceRGB' then
+          color_model = 3
+        elseif color_model == 'DeviceCMYK' then
+          color_model = 4
+        elseif color_model == 'DeviceGray' then
+          color_model = 1
+        else
+          error'Unsupported color model in Shading dictionary'
+        end
+        local components = color_model + 3
+        pdf_dict = pdf_dict .. '/BitsPerCoordinate 24/BitsPerComponent 8/BitsPerFlag 8/Decode[-8192 8191 -8192 8191' .. string.rep(' 0 1', color_model) .. ']'
+        local data = ''
+        for i = 1, #data_src-components+1, components do
+          data = data .. string.pack('>BI3I3', data_src[i], (data_src[i+1]*1024+.5)//1 + 8388608, (data_src[i+2]*1024+.5)//1 + 8388608)
+          for j = i + 3, i + 2 + color_model do
+            data = data .. string.pack('B', (data_src[j]*255+.5)//1)
+          end
+        end
+        data_src = data
+      else
+        error'Unsupported DataSource variant'
+      end
+      local obj = write_shading(pdf_dict, data_src)
+      pdfprint(string.format('%s sh', write_shading(pdf_dict, data_src)))
     end
   end,
 
