@@ -6,6 +6,7 @@ checkengines = {"luatex"}
 
 installfiles = {"luapstricks.lua"}
 sourcefiles = {"luapstricks.lua", "pstricks.tex", "pstricks.pro"}
+testsuppdir = "PSTricksFiles"
 -- typesetfiles = {"luapstricks.tex"}
 
 tdsroot = "luatex"
