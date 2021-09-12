@@ -3451,6 +3451,39 @@ ResourceCategories.value.Generic = {kind = 'dict', value = {
   ['.Instances'] = {kind = 'dict', value = {}},
 }}
 
+local register_texbox do
+  local meta = {__gc = function(t) node.direct.free(t.box) end}
+  local dict = {}
+  ResourceCategories.value['.TeXBox'] = {kind = 'dict', value = {
+    Category = {kind = 'name', value = '.TeXBox'},
+    DefineResource = function()
+      push{kind = 'name', value = '.TeXBox'}
+      error'undefined'
+    end,
+    UndefineResource = function()
+      local key = pop_key()
+      dict[key] = nil
+    end,
+    FindResource = function()
+      local key = pop_key()
+      local instance = dict[key]
+      if instance then
+        push(instance)
+        return
+      end
+      push(key)
+      error'undefinedresource'
+    end,
+  }}
+  local id = 0
+  function register_texbox(box)
+    id = id + 1
+    box = setmetatable({box = node.direct.todirect(box)}, meta)
+    dict[id] = function() flush_delayed() vf.push() vf.node(box.box) vf.pop() end
+    return id
+  end
+end
+
 ResourceCategories.value.Category = {kind = 'dict', value = {
   Category = {kind = 'name', value = 'Generic'},
   InstanceType = 'dicttype',
@@ -3711,4 +3744,11 @@ do
     local result, suffix, prefix = anycolor:match(token.scan_argument())
     tex.sprint(-2, dvips_format and prefix .. result or result .. suffix)
   end
+end
+
+func = luatexbase.new_luafunction'luaPSTbox'
+token.set_lua('luaPSTbox', func)
+lua.get_functions_table()[func] = function()
+  local box = register_texbox(token.scan_list())
+  tex.sprint(-2, tostring(box))
 end
