@@ -3582,7 +3582,7 @@ lua.get_functions_table()[func] = function()
   end
 end
 
-local ps_tokens
+local ps_tokens, ps_direct, ps_pos_x, ps_pos_y
 local fid = font.define{
   name = 'dummy virtual font for PS rendering',
   -- type = 'virtual',
@@ -3593,10 +3593,10 @@ local fid = font.define{
           local n = node.new('glyph', 256)
           n.font = fid
           n.char = 1
-          local x, y = pdf.getpos()
-          n.xoffset = -x
-          n.yoffset = -y
-          ps_tokens[1], ps_tokens[2] = x/65781.76, y/65781.76
+          assert(not ps_pos_x)
+          ps_pos_x, ps_pos_y = pdf.getpos()
+          n.xoffset = -ps_pos_x
+          n.yoffset = -ps_pos_y
           n = node.hpack(n)
           vf.node(node.direct.todirect(n))
           node.free(n)
@@ -3606,10 +3606,28 @@ local fid = font.define{
     [1] = {
       commands = {
         {'lua', function()
-          local tokens = ps_tokens
+          local tokens, direct = assert(ps_tokens), ps_direct
           ps_tokens = nil
-          execute_ps(tokens)
+          local x, y = pdf.getpos()
+          local height = #operand_stack
+          operand_stack[height + 1], operand_stack[height + 2] = ps_pos_x/65781.76, ps_pos_y/65781.76
+          ps_pos_x, ps_pos_y = nil
+          if direct then
+            systemdict.value.moveto()
+          else
+            systemdict.value.gsave()
+            systemdict.value.translate()
+          end
+          execute_string(tokens)
           flush_delayed()
+          if not direct then
+            systemdict.value.grestore()
+            local new_height = #operand_stack
+            assert(new_height >= height)
+            for k = height + 1, new_height do
+              operand_stack[k] = nil
+            end
+          end
         end}
       }
     },
@@ -3620,22 +3638,13 @@ local modes = tex.getmodevalues()
 local func = luatexbase.new_luafunction'luaPST'
 token.set_lua('luaPST', func, 'protected')
 lua.get_functions_table()[func] = function()
-  local mode = token.scan_keyword'direct' and 'page' or 'origin'
-  local tokens = parse_ps(token.scan_argument(true))
-  table.move(tokens, 1, #tokens, mode == 'origin' and 5 or 4)
-  tokens[1], tokens[2] = 'null', 'null'
-  if mode == 'origin' then
-    tokens[3], tokens[4] = 'gsave', 'translate'
-    tokens[#tokens+1] = 'grestore'
-  else
-    tokens[3] = 'moveto'
-  end
+  local direct = token.scan_keyword'direct'
+  local tokens = token.scan_argument(true)
   local n = node.new('whatsit', 'late_lua')
   function n.data()
-    local x, y = pdf.getpos()
-    tokens[1], tokens[2] = x/65781.76, y/65781.76
     assert(not ps_tokens)
     ps_tokens = tokens
+    ps_direct = direct
   end
   local nn = node.new('glyph')
   nn.subtype = 256
