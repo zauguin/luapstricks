@@ -332,6 +332,11 @@ for psname, remapped in next, {
   ['NimbusSanL-Bold'] = 'NimbusSans-Bold',
   ['NimbusSanL-BoldItal'] = 'NimbusSans-BoldItalic',
 
+  ['NimbusSanL-BoldCond'] = 'NimbusSansNarrow-Bold',
+  ['NimbusSanL-BoldCondItal'] = 'NimbusSansNarrow-BoldOblique',
+  ['NimbusSanL-ReguCond'] = 'NimbusSansNarrow-Regular',
+  ['NimbusSanL-ReguCondItal'] = 'NimbusSansNarrow-Oblique',
+
   ['NimbusRomNo9L-Regu'] = 'NimbusRoman-Regular',
   ['NimbusRomNo9L-ReguItal'] = 'NimbusRoman-Italic',
   ['NimbusRomNo9L-Medi'] = 'NimbusRoman-Bold',
@@ -342,6 +347,28 @@ for psname, remapped in next, {
   ['NimbusMonL-ReguObli'] = 'NimbusMonoPS-Italic',
   ['NimbusMonL-Bold'] = 'NimbusMonoPS-Bold',
   ['NimbusMonL-BoldObli'] = 'NimbusMonoPS-BoldItalic',
+
+  ['URWBookmanL-DemiBoldItal'] = 'URWBookman-DemiItalic',
+  ['URWBookmanL-DemiBold'] = 'URWBookman-Demi',
+  ['URWBookmanL-LighItal'] = 'URWBookman-LightItalic',
+  ['URWBookmanL-Ligh'] = 'URWBookman-Light',
+
+  ['URWGothicL-BookObli'] = 'URWGothic-BookOblique',
+  ['URWGothicL-Book'] = 'URWGothic-Book',
+  ['URWGothicL-DemiObli'] = 'URWGothic-DemiOblique',
+  ['URWGothicL-Demi'] = 'URWGothic-Demi',
+
+  ['CenturySchL-Roma'] = 'NewCenturySchlbk-Roman',
+  ['CenturySchL-Ital'] = 'NewCenturySchlbk-Italic',
+  ['CenturySchL-Bold'] = 'NewCenturySchlbk-Bold',
+  ['CenturySchL-BoldItal'] = 'NewCenturySchlbk-BoldItalic',
+
+  ['URWPalladioL-Roma'] = 'Palatino-Roman',
+  ['URWPalladioL-Ital'] = 'Palatino-Italic',
+  ['URWPalladioL-Bold'] = 'Palatino-Bold',
+  ['URWPalladioL-BoldItal'] = 'Palatino-BoldItalic',
+
+  ['URWChanceryL-MediItal'] = 'ZapfChancery-MediumItalic',
 } do
   font_aliases[psname] = font_aliases[remapped] or remapped
 end
