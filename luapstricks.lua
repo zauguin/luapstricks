@@ -247,20 +247,10 @@ end
 
 local font_aliases = {
   -- First add some help to find the TeX Gyre names under the corresponding URW font names
-  ['URWGothic-Book'] = 'kpse:texgyreadventor-regular.otf',
-  ['URWGothic-BookOblique'] = 'kpse:texgyreadventor-italic.otf',
-  ['URWGothic-Demi'] = 'kpse:texgyreadventor-bold.otf',
-  ['URWGothic-DemiOblique'] = 'kpse:texgyreadventor-bolditalic.otf',
-
-  ['URWBookman-Light'] = 'kpse:texgyrebonum-regular.otf',
-  ['URWBookman-LightItalic'] = 'kpse:texgyrebonum-italic.otf',
-  ['URWBookman-Demi'] = 'kpse:texgyrebonum-bold.otf',
-  ['URWBookman-DemiItalic'] = 'kpse:texgyrebonum-bolditalic.otf',
-
-  ['NimbusMonoPS-Regular'] = 'kpse:texgyrecursor-regular.otf',
-  ['NimbusMonoPS-Italic'] = 'kpse:texgyrecursor-italic.otf',
-  ['NimbusMonoPS-Bold'] = 'kpse:texgyrecursor-bold.otf',
-  ['NimbusMonoPS-BoldItalic'] = 'kpse:texgyrecursor-bolditalic.otf',
+  ['NimbusRoman-Regular'] = 'kpse:texgyretermes-regular.otf',
+  ['NimbusRoman-Italic'] = 'kpse:texgyretermes-italic.otf',
+  ['NimbusRoman-Bold'] = 'kpse:texgyretermes-bold.otf',
+  ['NimbusRoman-BoldItalic'] = 'kpse:texgyretermes-bolditalic.otf',
 
   ['NimbusSans-Regular'] = 'kpse:texgyreheros-regular.otf',
   ['NimbusSans-Italic'] = 'kpse:texgyreheros-italic.otf',
@@ -272,6 +262,22 @@ local font_aliases = {
   ['NimbusSansNarrow-Bold'] = 'kpse:texgyreheroscn-bold.otf',
   ['NimbusSansNarrow-BoldOblique'] = 'kpse:texgyreheroscn-bolditalic.otf',
 
+  ['NimbusMonoPS-Regular'] = 'kpse:texgyrecursor-regular.otf',
+  ['NimbusMonoPS-Italic'] = 'kpse:texgyrecursor-italic.otf',
+  ['NimbusMonoPS-Bold'] = 'kpse:texgyrecursor-bold.otf',
+  ['NimbusMonoPS-BoldItalic'] = 'kpse:texgyrecursor-bolditalic.otf',
+
+  ['URWBookman-Light'] = 'kpse:texgyrebonum-regular.otf',
+  ['URWBookman-LightItalic'] = 'kpse:texgyrebonum-italic.otf',
+  ['URWBookman-Demi'] = 'kpse:texgyrebonum-bold.otf',
+  ['URWBookman-DemiItalic'] = 'kpse:texgyrebonum-bolditalic.otf',
+
+  ['URWGothic-Book'] = 'kpse:texgyreadventor-regular.otf',
+  ['URWGothic-BookOblique'] = 'kpse:texgyreadventor-italic.otf',
+  ['URWGothic-Demi'] = 'kpse:texgyreadventor-bold.otf',
+  ['URWGothic-DemiOblique'] = 'kpse:texgyreadventor-bolditalic.otf',
+
+  -- These fonts have weird names in their URW variant, so we use the standard font names directly instead.
   ['NewCenturySchlbk-Roman'] = 'kpse:texgyreschola-regular.otf',
   ['NewCenturySchlbk-Italic'] = 'kpse:texgyreschola-italic.otf',
   ['NewCenturySchlbk-Bold'] = 'kpse:texgyreschola-bold.otf',
@@ -281,11 +287,6 @@ local font_aliases = {
   ['Palatino-Italic'] = 'kpse:texgyrepagella-italic.otf',
   ['Palatino-Bold'] = 'kpse:texgyrepagella-bold.otf',
   ['Palatino-BoldItalic'] = 'kpse:texgyrepagella-bolditalic.otf',
-
-  ['NimbusRoman-Regular'] = 'kpse:texgyretermes-regular.otf',
-  ['NimbusRoman-Italic'] = 'kpse:texgyretermes-italic.otf',
-  ['NimbusRoman-Bold'] = 'kpse:texgyretermes-bold.otf',
-  ['NimbusRoman-BoldItalic'] = 'kpse:texgyretermes-bolditalic.otf',
 
   ['ZapfChancery-MediumItalic'] = 'kpse:texgyrechorus-mediumitalic.otf',
 
@@ -297,36 +298,48 @@ local font_aliases = {
 -- Then map the standard 35 font names to the URW names as done by GhostScript
 -- (Except for New Century Schoolbook which got mapped directly before.
 for psname, remapped in next, {
-  ['AvantGarde-BookOblique'] = 'URWGothic-BookOblique',
-  ['AvantGarde-Book'] = 'URWGothic-Book',
-  ['AvantGarde-DemiOblique'] = 'URWGothic-DemiOblique',
-  ['AvantGarde-Demi'] = 'URWGothic-Demi',
-  ['Bookman-DemiItalic'] = 'URWBookman-DemiItalic',
-  ['Bookman-Demi'] = 'URWBookman-Demi',
-  ['Bookman-LightItalic'] = 'URWBookman-LightItalic',
-  ['Bookman-Light'] = 'URWBookman-Light',
-  ['Courier-Bold'] = 'NimbusMonoPS-Bold',
-  ['Courier-BoldOblique'] = 'NimbusMonoPS-BoldItalic',
-  ['Courier'] = 'NimbusMonoPS-Regular',
-  ['Courier-Oblique'] = 'NimbusMonoPS-Italic',
-  ['Helvetica-Bold'] = 'NimbusSans-Bold',
-  ['Helvetica-BoldOblique'] = 'NimbusSans-BoldItalic',
-  ['Helvetica-Narrow-Bold'] = 'NimbusSansNarrow-Bold',
-  ['Helvetica-Narrow-BoldOblique'] = 'NimbusSansNarrow-BoldOblique',
-  ['Helvetica-Narrow'] = 'NimbusSansNarrow-Regular',
-  ['Helvetica-Narrow-Oblique'] = 'NimbusSansNarrow-Oblique',
+  ['Times-Roman'] = 'NimbusRoman-Regular',
+  ['Times-Italic'] = 'NimbusRoman-Italic',
+  ['Times-Bold'] = 'NimbusRoman-Bold',
+  ['Times-BoldItalic'] = 'NimbusRoman-BoldItalic',
+
   ['Helvetica'] = 'NimbusSans-Regular',
   ['Helvetica-Oblique'] = 'NimbusSans-Italic',
-  ['Times-BoldItalic'] = 'NimbusRoman-BoldItalic',
-  ['Times-Bold'] = 'NimbusRoman-Bold',
-  ['Times-Italic'] = 'NimbusRoman-Italic',
-  ['Times-Roman'] = 'NimbusRoman-Regular',
+  ['Helvetica-Bold'] = 'NimbusSans-Bold',
+  ['Helvetica-BoldOblique'] = 'NimbusSans-BoldItalic',
+
+  ['Helvetica-Narrow'] = 'NimbusSansNarrow-Regular',
+  ['Helvetica-Narrow-Oblique'] = 'NimbusSansNarrow-Oblique',
+  ['Helvetica-Narrow-Bold'] = 'NimbusSansNarrow-Bold',
+  ['Helvetica-Narrow-BoldOblique'] = 'NimbusSansNarrow-BoldOblique',
+
+  ['Courier'] = 'NimbusMonoPS-Regular',
+  ['Courier-Oblique'] = 'NimbusMonoPS-Italic',
+  ['Courier-Bold'] = 'NimbusMonoPS-Bold',
+  ['Courier-BoldOblique'] = 'NimbusMonoPS-BoldItalic',
+
+  ['Bookman-Light'] = 'URWBookman-Light',
+  ['Bookman-LightItalic'] = 'URWBookman-LightItalic',
+  ['Bookman-Demi'] = 'URWBookman-Demi',
+  ['Bookman-DemiItalic'] = 'URWBookman-DemiItalic',
+
+  ['AvantGarde-Book'] = 'URWGothic-Book',
+  ['AvantGarde-BookOblique'] = 'URWGothic-BookOblique',
+  ['AvantGarde-Demi'] = 'URWGothic-Demi',
+  ['AvantGarde-DemiOblique'] = 'URWGothic-DemiOblique',
 
   ['Symbol'] = 'StandardSymbolsPS',
   ['StandardSymL'] = 'StandardSymbolsPS',
+
   ['ZapfDingbats'] = 'Dingbats',
 
   -- Some additional names needed for PSTricks
+  ['NimbusRomNo9L-Regu'] = 'NimbusRoman-Regular',
+  ['NimbusRomNo9L-ReguItal'] = 'NimbusRoman-Italic',
+  ['NimbusRomNo9L-Medi'] = 'NimbusRoman-Bold',
+  ['NimbusRomNo9L-MediItal'] = 'NimbusRoman-BoldItalic',
+  ['NimbusRomNo9L-Bold'] = 'NimbusRoman-Bold',
+
   ['NimbusSanL-Regu'] = 'NimbusSans-Regular',
   ['NimbusSanL-ReguItal'] = 'NimbusSans-Italic',
   ['NimbusSanL-Bold'] = 'NimbusSans-Bold',
@@ -336,12 +349,6 @@ for psname, remapped in next, {
   ['NimbusSanL-BoldCondItal'] = 'NimbusSansNarrow-BoldOblique',
   ['NimbusSanL-ReguCond'] = 'NimbusSansNarrow-Regular',
   ['NimbusSanL-ReguCondItal'] = 'NimbusSansNarrow-Oblique',
-
-  ['NimbusRomNo9L-Regu'] = 'NimbusRoman-Regular',
-  ['NimbusRomNo9L-ReguItal'] = 'NimbusRoman-Italic',
-  ['NimbusRomNo9L-Medi'] = 'NimbusRoman-Bold',
-  ['NimbusRomNo9L-MediItal'] = 'NimbusRoman-BoldItalic',
-  ['NimbusRomNo9L-Bold'] = 'NimbusRoman-Bold',
 
   ['NimbusMonL-Regu'] = 'NimbusMonoPS-Regular',
   ['NimbusMonL-ReguObli'] = 'NimbusMonoPS-Italic',
