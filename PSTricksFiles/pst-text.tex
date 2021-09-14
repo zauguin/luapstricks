@@ -1,0 +1,251 @@
+%% BEGIN pst-text.tex
+%% $Id: pst-text.tex 891 2018-12-29 19:42:20Z herbert $
+%%
+%% Placing text on a path with PSTricks 97.
+%% See the PSTricks User's Guide for description.
+%% This uses the header file `pst-text.pro'.
+%%
+%%
+%% COPYRIGHT 1993, 1994, 1999 by Timothy Van Zandt, tvz@nwu.edu.
+%%	     2006--2019  Herbert Voss <hvoss@tug.org>
+%%
+%% This program can be redistributed and/or modified under the terms
+%% of the LaTeX Project Public License Distributed from CTAN
+%% archives in directory macros/latex/base/lppl.txt.
+%%
+%
+\csname PSTextPathLoaded\endcsname
+\let\PSTextPathLoaded\endinput
+\ifx\PSTricksLoaded\endinput\else\input pstricks \fi
+%\ifx\PSTXKeyLoaded\endinput\else\input pst-xkey  \fi
+%
+\def\fileversion{1.01}
+\def\filedate{2018/12/22}
+\message{ v\fileversion, \filedate (tvz,hv)}
+
+\edef\TheAtCode{\the\catcode`\@}
+\catcode`\@=11
+
+\pst@addfams{pst-text}
+
+\pstheader{pst-text.pro}
+%
+\def\pstextpath{\@ifnextchar[{\pstextpath@}{\pstextpath@[l]}}
+\def\pstextpath@[#1]{%
+  \@ifnextchar({\pstextpath@@[#1]}{\pstextpath@@[#1](0,\TPoffset)}}
+\def\pstextpath@@[#1](#2)#3{\pst@makebox{\pstextpath@@@[#1](#2){#3}}}
+\def\pstextpath@@@[#1](#2,#3)#4{%
+  \pst@killglue
+  \begingroup
+    \ifx c#1\relax
+      \def\pst@tempa{.5}%
+    \else
+      \ifx r#1\relax
+        \def\pst@tempa{1}%
+      \else
+        \def\pst@tempa{0}%
+      \fi
+    \fi
+    \def\use@pscode{%
+      \pst@Verb{%
+        /mtrxc CM def
+        \tx@STV
+        CP translate
+        newpath
+        \pst@code
+        mtrxc setmatrix
+        0 setgray}%
+      \gdef\pst@code{}}%
+    \def\psclip#1{\pst@misplaced\psclip}%
+    \let\endpsclip\relax
+    \def\@multips(##1)(##2)##3##4{\pst@misplaced\multips}%
+    \def\nc@object##1##2##3##4{\pst@misplaced{node connection}}%
+    \def\PSTtoEPS@i##1##2{\pst@misplaced\PSTtoEPS}%
+    \pssetlength\pst@dima{#2}%
+    \pssetlength\pst@dimb{#3}%
+    \setbox\pst@hbox\hbox{%
+      \hbox to\z@{%
+        \kern -\wd\pst@hbox
+        % BoxWidth = CurrX - Hoffset.
+        \pstVerb{tx@TextPathDict begin
+          currentpoint pop /Hoffset exch def end}%
+        \kern\pst@dima
+        % XOffset = Voffset - Hoffset (extra horizontal skip)
+        \pstVerb{tx@TextPathDict begin
+          currentpoint pop /Voffset exch def end}%
+        \hss
+        \pstVerb{%
+          \ifPSTlualatex
+            \luaPSTbox \box \pst@hbox \space /.TeXBox findresource
+          \else
+          /tx@TextPathSavedShow /show load def
+          \fi
+          \pst@dict \tx@PathLength end
+          dup 0 gt
+          \ifPSTlualatex
+            {
+              tx@TextPathDict begin
+                \number-\pst@dimb\space 65781.76 div exch
+                \pst@tempa\space
+                LuaTextPath
+              end
+            }
+            { pop exec }
+          \else
+          { tx@TextPathDict begin \pst@tempa\space InitTextPath end
+            /show { tx@TextPathDict begin TextPathShow end } def
+          }
+          { pop }
+          \fi
+          ifelse}}%
+      \ifPSTlualatex\else
+      \raise\pst@dimb\box\pst@hbox
+      \pstVerb{%
+        currentpoint newpath moveto
+        /show /tx@TextPathSavedShow load def}%
+      \fi
+    }%
+    \wd\pst@hbox=\z@ \dp\pst@hbox=\z@ \ht\pst@hbox=\z@
+    \leavevmode
+    \hbox{{#4}\box\pst@hbox}%
+  \endgroup\ignorespaces}
+%
+\def\TPoffset{-0.7ex}
+%
+\def\tx@CharPathShow{%
+  /tx@CharPathSavedShow /show load def
+  /show {
+    % These 3 lines check whether charpath yields anything interesting.
+    dup gsave newpath 0 0 moveto
+    true charpath pathbbox grestore
+    3 -1 roll eq 3 1 roll eq and
+    % If not, just use show.
+    { tx@CharPathSavedShow }
+    % Otherwise, use charpath.
+    { true charpath }
+    ifelse }
+  def }
+%
+\def\pscharpath{\def\pst@par{}\pst@object{pscharpath}}
+\def\pscharpath@i{\pst@makebox\pscharpath@ii}
+\def\pscharpath@ii{%
+  \leavevmode\hbox{%
+    \pstVerb{\tx@CharPathShow}%
+    \box\pst@hbox
+    \pstVerb{/show /tx@CharPathSavedShow load def}%
+% DG/SR modification begin - Nov. 26, 1998 - Patch 2
+% \if@star is true but \solid@star must not be executed in \begin@ClosedObj !
+%    \begin@ClosedObj
+    \let\solid@starOLD\solid@star
+    \let\solid@star\relax
+    \begin@ClosedObj
+    \let\solid@star\solid@starOLD
+% DG/SR modification end
+      \def\pst@linetype{1}%
+      \psdashadjustfalse
+      \showpointsfalse
+      \let\pst@newpath\@empty
+      \def\use@pscode{%
+        \pst@Verb{
+          gsave
+            \tx@STV
+            \pst@code
+          grestore
+% DG/SR modification begin - Jul.  3, 1998 / Mar. 11, 1999 - Patches 1 and 3
+%         \if@star\else CP newpath moveto \fi}}%
+          \if@star\else CP newpath moveto \fi}%
+        \gdef\pst@code{}}%
+% DG/SR modification end
+    \end@ClosedObj}}
+%
+\def\pscharclip{\def\pst@par{}\pst@object{pscharclip}}
+\def\pscharclip@i{\pst@makebox\pscharclip@ii}
+\def\pscharclip@ii{%
+  \leavevmode
+  \begingroup
+    \begin@psclip
+    {\@startrue\pscharpath@ii}%
+    \pstVerb{clip \if@star\else currentpoint newpath moveto\fi}%
+    \def\endpscharclip{\end@psclip\endgroup}%
+    \ignorespaces}
+\def\endpscharclip{\pst@misplaced\endpscharclip}
+%
+\define@key[psset]{pst-text}{font}[NimbusSanL-Regu]{\def\psk@warpfont{#1 }}
+\define@key[psset]{pst-text}{fontsize}[24pt]{\pst@getlength{#1}\psk@warpfontsize}
+\psset[pst-text]{font=NimbusSanL-Regu,fontsize=24pt}
+
+\def\psWarp{\def\pst@par{}\pst@object{psWarp}}
+\def\psWarp@i{\@ifnextchar(\psWarp@ii{\psWarp@ii(0,0)}}
+\def\psWarp@ii(#1)#2{%
+  \addbefore@par{linewidth=0.1pt,doublecolor=blue}%
+  \begin@ClosedObj
+  \pst@getcoor{#1}\pst@tempCoor
+  \pstverb{
+    /\psk@warpfont findfont \psk@warpfontsize\space scalefont setfont
+    /amplitude \psk@warpfontsize\space 0.75 mul def
+    /damplitude amplitude 1.05 mul def
+    /warptxt (#2) def
+    /warpwidth warptxt stringwidth pop def
+    /warphalf warpwidth 2 div def
+    \pst@tempCoor translate  
+    0 \psk@warpfontsize\space neg moveto
+    0 amplitude moveto  %%% orig
+    0 1 warpwidth { amplitude lineto } for
+    warpwidth -1 0 { damplitude lineto } for
+    closepath
+    tx@TextPathDict begin 
+          warpit
+	  gsave
+	  \pst@usecolor\psdoublecolor
+	  fill
+	  grestore
+          \pst@number\pslinewidth setlinewidth
+	  stroke
+	end
+        0 0 moveto
+	warptxt true charpath
+	tx@TextPathDict begin 
+          warpit
+	  gsave
+	  \pst@usecolor\psfillcolor
+	  fill
+	  grestore
+          \pst@number\pslinewidth setlinewidth
+	  stroke
+	end
+  }
+  \end@ClosedObj
+}
+%
+\def\psCircleText{\def\pst@par{}\pst@object{psCircleText}}
+\def\psCircleText@i{\@ifnextchar(\psCircleText@ii{\psCircleText@ii(0,0)}}
+\def\psCircleText@ii(#1)#2{%
+  \addbefore@par{fillcolor=red!40,linewidth=0.01pt,radius=2cm}%
+  \begin@ClosedObj
+  \pst@getcoor{#1}\pst@tempCoor
+  \pssetlength\pst@dimb\psk@radius
+  \pstverb{
+    /\psk@warpfont findfont \psk@warpfontsize\space scalefont setfont
+    /circtxt (#2) def
+    /circwidth circtxt stringwidth pop def
+    \pst@tempCoor translate  
+    circwidth 2 div neg \pst@number\pst@dimb moveto
+    circtxt true charpath
+    tx@TextPathDict begin 
+    circit
+    gsave
+    \pst@usecolor\psfillcolor
+    fill
+    grestore
+    \pst@number\pslinewidth setlinewidth
+    stroke
+   end
+  }%
+  \end@ClosedObj
+}
+%
+
+\catcode`\@=\TheAtCode\relax
+\endinput
+%%
+%% END pst-text.tex

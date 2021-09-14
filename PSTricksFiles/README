@@ -44,3 +44,7 @@
 
 ----- psvectorian.pro
 suggested change   - Limit clipping using groups instead of resetting clip path
+
+
+----- ps-text.*
+suggested change   - Add \pstextpath implementation for LuaLaTeX
