@@ -1971,6 +1971,7 @@ systemdict = {kind = 'dict', value = {
   rcurveto = function()
     local state = graphics_stack[#graphics_stack]
     local current_path = assert(state.current_path, 'nocurrentpoint')
+    local current_point = state.current_point
     local x0, y0 = current_point[1], current_point[2]
     local y3 = pop_num() + y0
     local x3 = pop_num() + x0
