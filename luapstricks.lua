@@ -3186,6 +3186,25 @@ systemdict = {kind = 'dict', value = {
       systemdict.value.stack()
     end
   end,
+  readline = function()
+    local target = pop_string()
+    local f = pop()
+    local data = f:read'L' -- TODO: \r should be accepted as EOL marker too
+    if data then
+      if #data > #target.value then
+        push(f)
+        push(target)
+        error'rangecheck'
+      end
+      target = str_view(target, 1, #data)
+      target.value = data
+      push(target)
+      push(true)
+    else
+      push{kind = 'string', value = ''}
+      push(false)
+    end
+  end,
 
   token = function()
     local arg = pop()
