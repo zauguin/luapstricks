@@ -3162,7 +3162,7 @@ systemdict = {kind = 'dict', value = {
     local data = pop_num()
     local f = pop()
     data = data % 256
-    f:write(string.byte(data))
+    f:write(string.char(data))
   end,
   writestring = function()
     local data = pop_string().value
