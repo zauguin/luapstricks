@@ -487,6 +487,7 @@ local graphics_stack = {{
   miterlimit = nil,
 }}
 
+local lua_node_lookup = setmetatable({}, {__mode = 'k'})
 local char_width_storage -- Non nil only at the beginning of a Type 3 glyph. Used to export the width.
 local ExtGStateCount = 0
 local pdfdict_gput = token.create'pdfdict_gput:nnn'
@@ -1158,6 +1159,66 @@ systemdict = {kind = 'dict', value = {
           break
         end
         i = i + 1
+      end
+    end)
+    if not success and err ~= exitmarker then
+      error(err)
+    end
+  end,
+
+  ['.texboxforall'] = function()
+    local proc = pop_proc()
+    local boxop = pop()
+    local box = lua_node_lookup[boxop]
+    if not box then
+      -- push(boxop)
+      -- -- push(proc)
+      error'typecheck'
+    end
+    if node.direct.getid(box.box) ~= node.id'hlist' then
+      -- push(boxop)
+      -- push(proc)
+      error'.texboxforall is currently only supported for hboxes'
+    end
+
+    local head = node.direct.getlist(box.box)
+    head = node.direct.flatten_discretionaries(head)
+    node.direct.setlist(box.box, head)
+    local success, err = pcall(function()
+      local x, y = 0, 0
+      local n = head
+      while n do
+        local after = node.direct.getnext(n)
+        local width = node.direct.rangedimensions(box.box, n, after)/65781.76
+        push(mark)
+        local id = node.type(node.direct.getid(n))
+        local subbox = {box = n, parent = box} -- parent is needed for lifetime reasons
+        local function op()
+          flush_delayed()
+          vf.push()
+          local n = subbox.box -- Same as the outer box, but this preserves the lifetime of subbox
+          local parent = subbox.parent.box
+          local after = node.direct.getnext(n)
+          local head = node.direct.getlist(parent)
+          node.direct.setnext(n, nil)
+          node.direct.setlist(parent, subbox.box)
+          vf.node(parent)
+          node.direct.setnext(n, after)
+          node.direct.setlist(parent, head)
+          vf.pop()
+        end
+        lua_node_lookup[subbox] = op
+        push(op)
+        push(x)
+        push(y)
+        push(width)
+        push(0)
+        push(id)
+        execute_ps(proc)
+        if width ~= 0 then
+          x = x + width
+        end
+        n = after
       end
     end)
     if not success and err ~= exitmarker then
@@ -2091,7 +2152,7 @@ systemdict = {kind = 'dict', value = {
       if type(entry) == 'string' then
         if entry == 'c' then
           assert(i - last_op == 6)
-          flatten(new_path, tolerance, saved_x, saved_y, table.unpack(old_path, last_op, i-1))-- TODO Replace 1 with flatness graphic state parameter
+          flatten(new_path, tolerance, saved_x, saved_y, table.unpack(old_path, last_op, i-1))
           table.move(old_path, last_op + 4, last_op + 5, #new_path + 1, new_path)
           new_path[#new_path+1] = 'l'
         else
@@ -3513,7 +3574,9 @@ local register_texbox do
   function register_texbox(box)
     id = id + 1
     box = setmetatable({box = node.direct.todirect(box)}, meta)
-    dict[id] = function() flush_delayed() vf.push() vf.node(box.box) vf.pop() end
+    local op = function() flush_delayed() vf.push() vf.node(box.box) vf.pop() end
+    lua_node_lookup[op] = box
+    dict[id] = op
     return id
   end
 end
