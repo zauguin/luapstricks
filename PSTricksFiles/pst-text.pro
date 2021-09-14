@@ -77,8 +77,8 @@ tx@TextPathDict begin
     /Voffset exch def
   grestore
   gsave
+  matrix currentmatrix exch
   { % The stack contains: mark [...] op x y dx dy id, where id is the type of the node, dx the advance width, dy is 0, (x, y) the offset and op an operator drawing the node to coordinates (0, 0)
-    gsave
     pop % Ignore the type of the Node
     2 div /Sy exch def
     2 div /Sx exch def
@@ -88,7 +88,7 @@ tx@TextPathDict begin
     Sx neg Sy neg translate
     currentdict exch end exec begin
     cleartomark % Should always come at the end because later versions might push additional entries.
-    grestore
+    dup setmatrix
   }
   .texboxforall
   grestore
