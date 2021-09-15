@@ -1,4 +1,4 @@
-%% $Id: pst-tools.tex 245 2021-09-13 18:56:41Z herbert $
+%% $Id: pst-tools.tex 246 2021-09-13 20:06:21Z herbert $
 %%
 %% This is file `pst-tools.tex',
 %%
@@ -26,8 +26,8 @@
 % interface to the `xkeyval' package
 \pst@addfams{pst-tools}
 %
-\def\fileversion{0.11}
-\def\filedate{2021/09/13}
+\def\fileversion{0.12}
+\def\filedate{2021/09/15}
 \message{`PST-tools' v\fileversion, \filedate\space (hv)}
 %
 \define@key[psset]{pst-tools}{decimalSeparator}[.]{\def\psk@decimalSeparator{#1}}%
@@ -38,9 +38,9 @@
 \define@key[psset]{pst-tools}{yShift}[0]{\def\psk@yShift{#1}}
 \define@key[psset]{pst-tools}{postString}[{}]{\def\psk@postString{#1}}
 \define@key[psset]{pst-tools}{VarName}[]{\def\psk@VarName{#1 }}
-\define@key[psset]{pst-tools}{PSfont}[NimbusRomNo9L-Regu]{%
+\define@key[psset]{pst-tools}{printfont}[NimbusRomNo9L-Regu]{%
   \ifPSTlualatex
-    \ifx\relax#1\relax
+    \expandafter\ifx\expandafter\relax#1\relax
        \def\psk@printfont{ \fontid\font\space .findfontid }%
     \else
       \def\psk@printfont{ /#1 findfont }% 
@@ -56,7 +56,7 @@
 \define@key[psset]{pst-tools}{valuewidth}[10]{\pst@getint{#1}\psk@valuewidth }
 \define@key[psset]{pst-tools}{fontscale}[10]{\pst@checknum{#1}\psk@fontscale }
 \define@key[psset]{pst-tools}{decimals}[-1]{\pst@getint{#1}\psk@decimals }
-\psset[pst-tools]{PSfont=Helvetica,fontscale=10,valuewidth=10,decimals=-1,
+\psset[pst-tools]{printfont=Helvetica,fontscale=10,valuewidth=10,decimals=-1,
                   xShift=0,yShift=0,trimSpaces=false,postString={},VarName={},
                   comma=false,decimalSeparator=.}
 %
@@ -70,8 +70,7 @@
 \def\psPrintValue@ii#1,#2,#3\@nil{%  #1,#2 only for algebraic code
   \begin@SpecialObj
   \addto@pscode{  
-     gsave \psk@printfont 
-       \psk@fontscale scalefont setfont 
+     gsave \psk@printfont  \psk@fontscale scalefont setfont 
      \ifPst@algebraic 
        /x #1 def 
        /Func (#2) tx@AlgToPs begin AlgToPs end cvx def 
@@ -102,9 +101,9 @@
 \def\psPrintValueNew@ii#1,#2,#3!!{%  #1,#2 only for algebraic code
   \begin@SpecialObj
   \addto@pscode{  %		thanks to Buddy Ledger
-     /mfont { \psk@PSfont 
+     /mfont { \psk@printfont 
               \psk@fontscale scalefont setfont } bind def
-     /mfontexp { \psk@PSfont
+     /mfontexp { \psk@printfont
                  \psk@fontscale 1.2 div scalefont setfont } bind def
      /s1 { /StandardSymL findfont \psk@fontscale scalefont setfont } bind def
      \ifPst@algebraic 
