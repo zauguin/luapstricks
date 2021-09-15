@@ -38,13 +38,13 @@
                     for own use  NArray->NArray@i
 
 
------ pst-tree.tex
-1.14   2021-09-04  - set default linewidth and color for lualatex
-
-
 ----- psvectorian.pro
 suggested change   - Limit clipping using groups instead of resetting clip path
 
 
 ----- ps-text.*
 suggested change   - Add \pstextpath implementation for LuaLaTeX
+
+
+----- pst-solides3d.pro
+4.28  2021-09-15  - define charpath if not known
