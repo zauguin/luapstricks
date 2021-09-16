@@ -403,37 +403,52 @@ end
 
 local operand_stack = {}
 
+local pushs do
+  local function helper(height, args, arg, ...)
+    if args == 0 then return end
+    height = height + 1
+    operand_stack[height] = arg
+    return helper(height, args - 1, ...)
+  end
+  function pushs(...)
+    return helper(#operand_stack, select('#', ...), ...)
+  end
+end
 local function push(value)
   operand_stack[#operand_stack+1] = value
 end
-local function pop()
+local function pop(...)
   local height = #operand_stack
   if height == 0 then
+    pushs(...)
     error'Popping from empty stack'
   end
   local v = operand_stack[height]
   operand_stack[height] = nil
   return v
 end
-local function pop_num()
-  local n = pop()
-  if type(n) == 'table' and n.kind == 'executable' then
+local function pop_num(...)
+  local raw = pop(...)
+  local n = raw
+  local tn = type(n)
+  if tn == 'table' and n.kind == 'executable' then
     n = n.value
+    tn = type(n)
   end
-  if type(n) ~= 'number' then
-    push(n)
+  if tn ~= 'number' then
+    pushs(raw, ...)
     error'typecheck'
   end
-  return n
+  return n, raw
 end
 local pop_int = pop_num
-local function pop_proc()
+local function pop_proc(...)
   local v = pop()
   if type(v) ~= 'table' or v.kind ~= 'executable' or type(v.value) ~= 'table' or v.value.kind ~= 'array' then
-    push(v)
+    pushs(v, ...)
     error'typecheck'
   end
-  return v.value.value
+  return v.value.value, v
 end
 local pop_bool = pop
 local function pop_dict()
@@ -454,7 +469,7 @@ local function pop_dict()
     push(orig)
     error'typecheck'
   end
-  return dict
+  return dict.value, orig, dict
 end
 local function pop_array()
   local orig = pop()
@@ -971,7 +986,7 @@ systemdict = {kind = 'dict', value = {
         end
         arg.value = src
       elseif kind == 'dict' then
-        local src = pop_dict().value
+        local src = pop_dict()
         if next(arg.value) then
           error'Target dictionary must be empty'
         end
@@ -987,9 +1002,12 @@ systemdict = {kind = 'dict', value = {
     end
   end,
   roll = function()
-    local j = pop_int()
-    local n = pop_int()
-    if n < 0 then error'Invalid roll size' end
+    local j, arg2 = pop_int()
+    local n, arg1 = pop_int(arg2)
+    if n < 0 then
+      pushs(arg1, arg2)
+      error'rangecheck'
+    end
     if n == 0 or j == 0 then return end
     local height = #operand_stack
     if j < 0 then
@@ -1005,9 +1023,12 @@ systemdict = {kind = 'dict', value = {
     end
   end,
   index = function()
-    local i = pop_int()
+    local i, arg1 = pop_int()
     local height = #operand_stack
-    if i < 0 or height <= i then error'Invalid index' end
+    if i < 0 or height <= i then
+      push(arg1)
+      error'rangecheck'
+    end
     push(operand_stack[height - i])
   end,
   null = function()
@@ -1071,27 +1092,27 @@ systemdict = {kind = 'dict', value = {
   end,
 
   ['if'] = function()
-    local proc = pop_proc()
-    local cond = pop_bool()
+    local proc, arg2 = pop_proc()
+    local cond = pop_bool(arg2)
     if cond then
       execute_ps(proc)
     end
   end,
   ifelse = function()
-    local proc2 = pop_proc()
-    local proc1 = pop_proc()
-    local cond = pop_bool()
+    local proc_else, arg3 = pop_proc()
+    local proc_then, arg2 = pop_proc(arg3)
+    local cond = pop_bool(arg2, arg3)
     if cond then
-      execute_ps(proc1)
+      execute_ps(proc_then)
     else
-      execute_ps(proc2)
+      execute_ps(proc_else)
     end
   end,
   ['for'] = function()
-    local proc = pop_proc()
-    local limit = pop_num()
-    local step = pop_num()
-    local initial = pop_num()
+    local proc, arg4 = pop_proc()
+    local limit, arg3 = pop_num(arg4)
+    local step, arg2 = pop_num(arg3, arg4)
+    local initial = pop_num(arg2, arg3, arg4)
     local success, err = pcall(function()
       for i=initial, limit, step do
         push(i)
@@ -1103,12 +1124,19 @@ systemdict = {kind = 'dict', value = {
     end
   end,
   forall = function()
-    local proc = pop_proc()
+    local proc, arg2 = pop_proc()
     local obj = pop()
-    if type(obj) ~= 'table' then error'typecheck' end
+    local arg1 = obj
+    if type(obj) ~= 'table' then
+      pushs(arg1, proc2)
+      error'typecheck'
+    end
     if obj.kind == 'executable' then
       obj = obj.value
-      if type(obj) ~= 'table' then error'typecheck' end
+      if type(obj) ~= 'table' then
+        pushs(arg1, proc2)
+        error'typecheck'
+      end
     end
     local success, err = pcall(
          obj.kind == 'array' and function()
@@ -1125,19 +1153,18 @@ systemdict = {kind = 'dict', value = {
          end
       or obj.kind == 'dict' and function()
            for k, v in next, obj.value do
-             push(k)
-             push(v)
+             pushs(k, v)
              execute_ps(proc)
            end
          end
-      or error'typecheck')
+      or (pushs(arg1, arg2) and false or error'typecheck'))
     if not success and err ~= exitmarker then
       error(err)
     end
   end,
   ['repeat'] = function()
-    local proc = pop_proc()
-    local count = pop_num()
+    local proc, arg2 = pop_proc()
+    local count = pop_int(arg2)
     local success, err = pcall(function()
       for i=1, count do
         execute_ps(proc)
@@ -1615,7 +1642,7 @@ systemdict = {kind = 'dict', value = {
   end,
 
   string = function()
-    push{kind = 'string', value = string.rep('\0', pop_int())}
+    push{kind = 'string', value = string.rep('\0', (pop_int()))}
   end,
   search = function()
     local seek = pop_string()
@@ -1694,7 +1721,8 @@ systemdict = {kind = 'dict', value = {
     push{kind = 'dict', value = lua.newtable(0, size)}
   end,
   begin = function()
-    dictionary_stack[#dictionary_stack + 1] = pop_dict()
+    local _
+    _, _, dictionary_stack[#dictionary_stack + 1] = pop_dict()
   end,
   ['end'] = function()
     if #dictionary_stack <= 3 then
@@ -1804,7 +1832,7 @@ systemdict = {kind = 'dict', value = {
   end,
   undef = function()
     local key = pop_key()
-    local dict = pop_dict().value
+    local dict = pop_dict()
     dict[key] = nil
   end,
   length = function()
@@ -2249,28 +2277,28 @@ systemdict = {kind = 'dict', value = {
   end,
 
   shfill = function()
+    local shading_dict, arg1 = pop_dict()
     flush_delayed()
-    local shading_dict = pop_dict()
     local data_src
     local pdf_dict = ''
-    for k, v in next, shading_dict.value do
+    for k, v in next, shading_dict do
       if k == 'DataSource' then
         data_src = v
       else
         pdf_dict = pdf_dict .. serialize_pdf(k) .. ' ' .. serialize_pdf(v)
       end
     end
-    if shading_dict.value.ShadingType == 4 then
+    if shading_dict.ShadingType == 4 then
       assert(data_src)
       if type(data_src) ~= 'table' then
-        push(shading_dict)
+        push(arg1)
         error'typecheck'
       end
       if data_src.kind == 'string' then
         data_src = data_src.value
       elseif data_src.kind == 'array' then
         data_src = data_src.value
-        local color_model = shading_dict.value.ColorSpace.value[1]
+        local color_model = shading_dict.ColorSpace.value[1]
         if type(color_model) == 'table' and color_model.kind == 'name' then
           color_model = color_model.value
         end
@@ -2803,14 +2831,15 @@ systemdict = {kind = 'dict', value = {
     end
   end,
   definefont = function()
-    local fontdict = pop_dict()
+    local fontdict, raw_fontdict = pop_dict()
     local fontkey = pop_key()
-    fontdict.value.FontMatrix = fontdict.value.FontMatrix or {kind = 'array', value = {1, 0, 0, 1, 0, 0}}
-    if assert(fontdict.value.FontType) == 0x1CA then
-      local fontname = fontdict.value.FontName
+    fontdict.FontMatrix = fontdict.FontMatrix or {kind = 'array', value = {1, 0, 0, 1, 0, 0}}
+    if assert(fontdict.FontType) == 0x1CA then
+      local fontname = fontdict.FontName
       if type(fontname) == 'table' and fontname.kind == 'name' then
         fontname = fontname.value
       elseif type(fontname) ~= 'string' then
+        pushs(fontkey, raw_fontdict)
         error'typecheck'
       end
       local fid = fonts.definers.read(fontname, 65782)
@@ -2820,18 +2849,17 @@ systemdict = {kind = 'dict', value = {
         fid = font.define(data)
         fonts.definers.register(data, fid)
       end
-      fontdict.value.FID = fid
+      fontdict.FID = fid
     else
       texio.write_nl'definefont is not implemnted. Pushing dummy font.'
     end
-    FontDirectory[fontkey] = fontdict
-    push(fontdict)
+    FontDirectory[fontkey] = raw_fontdict
+    push(raw_fontdict)
   end,
   makefont = function()
     local m = pop_array().value
     if #m ~= 6 then error'Unexpected size of matrix' end
-    local fontdict = pop_dict()--.value
-    fontdict = fontdict.value
+    local fontdict = pop_dict()
     local new_fontdict = {}
     for k,v in next, fontdict do
       new_fontdict[k] = v
@@ -2846,8 +2874,7 @@ systemdict = {kind = 'dict', value = {
   end,
   scalefont = function()
     local factor = pop_num()
-    local fontdict = pop_dict()--.value
-    fontdict = fontdict.value
+    local fontdict = pop_dict()
     local new_fontdict = {}
     for k,v in next, fontdict do
       new_fontdict[k] = v
@@ -2861,7 +2888,7 @@ systemdict = {kind = 'dict', value = {
     push{kind = 'dict', value = new_fontdict}
   end,
   setfont = function()
-    local fontdict = pop_dict()
+    local _, _, fontdict = pop_dict()
     local state = graphics_stack[#graphics_stack]
     state.font = fontdict
   end,
@@ -3538,20 +3565,20 @@ ResourceCategories.value.Generic = {kind = 'dict', value = {
     local instance = pop()
     local key = pop_key()
     execute_tok'.Instances'
-    local instances = pop_dict().value
+    local instances = pop_dict()
     instances[key] = instance
     push(instance)
   end,
   UndefineResource = function()
     local key = pop_key()
     execute_tok'.Instances'
-    local instances = pop_dict().value
+    local instances = pop_dict()
     instances[key] = nil
   end,
   FindResource = function()
     local key = pop_key()
     execute_tok'.Instances'
-    local instances = pop_dict().value
+    local instances = pop_dict()
     local instance = instances[key]
     if instance then
       push(instance)
@@ -3648,7 +3675,7 @@ ResourceCategories.value.Category = {kind = 'dict', value = {
   -- ResourceStatus = function()
   --   local key = pop_key()
   --   execute_tok'.Instances'
-  --   local instances = pop_dict().value
+  --   local instances = pop_dict()
   --   local instance = instances[key]
   --   if instance then
   --     push(instance)
@@ -3660,7 +3687,7 @@ ResourceCategories.value.Category = {kind = 'dict', value = {
   -- ResourceForAll = function()
   --   local key = pop_key()
   --   execute_tok'.Instances'
-  --   local instances = pop_dict().value
+  --   local instances = pop_dict()
   --   local instance = instances[key]
   --   if instance then
   --     push(instance)
