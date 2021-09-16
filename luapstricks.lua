@@ -153,7 +153,7 @@ local serialize_pdf do
   function serialize_pdf(obj)
     local t = type(obj)
     if t == 'number' then
-      return string.format(math.type(obj) == 'float' and '%.3f' or '%i', obj)
+      return string.format(math.type(obj) == 'float' and '%.5f' or '%i', obj)
     elseif t == 'boolean' then
       return obj and 'true' or 'false'
     elseif t == 'string' then
@@ -650,10 +650,10 @@ local function flush_delayed_table(delayed, state, force_start)
   local delayed_matrix = delayed.matrix
   local delayed_text = delayed.text
 
-  local cm_string = string.format('%.4f %.4f %.4f %.4f %.4f %.4f cm', delayed_matrix[1], delayed_matrix[2],
+  local cm_string = string.format('%.5f %.5f %.5f %.5f %.5f %.5f cm', delayed_matrix[1], delayed_matrix[2],
                                                                       delayed_matrix[3], delayed_matrix[4],
                                                                       delayed_matrix[5], delayed_matrix[6])
-  if cm_string == "1.0000 0.0000 0.0000 1.0000 0.0000 0.0000 cm" then
+  if cm_string == "1.00000 0.00000 0.00000 1.00000 0.00000 0.00000 cm" then
     cm_string = nil
   end
 
@@ -668,7 +668,7 @@ local function flush_delayed_table(delayed, state, force_start)
     pdfprint(delayed_text[i])
   end
   if cm_string then
-    pdfprint(cm_string)
+    pdfprint((cm_string:gsub('%.?0+ ', ' ')))
   end
   return reset_delayed(delayed)
 end
@@ -2123,7 +2123,7 @@ systemdict = {kind = 'dict', value = {
     flush_delayed(true)
     for i = 1, #current_path do
       if type(current_path[i]) == 'number' then
-        pdfprint(string.format('%.3f', current_path[i]))
+        pdfprint(string.format('%.5f', current_path[i]))
       else
         pdfprint(current_path[i])
       end
@@ -2137,7 +2137,7 @@ systemdict = {kind = 'dict', value = {
     flush_delayed(true)
     for i = 1, #current_path do
       if type(current_path[i]) == 'number' then
-        pdfprint(string.format('%.3f', current_path[i]))
+        pdfprint(string.format('%.5f', current_path[i]))
       else
         pdfprint(current_path[i])
       end
@@ -2151,7 +2151,7 @@ systemdict = {kind = 'dict', value = {
     current_path[#current_path+1] = 'f*'
     for i = 1, #current_path do
       if type(current_path[i]) == 'number' then
-        current_path[i] = string.format('%.3f', current_path[i])
+        current_path[i] = string.format('%.5f', current_path[i])
       end
     end
     flush_delayed()
@@ -2165,7 +2165,7 @@ systemdict = {kind = 'dict', value = {
     current_path[#current_path+1] = 'f'
     for i = 1, #current_path do
       if type(current_path[i]) == 'number' then
-        current_path[i] = string.format('%.3f', current_path[i])
+        current_path[i] = string.format('%.5f', current_path[i])
       end
     end
     flush_delayed()
@@ -2179,7 +2179,7 @@ systemdict = {kind = 'dict', value = {
     current_path[#current_path+1] = 'S'
     for i = 1, #current_path do
       if type(current_path[i]) == 'number' then
-        current_path[i] = string.format('%.3f', current_path[i])
+        current_path[i] = string.format('%.5f', current_path[i])
       end
     end
     flush_delayed()
@@ -2238,7 +2238,7 @@ systemdict = {kind = 'dict', value = {
       local w = pop_num()
       local y = pop_num()
       local x = pop_num()
-      pdfprint(string.format('%.3f %.3f %.3f %.3f re W n', x, y, w, h))
+      pdfprint(string.format('%.5f %.5f %.5f %.5f re W n', x, y, w, h))
     else
       error'Unsupported rectclip variant'
     end
@@ -2254,7 +2254,7 @@ systemdict = {kind = 'dict', value = {
       local w = pop_num()
       local y = pop_num()
       local x = pop_num()
-      pdfprint(string.format('%.3f %.3f %.3f %.3f re S', x, y, w, h))
+      pdfprint(string.format('%.5f %.5f %.5f %.5f re S', x, y, w, h))
     else
       error'Unsupported rectstroke variant'
     end
@@ -2270,7 +2270,7 @@ systemdict = {kind = 'dict', value = {
       local w = pop_num()
       local y = pop_num()
       local x = pop_num()
-      pdfprint(string.format('%.3f %.3f %.3f %.3f re f', x, y, w, h))
+      pdfprint(string.format('%.5f %.5f %.5f %.5f re f', x, y, w, h))
     else
       error'Unsupported rectfill variant'
     end
