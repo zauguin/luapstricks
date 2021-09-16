@@ -2155,7 +2155,7 @@ systemdict = {kind = 'dict', value = {
       end
     end
     flush_delayed()
-    pdfprint(table.concat(current_path, ' '))
+    pdfprint((table.concat(current_path, ' '):gsub('%.?0+ ', ' ')))
     state.current_path, state.current_point = nil
   end,
   fill = function()
@@ -2169,7 +2169,7 @@ systemdict = {kind = 'dict', value = {
       end
     end
     flush_delayed()
-    pdfprint(table.concat(current_path, ' '))
+    pdfprint((table.concat(current_path, ' '):gsub('%.?0+ ', ' ')))
     state.current_path, state.current_point = nil
   end,
   stroke = function()
@@ -2183,7 +2183,7 @@ systemdict = {kind = 'dict', value = {
       end
     end
     flush_delayed()
-    pdfprint(table.concat(current_path, ' '))
+    pdfprint((table.concat(current_path, ' '):gsub('%.?0+ ', ' ')))
     state.current_path, state.current_point = nil
   end,
   flattenpath = function()
@@ -2238,7 +2238,7 @@ systemdict = {kind = 'dict', value = {
       local w = pop_num()
       local y = pop_num()
       local x = pop_num()
-      pdfprint(string.format('%.5f %.5f %.5f %.5f re W n', x, y, w, h))
+      pdfprint((string.format('%.5f %.5f %.5f %.5f re W n', x, y, w, h):gsub('%.?0+ ', ' ')))
     else
       error'Unsupported rectclip variant'
     end
@@ -2254,7 +2254,7 @@ systemdict = {kind = 'dict', value = {
       local w = pop_num()
       local y = pop_num()
       local x = pop_num()
-      pdfprint(string.format('%.5f %.5f %.5f %.5f re S', x, y, w, h))
+      pdfprint((string.format('%.5f %.5f %.5f %.5f re S', x, y, w, h):gsub('%.?0+ ', ' ')))
     else
       error'Unsupported rectstroke variant'
     end
@@ -2270,7 +2270,7 @@ systemdict = {kind = 'dict', value = {
       local w = pop_num()
       local y = pop_num()
       local x = pop_num()
-      pdfprint(string.format('%.5f %.5f %.5f %.5f re f', x, y, w, h))
+      pdfprint((string.format('%.5f %.5f %.5f %.5f re f', x, y, w, h):gsub('%.?0+ ', ' ')))
     else
       error'Unsupported rectfill variant'
     end
