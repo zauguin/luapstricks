@@ -141,11 +141,6 @@ local any_object = l.P{whitespace^-1 * (
 )}
 local object_list = l.Ct(any_object^0) * whitespace^-1 * (-1 + l.Cp())
 
-local function ps_error(kind, ...)
-  pushs(...)
-  return error(kind)
-end
-
 local function parse_ps(s)
   local tokens, fail_offset = object_list:match(s)
   if fail_offset then
@@ -422,6 +417,12 @@ end
 local function push(value)
   operand_stack[#operand_stack+1] = value
 end
+
+local function ps_error(kind, ...)
+  pushs(...)
+  return error{pserror = kind, trace = debug.traceback()}
+end
+
 local function pop(...)
   local height = #operand_stack
   if height == 0 then
@@ -1117,7 +1118,7 @@ systemdict = {kind = 'dict', value = {
       end
     end)
     if not success and err ~= exitmarker then
-      error(err)
+      error(err, 0)
     end
   end,
   forall = function()
@@ -1153,7 +1154,7 @@ systemdict = {kind = 'dict', value = {
          end
       or ps_error('typecheck', arg1, arg2))
     if not success and err ~= exitmarker then
-      error(err)
+      error(err, 0)
     end
   end,
   ['repeat'] = function()
@@ -1165,7 +1166,7 @@ systemdict = {kind = 'dict', value = {
       end
     end)
     if not success and err ~= exitmarker then
-      error(err)
+      error(err, 0)
     end
   end,
   loop = function()
@@ -1176,7 +1177,7 @@ systemdict = {kind = 'dict', value = {
       end
     end)
     if not success and err ~= exitmarker then
-      error(err)
+      error(err, 0)
     end
   end,
 
@@ -1204,7 +1205,7 @@ systemdict = {kind = 'dict', value = {
       end
     end)
     if not success and err ~= exitmarker then
-      error(err)
+      error(err, 0)
     end
   end,
 
@@ -1264,7 +1265,7 @@ systemdict = {kind = 'dict', value = {
       end
     end)
     if not success and err ~= exitmarker then
-      error(err)
+      error(err, 0)
     end
   end,
   pathbbox = function()
@@ -2822,23 +2823,19 @@ systemdict = {kind = 'dict', value = {
     push(y)
   end,
   ashow = function()
-    local str = pop_string()
-    local ay = pop_num()
-    local ax = pop_num()
+    local str, arg3 = pop_string()
+    local ay, arg2 = pop_num(arg3)
+    local ax, arg1 = pop_num(arg2, arg3)
     local res, err = generic_show(str, ax, ay)
     if not res then
-      push(ax)
-      push(ay)
-      push(str)
-      error(err)
+      ps_error(err, arg1, arg2, arg3)
     end
   end,
   show = function()
-    local str = pop_string()
+    local str, orig = pop_string()
     local res, err = generic_show(str)
     if not res then
-      push(str)
-      error(err)
+      ps_error(err, orig)
     end
   end,
   definefont = function()
@@ -3712,7 +3709,6 @@ ResourceCategories.value.Category = {kind = 'dict', value = {
 function execute_tok(tok, suppress_proc)
   local ttok = type(tok)
   if ttok == 'string' then
-    print(tok, 'exec', #operand_stack)
     return execute_tok(lookup(tok))
   elseif ttok == 'function' then
     return tok()
@@ -3755,9 +3751,9 @@ function execute_string(str, context)
     if pos then
       local success, err = pcall(execute_tok, tok, true)
       if not success then
-        print(string.format('ERROR %q while executing %s in %q', err, tok, str))
-        if context then
-          print(context)
+        if context and type(err) == 'table' and err.pserror and not err.context then
+          err.tok = tok
+          err.context = context
         end
         error(err)
       end
@@ -3773,10 +3769,11 @@ local func = luatexbase.new_luafunction'luaPSTheader'
 token.set_lua('luaPSTheader', func, 'protected')
 lua.get_functions_table()[func] = function()
   local stack_depth = #operand_stack
-  local f = io.open(kpse.find_file(token.scan_argument(), 'PostScript header'), 'r')
+  local filename = token.scan_argument()
+  local f = io.open(kpse.find_file(filename, 'PostScript header'), 'r')
   local src = f:read'a'
   f:close()
-  execute_string(src)
+  execute_string(src, filename)
   if #operand_stack ~= stack_depth then
     error'Unexpected values on operand stack'
   end
@@ -3835,7 +3832,16 @@ local fid = font.define{
             systemdict.value.gsave()
             systemdict.value.translate()
           end
-          execute_string(tokens, ps_context)
+          local success, err = pcall(execute_string, tokens, ps_context)
+          if not success then
+            if type(err) == 'table' and err.pserror then
+              tex.error(string.format('luapstricks: %q error occured while executing PS code from %q', err.pserror, err.context), {
+                string.format('The error occured while executing the PS command %q.\n%s', err.tok, err.trace)
+              })
+            else
+              error(err, 0)
+            end
+          end
           flush_delayed()
           if not direct then
             systemdict.value.grestore()
