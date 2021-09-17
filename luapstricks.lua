@@ -141,6 +141,11 @@ local any_object = l.P{whitespace^-1 * (
 )}
 local object_list = l.Ct(any_object^0) * whitespace^-1 * (-1 + l.Cp())
 
+local function ps_error(kind, ...)
+  pushs(...)
+  return error(kind)
+end
+
 local function parse_ps(s)
   local tokens, fail_offset = object_list:match(s)
   if fail_offset then
@@ -420,12 +425,11 @@ end
 local function pop(...)
   local height = #operand_stack
   if height == 0 then
-    pushs(...)
-    error'Popping from empty stack'
+    return ps_error('stackunderflow', ...)
   end
   local v = operand_stack[height]
   operand_stack[height] = nil
-  return v
+  return v, v
 end
 local function pop_num(...)
   local raw = pop(...)
@@ -436,8 +440,7 @@ local function pop_num(...)
     tn = type(n)
   end
   if tn ~= 'number' then
-    pushs(raw, ...)
-    error'typecheck'
+    ps_error('typecheck', raw, ...)
   end
   return n, raw
 end
@@ -445,8 +448,7 @@ local pop_int = pop_num
 local function pop_proc(...)
   local v = pop()
   if type(v) ~= 'table' or v.kind ~= 'executable' or type(v.value) ~= 'table' or v.value.kind ~= 'array' then
-    pushs(v, ...)
-    error'typecheck'
+    ps_error('typecheck', v, ...)
   end
   return v.value.value, v
 end
@@ -455,19 +457,16 @@ local function pop_dict()
   local orig = pop()
   local dict = orig
   if type(dict) ~= 'table' then
-    push(orig)
-    error'typecheck'
+    ps_error('typecheck', orig)
   end
   if dict.kind == 'executable' then
     dict = dict.value
     if type(dict) ~= 'table' then
-      push(orig)
-      error'typecheck'
+      ps_error('typecheck', orig)
     end
   end
   if dict.kind ~= 'dict' then
-    push(orig)
-    error'typecheck'
+    ps_error('typecheck', orig)
   end
   return dict.value, orig, dict
 end
@@ -478,8 +477,7 @@ local function pop_array()
     arr = arr.value
   end
   if type(arr) ~= 'table' or arr.kind ~= 'array' then
-    push(orig)
-    error'typecheck'
+    ps_error('typecheck', orig)
   end
   return arr
 end
@@ -942,7 +940,8 @@ systemdict = {kind = 'dict', value = {
     push(v)
   end,
   exch = function()
-    local b, a = pop() a = pop()
+    local b = pop()
+    local a = pop(b)
     push(b)
     push(a)
   end,
@@ -955,7 +954,7 @@ systemdict = {kind = 'dict', value = {
     end
   end,
   copy = function()
-    local arg = pop()
+    local arg, orig = pop()
     local exec
     if type(arg) == 'table' and arg.kind == 'executable' then
       exec = true
@@ -982,7 +981,7 @@ systemdict = {kind = 'dict', value = {
         elseif #src < #arg.value then
           arg = str_view(arg, 1, #src)
         else
-          error'rangecheck'
+          ps_error'rangecheck'
         end
         arg.value = src
       elseif kind == 'dict' then
@@ -994,19 +993,18 @@ systemdict = {kind = 'dict', value = {
           arg.value[k] = v
         end
       else
-        error'typecheck'
+        ps_error'typecheck'
       end
       push(exec and {kind = 'executable', value = arg} or arg)
     else
-      error'typecheck'
+      ps_error('typecheck', orig)
     end
   end,
   roll = function()
     local j, arg2 = pop_int()
     local n, arg1 = pop_int(arg2)
     if n < 0 then
-      pushs(arg1, arg2)
-      error'rangecheck'
+      ps_error('rangecheck', arg1, arg2)
     end
     if n == 0 or j == 0 then return end
     local height = #operand_stack
@@ -1026,8 +1024,7 @@ systemdict = {kind = 'dict', value = {
     local i, arg1 = pop_int()
     local height = #operand_stack
     if i < 0 or height <= i then
-      push(arg1)
-      error'rangecheck'
+      ps_error('rangecheck', arg1)
     end
     push(operand_stack[height - i])
   end,
@@ -1125,17 +1122,14 @@ systemdict = {kind = 'dict', value = {
   end,
   forall = function()
     local proc, arg2 = pop_proc()
-    local obj = pop()
-    local arg1 = obj
+    local obj, arg1 = pop()
     if type(obj) ~= 'table' then
-      pushs(arg1, proc2)
-      error'typecheck'
+      ps_error('typecheck', arg1, arg2)
     end
     if obj.kind == 'executable' then
       obj = obj.value
       if type(obj) ~= 'table' then
-        pushs(arg1, proc2)
-        error'typecheck'
+        ps_error('typecheck', arg1, arg2)
       end
     end
     local success, err = pcall(
@@ -1157,7 +1151,7 @@ systemdict = {kind = 'dict', value = {
              execute_ps(proc)
            end
          end
-      or (pushs(arg1, arg2) and false or error'typecheck'))
+      or ps_error('typecheck', arg1, arg2))
     if not success and err ~= exitmarker then
       error(err)
     end
@@ -1215,13 +1209,13 @@ systemdict = {kind = 'dict', value = {
   end,
 
   ['.texboxforall'] = function()
-    local proc = pop_proc()
+    local proc, arg2 = pop_proc()
     local boxop = pop()
     local box = lua_node_lookup[boxop]
     if not box then
       -- push(boxop)
       -- -- push(proc)
-      error'typecheck'
+      ps_error('typecheck', boxop, arg2)
     end
     if node.direct.getid(box.box) ~= node.id'hlist' then
       -- push(boxop)
@@ -1298,7 +1292,7 @@ systemdict = {kind = 'dict', value = {
   end,
 
   ['not'] = function()
-    local val = pop()
+    local val, orig = pop()
     local tval = type(val)
     if tval == 'table' and val.kind == 'executable' then
       val = val.value
@@ -1309,11 +1303,11 @@ systemdict = {kind = 'dict', value = {
     elseif tval == 'number' then
       push(~val)
     else
-      error'typecheck'
+      ps_error('typecheck', orig)
     end
   end,
   ['and'] = function()
-    local val = pop()
+    local val, orig = pop()
     local tval = type(val)
     if tval == 'table' and val.kind == 'executable' then
       val = val.value
@@ -1324,11 +1318,11 @@ systemdict = {kind = 'dict', value = {
     elseif tval == 'number' then
       push(val & pop_int())
     else
-      error'typecheck'
+      ps_error('typecheck', orig)
     end
   end,
   ['or'] = function()
-    local val = pop()
+    local val, orig = pop()
     local tval = type(val)
     if tval == 'table' and val.kind == 'executable' then
       val = val.value
@@ -1339,11 +1333,11 @@ systemdict = {kind = 'dict', value = {
     elseif tval == 'number' then
       push(val | pop_int())
     else
-      error'typecheck'
+      ps_error('typecheck', orig)
     end
   end,
   ['xor'] = function()
-    local val = pop()
+    local val, orig = pop()
     local tval = type(val)
     if tval == 'table' and val.kind == 'executable' then
       val = val.value
@@ -1354,17 +1348,18 @@ systemdict = {kind = 'dict', value = {
     elseif tval == 'number' then
       push(val ~ pop_int())
     else
-      error'typecheck'
+      ps_error('typecheck', orig)
     end
   end,
   bitshift = function()
-    local shift = pop_num()
-    local val = pop_num()
+    local shift, arg2 = pop_num()
+    local val = pop_num(arg2)
     push(val << shift)
   end,
 
   eq = function()
-    local b, a = pop() a = pop()
+    local b = pop()
+    local a = pop(b)
     if type(a) == 'table' and (a.kind == 'executable' or a.kind == 'name' or a.kind == 'operator') then
       a = a.value
     end
@@ -1380,7 +1375,8 @@ systemdict = {kind = 'dict', value = {
     push(a==b)
   end,
   ne = function()
-    local b, a = pop() a = pop()
+    local b = pop()
+    local a = pop(b)
     if type(a) == 'table' and (a.kind == 'executable' or a.kind == 'name' or a.kind == 'operator') then
       a = a.value
     end
@@ -1396,7 +1392,8 @@ systemdict = {kind = 'dict', value = {
     push(a~=b)
   end,
   gt = function()
-    local b, a = pop() a = pop()
+    local b, arg2 = pop()
+    local a, arg1 = pop(arg2)
     local ta, tb = type(a), type(b)
     if ta == 'table' and a.kind == 'executable' then
       a = a.value ta = type(a)
@@ -1406,20 +1403,21 @@ systemdict = {kind = 'dict', value = {
     end
     if ta == 'number' then
       if tb ~= 'number' then
-        error'typecheck'
+        ps_error('typecheck', arg1, arg2)
       end
     elseif ta == 'table' and ta.kind == 'string' then
       if tb ~= 'table' or tb.kind ~= 'string' then
-        error'typecheck'
+        ps_error('typecheck', arg1, arg2)
       end
       a, b = a.value, b.value
     else
-        error'typecheck'
+      ps_error('typecheck', arg1, arg2)
     end
     push(a>b)
   end,
   ge = function()
-    local b, a = pop() a = pop()
+    local b, arg2 = pop()
+    local a, arg1 = pop(arg2)
     local ta, tb = type(a), type(b)
     if ta == 'table' and a.kind == 'executable' then
       a = a.value ta = type(a)
@@ -1429,20 +1427,21 @@ systemdict = {kind = 'dict', value = {
     end
     if ta == 'number' then
       if tb ~= 'number' then
-        error'typecheck'
+        ps_error('typecheck', arg1, arg2)
       end
     elseif ta == 'table' and ta.kind == 'string' then
       if tb ~= 'table' or tb.kind ~= 'string' then
-        error'typecheck'
+        ps_error('typecheck', arg1, arg2)
       end
       a, b = a.value, b.value
     else
-        error'typecheck'
+      ps_error('typecheck', arg1, arg2)
     end
     push(a>=b)
   end,
   le = function()
-    local b, a = pop() a = pop()
+    local b, arg2 = pop()
+    local a, arg1 = pop(arg2)
     local ta, tb = type(a), type(b)
     if ta == 'table' and a.kind == 'executable' then
       a = a.value ta = type(a)
@@ -1452,20 +1451,21 @@ systemdict = {kind = 'dict', value = {
     end
     if ta == 'number' then
       if tb ~= 'number' then
-        error'typecheck'
+        ps_error('typecheck', arg1, arg2)
       end
     elseif ta == 'table' and ta.kind == 'string' then
       if tb ~= 'table' or tb.kind ~= 'string' then
-        error'typecheck'
+        ps_error('typecheck', arg1, arg2)
       end
       a, b = a.value, b.value
     else
-        error'typecheck'
+      ps_error('typecheck', arg1, arg2)
     end
     push(a<=b)
   end,
   lt = function()
-    local b, a = pop() a = pop()
+    local b, arg2 = pop()
+    local a, arg1 = pop(arg2)
     local ta, tb = type(a), type(b)
     if ta == 'table' and a.kind == 'executable' then
       a = a.value ta = type(a)
@@ -1475,45 +1475,52 @@ systemdict = {kind = 'dict', value = {
     end
     if ta == 'number' then
       if tb ~= 'number' then
-        error'typecheck'
+        ps_error('typecheck', arg1, arg2)
       end
     elseif ta == 'table' and a.kind == 'string' then
       if tb ~= 'table' or b.kind ~= 'string' then
-        error'typecheck'
+        ps_error('typecheck', arg1, arg2)
       end
       a, b = a.value, b.value
     else
-      error'typecheck'
+      ps_error('typecheck', arg1, arg2)
     end
     push(a<b)
   end,
 
   add = function()
-    local b, a = pop_num() a = pop_num()
+    local b, arg2 = pop_num()
+    local a = pop_num(arg2)
     push(a+b)
   end,
   sub = function()
-    local b, a = pop_num() a = pop_num()
+    local b, arg2 = pop_num()
+    local a = pop_num(arg2)
     push(a-b)
   end,
   mul = function()
-    local b, a = pop_num() a = pop_num()
+    local b, arg2 = pop_num()
+    local a = pop_num(arg2)
     push(a*b)
   end,
   div = function()
-    local b, a = pop_num() a = pop_num()
+    local b, arg2 = pop_num()
+    local a = pop_num(arg2)
     push(a/b)
   end,
   idiv = function()
-    local b, a = pop_num() a = pop_num()
+    local b, arg2 = pop_num()
+    local a = pop_num(arg2)
     push(a//b)
   end,
   mod = function()
-    local b, a = pop_num() a = pop_num()
+    local b, arg2 = pop_num()
+    local a = pop_num(arg2)
     push(a%b)
   end,
   exp = function()
-    local b, a = pop_num() a = pop_num()
+    local b, arg2 = pop_num()
+    local a = pop_num(arg2)
     push(a^b)
   end,
   sqrt = function()
@@ -1538,7 +1545,8 @@ systemdict = {kind = 'dict', value = {
     end
   end,
   atan = function()
-    local b, a = pop_num() a = pop_num()
+    local b, arg2 = pop_num()
+    local a = pop_num(arg2)
     local res = math.deg(math.atan(a, b))
     if res < 0 then res = res + 360 end
     push(res)
@@ -1565,7 +1573,7 @@ systemdict = {kind = 'dict', value = {
     return push(math.floor(pop_num()))
   end,
   ln = function()
-    push(math.log(pop_num()))
+    push(math.log((pop_num())))
   end,
   log = function()
     push(math.log(pop_num(), 10))
@@ -1574,53 +1582,59 @@ systemdict = {kind = 'dict', value = {
     push((math.modf(pop_num())))
   end,
   cvn = function()
-    local a = pop()
+    local a, raw = pop()
     if type(a) == 'table' and a.kind == 'executable' then
       local val = a.value
       if type(val) ~= 'table' or val.kind ~= 'string' then
-        error'typecheck'
+        ps_error('typecheck', raw)
       end
       push(val.value)
     end
     if type(a) ~= 'table' or a.kind ~= 'string' then
-      error'typecheck'
+      ps_error('typecheck', raw)
     end
     return push{kind = 'name', value = a.value}
   end,
   cvi = function()
-    local a = pop()
+    local a, raw = pop()
     if type(a) == 'table' and a.kind == 'executable' then
       a = a.value
     end
     if type(a) == 'table' and a.kind == 'string' then
-      a = assert((number * -1):match(a.value), 'syntaxerror')
+      a = (number * -1):match(a.value)
+      if not a then
+        ps_error('syntaxerror', raw)
+      end
     end
-    if type(a) ~= 'number' then error'typecheck' end
+    if type(a) ~= 'number' then ps_error('typecheck', raw) end
     push(a//1)
   end,
   cvr = function()
-    local a = pop()
+    local a, raw = pop()
     if type(a) == 'table' and a.kind == 'executable' then
       a = a.value
     end
     if type(a) == 'table' and a.kind == 'string' then
-      a = assert((number * -1):match(a.value), 'syntaxerror')
+      a = (number * -1):match(a.value)
+      if not a then
+        ps_error('syntaxerror', raw)
+      end
     end
-    if type(a) ~= 'number' then error'typecheck' end
+    if type(a) ~= 'number' then ps_error('typecheck', raw) end
     push(a*1.)
   end,
   cvs = function()
-    local old_str = pop_string()
-    local a = pop()
+    local old_str, arg2 = pop_string()
+    local a, arg1 = pop()
     a = ps_to_string(a)
-    if #old_str.value < #a then error'rangecheck' end
+    if #old_str.value < #a then ps_error('rangecheck', arg1, arg2) end
     old_str.value = a .. string.sub(old_str.value, #a+1, -1)
     return push{kind = 'string', value = a}
   end,
   cvrs = function()
-    local old_str = pop_string()
-    local radix = pop_num()
-    local num = pop_num()
+    local old_str, arg3 = pop_string()
+    local radix, arg2 = pop_num()
+    local num, arg1 = pop_num()
     if radix == 10 then
       num = string.format(math.type(num) == 'float' and '%.6g' or '%i', num)
     else
@@ -1629,14 +1643,11 @@ systemdict = {kind = 'dict', value = {
         num = num + 0x100000000
       end
       if num < 0 then
-        push(num)
-        push(radix)
-        push(old_str)
-        error'rangecheck'
+        ps_error('rangecheck', arg1, arg2, arg3)
       end
       num = num == 0 and '0' or num_to_base(num, radix)
     end
-    if #old_str.value < #num then error'rangecheck' end
+    if #old_str.value < #num then ps_error('rangecheck', arg1, arg2, arg3) end
     old_str.value = num .. string.sub(old_str.value, #num+1, -1)
     return push{kind = 'string', value = num}
   end,
@@ -1679,13 +1690,13 @@ systemdict = {kind = 'dict', value = {
     push(arr)
   end,
   getinterval = function()
-    local count = pop_int()
-    local index = pop_int()
-    local arr = pop()
-    if type(arr) ~= 'table' then error'typecheck' end
+    local count, arg3 = pop_int()
+    local index, arg2 = pop_int()
+    local arr, arg1 = pop()
+    if type(arr) ~= 'table' then ps_error('typecheck', arg1, arg2, arg3) end
     if arr.kind == 'executable' then
       arr = arr.value
-      if type(arr) ~= 'table' then error'typecheck' end
+      if type(arr) ~= 'table' then ps_error('typecheck', arg1, arg2, arg3) end
     end
     if arr.kind == 'string' then
       push(str_view(arr, index + 1, count))
@@ -1693,16 +1704,16 @@ systemdict = {kind = 'dict', value = {
       -- TODO: At least for the array case, we could use metamethods to make get element sharing behavior
       push{kind = 'array', value = table.move(arr.value, index + 1, index + count, 1, {})}
     else
-      error'typecheck'
+      ps_error('typecheck', arg1, arg2, arg3)
     end
   end,
   putinterval = function()
-    local from = pop()
-    local index = pop_int()
-    if type(from) ~= 'table' then error'typecheck' end
+    local from, arg2 = pop()
+    local index, arg1 = pop_int()
+    if type(from) ~= 'table' then ps_error('typecheck', arg1, arg2) end
     if from.kind == 'executable' then
       from = from.value
-      if type(from) ~= 'table' then error'typecheck' end
+      if type(from) ~= 'table' then ps_error('typecheck', arg1, arg2) end
     end
     if from.kind == 'string' then
       local to = pop_string()
@@ -1712,7 +1723,7 @@ systemdict = {kind = 'dict', value = {
       local to = pop_array()
       table.move(from.value, 1, #from.value, index + 1, to.value)
     else
-      error'typecheck'
+      ps_error('typecheck', arg1, arg2)
     end
   end,
 
@@ -1726,7 +1737,7 @@ systemdict = {kind = 'dict', value = {
   end,
   ['end'] = function()
     if #dictionary_stack <= 3 then
-      error'dictstackunderflow'
+      ps_error'dictstackunderflow'
     end
     dictionary_stack[#dictionary_stack] = nil
   end,
@@ -1736,12 +1747,12 @@ systemdict = {kind = 'dict', value = {
   bind = function()
     local d = pop()
     push(d)
-    if type(d) ~= 'table' then error'typecheck' end
+    if type(d) ~= 'table' then ps_error'typecheck' end
     if d.kind == 'executable' then
       d = d.value
-      if type(d) ~= 'table' then error'typecheck' end
+      if type(d) ~= 'table' then ps_error'typecheck' end
     end
-    if d.kind ~= 'array' then error'typecheck' end
+    if d.kind ~= 'array' then ps_error'typecheck' end
     bind(d.value)
   end,
   def = function()
@@ -1783,51 +1794,51 @@ systemdict = {kind = 'dict', value = {
   get = function()
     local key = pop()
     local obj = pop()
-    if type(obj) ~= 'table' then error'typecheck' end
+    if type(obj) ~= 'table' then ps_error'typecheck' end
     if obj.kind == 'executable' then
       obj = obj.value
-      if type(obj) ~= 'table' then error'typecheck' end
+      if type(obj) ~= 'table' then ps_error'typecheck' end
     end
     local val = obj.value
     if obj.kind == 'string' then
       push(key) key = pop_int()
-      if key < 0 or key >= #val then error'rangecheck' end
+      if key < 0 or key >= #val then ps_error'rangecheck' end
       push(string.byte(val, key+1))
     elseif obj.kind == 'array' then
       push(key) key = pop_int()
-      if key < 0 or key >= #val then error'rangecheck' end
+      if key < 0 or key >= #val then ps_error'rangecheck' end
       push(val[key+1])
     elseif obj.kind == 'dict' then
       push(key) key = pop_key()
       push(val[key])
     else
-      error'typecheck'
+      ps_error'typecheck'
     end
   end,
   put = function()
     local value = pop()
     local key = pop()
     local obj = pop()
-    if type(obj) ~= 'table' then error'typecheck' end
+    if type(obj) ~= 'table' then ps_error'typecheck' end
     if obj.kind == 'executable' then
       obj = obj.value
-      if type(obj) ~= 'table' then error'typecheck' end
+      if type(obj) ~= 'table' then ps_error'typecheck' end
     end
     local val = obj.value
     if obj.kind == 'string' then
       push(key) key = pop_int()
-      if key < 0 or key >= #val then error'rangecheck' end
+      if key < 0 or key >= #val then ps_error'rangecheck' end
       push(value) value = pop_int()
       obj.value = string.sub(val, 1, key) .. string.char(value) .. string.sub(val, key+2, #val)
     elseif obj.kind == 'array' then
       push(key) key = pop_int()
-      if key < 0 or key >= #val then error'rangecheck' end
+      if key < 0 or key >= #val then ps_error'rangecheck' end
       val[key+1] = value
     elseif obj.kind == 'dict' then
       push(key) key = pop_key()
       val[key] = value
     else
-      error'typecheck'
+      ps_error'typecheck'
     end
   end,
   undef = function()
@@ -1840,11 +1851,11 @@ systemdict = {kind = 'dict', value = {
     if type(obj) == 'string' then
       return push(#obj)
     elseif type(obj) ~= 'table' then
-      error'typecheck'
+      ps_error'typecheck'
     end
     if obj.kind == 'executable' then
       obj = obj.value
-      if type(obj) ~= 'table' then error'typecheck' end
+      if type(obj) ~= 'table' then ps_error'typecheck' end
     end
     local val = obj.value
     if obj.kind == 'string' then
@@ -1860,7 +1871,7 @@ systemdict = {kind = 'dict', value = {
       end
       push(length)
     else
-      error'typecheck'
+      ps_error'typecheck'
     end
   end,
 
@@ -2292,7 +2303,7 @@ systemdict = {kind = 'dict', value = {
       assert(data_src)
       if type(data_src) ~= 'table' then
         push(arg1)
-        error'typecheck'
+        ps_error'typecheck'
       end
       if data_src.kind == 'string' then
         data_src = data_src.value
@@ -2472,10 +2483,10 @@ systemdict = {kind = 'dict', value = {
   setmatrix = function()
     local m = pop()
     if type(m) ~= 'table' or m.kind ~= 'array' then
-      error'typecheck'
+      ps_error'typecheck'
     end
     local m = m.value
-    if #m ~= 6 then error'rangecheck' end
+    if #m ~= 6 then ps_error'rangecheck' end
     local old = graphics_stack[#graphics_stack].matrix
     local pt = graphics_stack[#graphics_stack].current_point
     local a, b, c, d, e, f = matrix_invert(old[1], old[2], old[3], old[4], old[5], old[6])
@@ -2579,7 +2590,7 @@ systemdict = {kind = 'dict', value = {
       blendmode = blendmode.value
     else
       push(blendmode)
-      error'typecheck'
+      ps_error'typecheck'
     end
     graphics_stack[#graphics_stack].blendmode = blendmode
     delayed_print(ExtGState['<</BM /' .. blendmode .. '>>'])
@@ -2840,10 +2851,10 @@ systemdict = {kind = 'dict', value = {
         fontname = fontname.value
       elseif type(fontname) ~= 'string' then
         pushs(fontkey, raw_fontdict)
-        error'typecheck'
+        ps_error'typecheck'
       end
       local fid = fonts.definers.read(fontname, 65782)
-      if not fid then error'invalidfont' end
+      if not fid then ps_error'invalidfont' end
       if not tonumber(fid) then
         local data = fid
         fid = font.define(data)
@@ -2897,7 +2908,7 @@ systemdict = {kind = 'dict', value = {
 
     if font.frozen(fid) == nil then
       push(fid)
-      error'invalidfont'
+      ps_error'invalidfont'
     end
     local fontsize_inv = 65782/pdf.getfontsize(fid)
     local fontname = tex.fontname(fid)
@@ -2915,7 +2926,7 @@ systemdict = {kind = 'dict', value = {
 
     fontname = font_aliases[fontname] or fontname
     local fid = fonts.definers.read(fontname, 65782)
-    if not fid then error'invalidfont' end
+    if not fid then ps_error'invalidfont' end
     if not tonumber(fid) then
       local data = fid
       fid = font.define(data)
@@ -2971,7 +2982,7 @@ systemdict = {kind = 'dict', value = {
     if not catdict then
       push(category)
       print('undefined resource category', category)
-      error'undefined'
+      ps_error'undefined'
     end
     local dict_height = #dictionary_stack + 1
     dictionary_stack[dict_height] = catdict
@@ -2987,7 +2998,7 @@ systemdict = {kind = 'dict', value = {
     if not catdict then
       push(category)
       print('undefined resource category', category)
-      error'undefined'
+      ps_error'undefined'
     end
     local dict_height = #dictionary_stack + 1
     dictionary_stack[dict_height] = catdict
@@ -3003,7 +3014,7 @@ systemdict = {kind = 'dict', value = {
     if not catdict then
       push(category)
       print('undefined resource category', category)
-      error'undefined'
+      ps_error'undefined'
     end
     local dict_height = #dictionary_stack + 1
     dictionary_stack[dict_height] = catdict
@@ -3019,7 +3030,7 @@ systemdict = {kind = 'dict', value = {
     if not catdict then
       push(category)
       print('undefined resource category', category)
-      error'undefined'
+      ps_error'undefined'
     end
     local dict_height = #dictionary_stack + 1
     dictionary_stack[dict_height] = catdict
@@ -3035,7 +3046,7 @@ systemdict = {kind = 'dict', value = {
     if not catdict then
       push(category)
       print('undefined resource category', category)
-      error'undefined'
+      ps_error'undefined'
     end
     local dict_height = #dictionary_stack + 1
     dictionary_stack[dict_height] = catdict
@@ -3138,7 +3149,7 @@ systemdict = {kind = 'dict', value = {
     end
   end,
   exec = function()
-    return execute_tok(pop())
+    return execute_tok((pop()))
   end,
   stopped = function()
     local proc = pop()
@@ -3191,19 +3202,19 @@ systemdict = {kind = 'dict', value = {
       if not filename then
         push(orig_filename)
         push(access)
-        error'undefinedfilename'
+        ps_error'undefinedfilename'
       end
     end
     if access.value == '' then
       push(orig_filename)
       push(access)
-      error'invalidfileaccess'
+      ps_error'invalidfileaccess'
     end
     local f = io.open(filename, access.value)
     if not f then
       push(orig_filename)
       push(access)
-      error'invalidfileaccess'
+      ps_error'invalidfileaccess'
     end
     push(f)
   end,
@@ -3243,7 +3254,7 @@ systemdict = {kind = 'dict', value = {
       if #data > #target.value then
         push(f)
         push(target)
-        error'rangecheck'
+        ps_error'rangecheck'
       end
       target = str_view(target, 1, #data)
       target.value = data
@@ -3262,7 +3273,7 @@ systemdict = {kind = 'dict', value = {
       if type(arg) == 'userdata' and arg.read then
         error'token applied to file arguments is no yet implemented'
       else
-        error'typecheck'
+        ps_error'typecheck'
       end
     end
     local str = arg.value
@@ -3272,7 +3283,7 @@ systemdict = {kind = 'dict', value = {
         push(false)
       else
         push(arg)
-        error'syntaxerror'
+        ps_error'syntaxerror'
       end
     else
       push(str_view(arg, after, #str - after + 1))
@@ -3585,7 +3596,7 @@ ResourceCategories.value.Generic = {kind = 'dict', value = {
       return
     end
     push(key)
-    error'undefinedresource'
+    ps_error'undefinedresource'
   end,
   -- ResourceStatus = function()
   --   local key = pop_key()
@@ -3597,7 +3608,7 @@ ResourceCategories.value.Generic = {kind = 'dict', value = {
   --     return
   --   end
   --   push(key)
-  --   error'undefinedresource'
+  --   ps_error'undefinedresource'
   -- end,
   -- ResourceForAll = function()
   --   local key = pop_key()
@@ -3609,7 +3620,7 @@ ResourceCategories.value.Generic = {kind = 'dict', value = {
   --     return
   --   end
   --   push(key)
-  --   error'undefinedresource'
+  --   ps_error'undefinedresource'
   -- end,
   ['.Instances'] = {kind = 'dict', value = {}},
 }}
@@ -3621,7 +3632,7 @@ local register_texbox do
     Category = {kind = 'name', value = '.TeXBox'},
     DefineResource = function()
       push{kind = 'name', value = '.TeXBox'}
-      error'undefined'
+      ps_error'undefined'
     end,
     UndefineResource = function()
       local key = pop_key()
@@ -3635,7 +3646,7 @@ local register_texbox do
         return
       end
       push(key)
-      error'undefinedresource'
+      ps_error'undefinedresource'
     end,
   }}
   local id = 0
@@ -3670,7 +3681,7 @@ ResourceCategories.value.Category = {kind = 'dict', value = {
       return
     end
     push(key)
-    error'undefinedresource'
+    ps_error'undefinedresource'
   end,
   -- ResourceStatus = function()
   --   local key = pop_key()
@@ -3682,7 +3693,7 @@ ResourceCategories.value.Category = {kind = 'dict', value = {
   --     return
   --   end
   --   push(key)
-  --   error'undefinedresource'
+  --   ps_error'undefinedresource'
   -- end,
   -- ResourceForAll = function()
   --   local key = pop_key()
@@ -3694,13 +3705,14 @@ ResourceCategories.value.Category = {kind = 'dict', value = {
   --     return
   --   end
   --   push(key)
-  --   error'undefinedresource'
+  --   ps_error'undefinedresource'
   -- end,
 }}
 
 function execute_tok(tok, suppress_proc)
   local ttok = type(tok)
   if ttok == 'string' then
+    print(tok, 'exec', #operand_stack)
     return execute_tok(lookup(tok))
   elseif ttok == 'function' then
     return tok()
@@ -3735,15 +3747,22 @@ function execute_ps(tokens)
   end
 end
 local any_object_or_end = any_object * l.Cp() + whitespace^-1 * -1 * l.Cc(nil) + l.Cp() * l.Cc(false)
-function execute_string(str)
+function execute_string(str, context)
   local pos = 1
   while true do
     local tok
     tok, pos = any_object_or_end:match(str, pos)
     if pos then
-      execute_tok(tok, true)
+      local success, err = pcall(execute_tok, tok, true)
+      if not success then
+        print(string.format('ERROR %q while executing %s in %q', err, tok, str))
+        if context then
+          print(context)
+        end
+        error(err)
+      end
     elseif pos == false then
-      error'syntaxerror'
+      ps_error'syntaxerror'
     else
       break
     end
@@ -3780,7 +3799,7 @@ lua.get_functions_table()[func] = function()
   end
 end
 
-local ps_tokens, ps_direct, ps_pos_x, ps_pos_y
+local ps_tokens, ps_direct, ps_context, ps_pos_x, ps_pos_y
 local fid = font.define{
   name = 'dummy virtual font for PS rendering',
   -- type = 'virtual',
@@ -3816,7 +3835,7 @@ local fid = font.define{
             systemdict.value.gsave()
             systemdict.value.translate()
           end
-          execute_string(tokens)
+          execute_string(tokens, ps_context)
           flush_delayed()
           if not direct then
             systemdict.value.grestore()
@@ -3836,6 +3855,7 @@ local modes = tex.getmodevalues()
 local func = luatexbase.new_luafunction'luaPST'
 token.set_lua('luaPST', func, 'protected')
 lua.get_functions_table()[func] = function()
+  local context = string.format('%s:%i', status.filename, status.linenumber)
   local direct = token.scan_keyword'direct'
   local tokens = token.scan_argument(true)
   local n = node.new('whatsit', 'late_lua')
@@ -3843,6 +3863,7 @@ lua.get_functions_table()[func] = function()
     assert(not ps_tokens)
     ps_tokens = tokens
     ps_direct = direct
+    ps_context = context
   end
   local nn = node.new('glyph')
   nn.subtype = 256
