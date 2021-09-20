@@ -2859,7 +2859,7 @@ systemdict = {kind = 'dict', value = {
       end
       fontdict.FID = fid
     else
-      texio.write_nl'definefont is not implemnted. Pushing dummy font.'
+      texio.write_nl'definefont is not implemented. Pushing dummy font.'
     end
     FontDirectory[fontkey] = raw_fontdict
     push(raw_fontdict)
