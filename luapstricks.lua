@@ -860,8 +860,8 @@ local function generic_show(str, ax, ay)
   local matrix = psfont.FontMatrix.value
   local fonttype = psfont.FontType
   if fonttype ~= 0x1CA and fonttype ~= 3 then
-    texio.write_nl'Font support is not implemented'
-    return true
+    texio.write_nl'luapstricks: Attempt to use unsupported font type.'
+    return nil, 'invalidfont'
   end
   local x0, y0 = current_point[1], current_point[2]
   update_matrix(
@@ -2774,8 +2774,8 @@ systemdict = {kind = 'dict', value = {
     local matrix = psfont.FontMatrix.value
     local fonttype = psfont.FontType
     if fonttype ~= 0x1CA and fonttype ~= 3 then
-      texio.write_nl'Font support is not implemented'
-      return
+      texio.write_nl'luapstricks: Attempt to use unsupported font type.'
+      ps_error('invalidfont')
     end
     local w = 0
     if fonttype == 0x1CA then
@@ -2858,8 +2858,9 @@ systemdict = {kind = 'dict', value = {
         fonts.definers.register(data, fid)
       end
       fontdict.FID = fid
+    elseif fontdict.FontType == 3 then
     else
-      texio.write_nl'definefont is not implemnted. Pushing dummy font.'
+      texio.write_nl'luapstricks: definefont has been called with a font type which is not supported by luapstricks. I will continue, but attempts to use this font will fail.'
     end
     FontDirectory[fontkey] = raw_fontdict
     push(raw_fontdict)
