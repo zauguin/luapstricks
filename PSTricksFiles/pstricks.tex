@@ -2131,7 +2131,9 @@
     } bind def 
 }}
 %
-\pstheader{pst-dots.pro}
+\ifPSTlualatex\else
+  \pstheader{PSTricksDotFont.pro}
+\fi
 
 \pstGSfontsfalse
 
