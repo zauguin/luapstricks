@@ -823,15 +823,20 @@ end
 
 local mark = {kind = 'mark'}
 local null = {kind = 'null'}
+local statusdict = {kind = 'dict', value = {}}
 local globaldict = {kind = 'dict', value = {}}
 local userdict = {kind = 'dict', value = {
   SDict = {kind = 'dict', value = {
     normalscale = {kind = 'executable', value = {kind = 'array', value = {}}},
   }},
+  TeXDict = {kind = 'dict', value = {
+    Resolution = function() push((pdf.getpkresolution())) end,
+  }},
   ['@beginspecial'] = {kind = 'executable', value = {kind = 'array', value = {}}},
   ['@setspecial'] = {kind = 'executable', value = {kind = 'array', value = {}}},
   ['@endspecial'] = {kind = 'executable', value = {kind = 'array', value = {}}},
 }}
+userdict.value.TeXDict.value.VResolution = userdict.value.TeXDict.value.Resolution
 local FontDirectory = {kind = 'dict', value = {}}
 local ResourceCategories = {kind = 'dict', value = {}}
 
@@ -3069,6 +3074,7 @@ systemdict = {kind = 'dict', value = {
     push(rand())
   end,
 
+  readonly = function() end, -- Concept not implemented
   type = function()
     local val = pop()
     local tval = type(val)
@@ -3294,6 +3300,7 @@ systemdict = {kind = 'dict', value = {
   ['true'] = true,
   ['false'] = false,
   systemdict = systemdict,
+  statusdict = statusdict,
   globaldict = globaldict,
   FontDirectory = FontDirectory,
 
@@ -3557,7 +3564,7 @@ systemdict = {kind = 'dict', value = {
   }}
 }}
 systemdict.value.systemdict = systemdict
-dictionary_stack = {systemdict, globaldict, userdict}
+dictionary_stack = {systemdict, globaldict, userdict, userdict.value.TeXDict}
 -- local execution_stack = {} -- Currently not implemented
 
 -- Quite some stuff is missing here since these aren't implemented yet. Anyway mostly useful for testing.
