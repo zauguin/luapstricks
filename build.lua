@@ -9,7 +9,7 @@ sourcefiles = {"luapstricks.lua", "pstricks.tex", "pstricks.pro"}
 testsuppdir = "PSTricksFiles"
 -- typesetfiles = {"luapstricks.tex"}
 
-tdsroot = "luatex"
+tdsroot = "lualatex"
 
 uploadconfig = {
   pkg = module,
