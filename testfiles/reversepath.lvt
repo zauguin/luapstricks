@@ -1,0 +1,32 @@
+\input regression-test
+% \documentclass{article}
+\directlua{require'luapstricks'}
+\START
+\showPS{
+  gsave
+  0 1 moveto
+  2 3 lineto
+  4 5 6 7 8 9 curveto
+  10 11 lineto
+  12 13 moveto
+  14 15 lineto
+  16 17 18 19 20 21 curveto
+  closepath
+  22 23 24 25 26 27 curveto
+  closepath
+  28 29 lineto
+  30 31 lineto
+  32 33 moveto
+  34 35 lineto
+  36 37 lineto
+  closepath
+  38 39 lineto
+  40 41 lineto
+  closepath
+  {/moveto}{/lineto}{/curveto}{/closepath} pathforall
+  /REVERSE
+  reversepath
+  {/moveto}{/lineto}{/curveto}{/closepath} pathforall
+  grestore
+}
+\END

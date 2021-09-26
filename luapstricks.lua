@@ -1186,6 +1186,73 @@ systemdict = {kind = 'dict', value = {
     end
   end,
 
+  reversepath = function()
+    local state = graphics_stack[#graphics_stack]
+    local path = state.current_path
+    if not path then return end
+    local newpath = lua.newtable(#path, 0)
+    local i = 1
+    local out_ptr = 1
+    -- Iterate over groups starting with "x y m". These can contain multiple subpaths separated with `h`.
+    while path[i+2] == 'm' do
+      local x0, y0 = path[i], path[i + 1]
+      local after = i + 3
+      while path[after] and path[after + 2] ~= 'm' do
+        after = after + 1
+      end
+      local j = after
+      out_ptr = out_ptr + 3 -- Leave space for the initial `x y m`
+      newpath[out_ptr - 1] = 'm'
+      local drop_closepath = true -- If this is true we do not end with a closepath and therefore have to remove the first one.
+      while true do
+        j = j - 1
+        local cmd = path[j]
+        if cmd == 'h' then
+          if j ~= after - 1 then
+            newpath[out_ptr - 3], newpath[out_ptr - 2] = x0, y0
+            if not drop_closepath then
+              newpath[out_ptr] = 'h'
+              out_ptr = out_ptr + 1
+            end
+            out_ptr = out_ptr + 3 -- Leave space for the initial `x y m`
+            newpath[out_ptr - 1] = 'm'
+          end
+          drop_closepath = false
+        elseif cmd == 'm' then
+          newpath[out_ptr - 3], newpath[out_ptr - 2] = path[j - 2], path[j - 1]
+          break
+        else
+          if cmd == 'c' then
+            newpath[out_ptr - 3], newpath[out_ptr - 2] = path[j - 2], path[j - 1]
+            newpath[out_ptr], newpath[out_ptr + 1], newpath[out_ptr + 2], newpath[out_ptr + 3] = path[j - 4], path[j - 3], path[j - 6], path[j - 5]
+            out_ptr = out_ptr + 6
+            newpath[out_ptr] = 'c'
+            j = j - 6
+          elseif cmd == 'l' then
+            newpath[out_ptr - 3], newpath[out_ptr - 2] = path[j - 2], path[j - 1]
+            out_ptr = out_ptr + 2
+            j = j - 2
+          else
+            assert(false)
+          end
+          newpath[out_ptr] = cmd
+          out_ptr = out_ptr + 1
+        end
+      end
+      if not drop_closepath then
+        newpath[out_ptr] = 'h'
+        out_ptr = out_ptr + 1
+      end
+      i = after
+    end
+    state.current_path = newpath
+    local last_cmd = #newpath
+    if newpath[last_cmd] == 'h' then
+      last_cmd = last_cmd - 1
+    end
+    state.current_point[1], state.current_point[2] = newpath[last_cmd - 2], newpath[last_cmd - 1]
+  end,
+
   pathforall = function()
     local close = pop_proc()
     local curve = pop_proc()
@@ -2034,6 +2101,7 @@ systemdict = {kind = 'dict', value = {
     local current_path = state.current_path
     local current_point = state.current_point
     if not current_path then return end
+    if current_path[#current_path] == 'h' then return end
     local x, y
     for i=#current_path, 1, -1 do
       if current_path[i] == 'm' then
@@ -3791,17 +3859,10 @@ local func = luatexbase.new_luafunction'showPS'
 token.set_lua('showPS', func, 'protected')
 lua.get_functions_table()[func] = function()
   local command = token.scan_argument(true)
+  -- This will break if any graphics commands are used.
   local tokens = parse_ps(command)
   execute_ps(tokens)
-  for i = 1, #operand_stack do
-    local op = operand_stack[i]
-    operand_stack[i] = nil
-    if type(op) == 'table' then
-      print(op.kind, op.value)
-    else
-      print(op)
-    end
-  end
+  systemdict.value.stack()
 end
 
 local ps_tokens, ps_direct, ps_context, ps_pos_x, ps_pos_y
