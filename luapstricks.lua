@@ -1185,7 +1185,6 @@ systemdict = {kind = 'dict', value = {
       error(err, 0)
     end
   end,
-
   reversepath = function()
     local state = graphics_stack[#graphics_stack]
     local path = state.current_path
