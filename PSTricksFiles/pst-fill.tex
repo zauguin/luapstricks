@@ -212,14 +212,18 @@
 %% DG addition begin - Apr. 8, 1997 and Dec. 1997 - Patch 2
 \ifx\PstTiling\@undefined
 \pst@def{AutoFillCycle}<%
+  fill@Dict begin
   /c ED
   /n 0 def
   /s {
     /x x w c div n mul add def
     /n n c abs 1 sub lt { n 1 add } { 0 } ifelse def
-  } def>
+  } def
+  end
+>
 
 \pst@def{BoxFill}<%
+  fill@Dict begin
   gsave
     gsave \tx@STV CM grestore dtransform CM idtransform
     abs /h ED abs /w ED
@@ -239,32 +243,32 @@
       s
       x2 {
         save CP x y1
-%% patch 4   hv --------------
         \ifx\VTeXversion\undefined
         \else
-%%============ mv: 09-10-01 ??? this is likely to be a right change
         neg
-%%============
         \fi
-%% end patch 4
-T moveto Box restore
+        T moveto Box restore
         /x x w add def
       } repeat
       /y1 y1 h add def
     } repeat
     % Next line not useful... To see that, suppress clipping (DG)
     CP x y1 T moveto Box
+    end
   currentpoint currentfont grestore setfont moveto>
 \else
-%% DG modification begin - Apr. 8, 1997 and Nov. / Dec. 1997 - Patch 2
-\pst@def{AutoFillCycleX}<%
-  /cX ED
-  /nX 0 def
-  /CycleX {
-    /x x w cX div nX mul add def
-    /nX nX cX abs 1 sub lt { nX 1 add } { 0 } ifelse def
-  } def>
+  \pst@def{AutoFillCycleX}<
+  fill@Dict begin
+    /cX ED
+    /nX 0 def
+    /CycleX {
+      /x x w cX div nX mul add def
+      /nX nX cX abs 1 sub lt { nX 1 add } { 0 } ifelse def
+    } def 
+    end
+>
 \pst@def{AutoFillCycleY}<%
+  fill@Dict begin
   /cY ED
   /mY 0 def
   /nY 0 def
@@ -272,18 +276,21 @@ T moveto Box restore
     /y1 y1 h cY div mY mul sub def
     nY cY abs 1 sub lt { /nY nY 1 add def /mY 1 def }
                        { /nY 0 def        /mY cY abs 1 sub neg def } ifelse
-  } def>
+  } def
+  end
+  >
+
 
 \pst@def{BoxFill}<
-%  20 dict begin
   \ifPSTlualatex
+    fill@Dict begin
     /save /gsave load def
     /restore /grestore load def
   \fi
   gsave
     gsave \tx@STV CM grestore dtransform CM idtransform
     abs /h ED abs /w ED
-    pathbbox
+    pathbbox 
     h div round 2 add cvi /y2 ED
     w div round 2 add cvi /x2 ED
     h div round 2 sub cvi /y1 ED
@@ -309,17 +316,13 @@ T moveto Box restore
     /CoefLoopY CoefLoopY \psk@fillloopaddy\space add def
     /x2 x2 x1 sub 4 sub CoefLoopX 2 mul add def
     /y2 y2 y1 sub 4 sub CoefLoopY 2 mul add def
-%% We must fix the origin of tiling, as it must not vary according other stuff
-%% in the page!
+%% We must fix the origin of tiling, as it must not vary according other stuff in the page!
     w x1 CoefLoopX add CoefMoveX add mul
       h y1 y2 add 1 sub CoefLoopY sub CoefMoveY sub mul moveto
     CP
     y1 h mul sub neg /y1 ED
     x1 w mul sub neg /x1 ED
-%%  hv 2004-06-22   to prevent clash with pst-gr3d
-%%    \psk@PstDebug 0 eq {clip} if
     \Pst@Debug 0 eq {clip} if
-%% end hv
     \psk@fillmovex\space \psk@fillmovey
     gsave \tx@STV CM grestore dtransform CM idtransform
     /hmove ED /wmove ED
@@ -333,15 +336,12 @@ T moveto Box restore
        x2 {
           /column column 1 add def
           CycleY
-          save CP x y1
-%% patch 4   hv --------------
+          save CP x y1 
           \ifx\VTeXversion\undefined
           \else
-%%============ mv: 09-10-01 ??? this is likely to be a right change
           neg
-%%============
           \fi
-  T moveto Box restore
+          T moveto Box restore
           /x x w add def
           0 hmove translate
           } repeat
@@ -349,7 +349,7 @@ T moveto Box restore
        /y1 y1 h add def
        wmove 0 translate
        } repeat
-%  end
+  \ifPSTlualatex end \fi
   currentpoint currentfont grestore setfont moveto>
 \fi
 
@@ -360,8 +360,8 @@ T moveto Box restore
     \pst@stroke
     \pst@FlushCode
     \pst@Verb{\psk@boxfillangle\space \tx@RotBegin}%
-    % \pstVerb{[matrix currentmatrix aload stack cleartomark \pst@dict /Box [ \luaPSTbox\hbox{%
-    \pstVerb{\pst@dict /Box [ /gsave cvx /currentpoint cvx /translate cvx \luaPSTbox\hbox{%
+    \pstVerb{  
+         \pst@dict /Box [ /gsave cvx /currentpoint cvx /translate cvx \luaPSTbox\hbox{%
         \ifx\PstTiling\@undefined
         \else
           \ifx\pst@tempa\@undefined % Undefined for instance for \pscharpath
@@ -369,13 +369,11 @@ T moveto Box restore
             \def\pst@temph{0}%
             \ifx\pst@tempa\pst@temph
             \else
-              % \pstVerb{/TR {pop pop currentpoint translate \pst@tempa\space translate } def}%
             \fi
           \fi\fi
         \fi
         \hbox to \z@{\vbox to\z@{\vss\copy\pst@fillbox\vskip-\dp\pst@fillbox}\hss}%
       } /.TeXBox findresource /grestore cvx ] cvx def
-      % } /.TeXBox findresource ] cvx def
       \ifx\PstTiling\@undefined
         \ifnum\psk@fillcycle=\z@
           /s {} def
@@ -400,7 +398,8 @@ T moveto Box restore
       \pst@number{\dp\pst@fillbox}%
       \psk@fillsepy\space add add
       \tx@BoxFill
-    end}%
+    end 
+  }%
     \pst@Verb{\tx@RotEnd}%
   \endgroup}
 \else%%%%%%%%%%%%%%% latex->dvips definition
