@@ -327,10 +327,6 @@
     gsave \tx@STV CM grestore dtransform CM idtransform
     /hmove ED /wmove ED
     /row 0 def
-  \ifPSTlualatex
-    /x1 x1 64 add  def
-    /y1 y1 268 add  def
-  \fi
    y2 {
        /row row 1 add def
        /column 0 def
@@ -362,7 +358,7 @@
     \pst@FlushCode
     \pst@Verb{\psk@boxfillangle\space \tx@RotBegin}%
     \pstVerb{  
-         \pst@dict /Box [ /gsave cvx /currentpoint cvx /translate cvx \luaPSTbox\hbox{%
+         \pst@dict /Box [ /gsave cvx currentpoint /translate cvx \luaPSTbox\hbox{%
         \ifx\PstTiling\@undefined
         \else
           \ifx\pst@tempa\@undefined % Undefined for instance for \pscharpath
