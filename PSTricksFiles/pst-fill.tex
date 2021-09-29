@@ -319,7 +319,7 @@
 %% We must fix the origin of tiling, as it must not vary according other stuff in the page!
     w x1 CoefLoopX add CoefMoveX add mul
       h y1 y2 add 1 sub CoefLoopY sub CoefMoveY sub mul moveto
-    CP
+    CP 
     y1 h mul sub neg /y1 ED
     x1 w mul sub neg /x1 ED
     \Pst@Debug 0 eq {clip} if
@@ -327,6 +327,10 @@
     gsave \tx@STV CM grestore dtransform CM idtransform
     /hmove ED /wmove ED
     /row 0 def
+  \ifPSTlualatex
+    /x1 x1 64 add  def
+    /y1 y1 268 add  def
+  \fi
    y2 {
        /row row 1 add def
        /column 0 def
@@ -337,10 +341,7 @@
           /column column 1 add def
           CycleY
           save CP x y1 
-          \ifx\VTeXversion\undefined
-          \else
-          neg
-          \fi
+          \ifPSTlualatex neg \fi
           T moveto Box restore
           /x x w add def
           0 hmove translate
