@@ -55,12 +55,10 @@
 \psset{boxfillsize={(-15cm,-15cm)(15cm,15cm)}}
 \define@key[psset]{pst-fill}{boxfillcolor}{\pst@getcolor{#1}\psboxfillcolor}
 \psset{boxfillcolor=black}% hv
-\define@key[psset]{pst-fill}{boxfillangle}{\pst@getangle{#1}\psk@boxfillangle}
-\psset{boxfillangle=0}
-\define@key[psset]{pst-fill}{fillsepx}{%
-  \pst@getlength{#1}\psk@fillsepx}
-\define@key[psset]{pst-fill}{fillsepy}{%
-  \pst@getlength{#1}\psk@fillsepy}
+\define@key[psset]{pst-fill}{boxfillangle}{\def\psk@boxfillangle{#1 }}% No check
+\ifPSTlualatex \psset{boxfillangle=0.001}\else\psset{boxfillangle=0}\fi
+\define@key[psset]{pst-fill}{fillsepx}{\pst@getlength{#1}\psk@fillsepx}
+\define@key[psset]{pst-fill}{fillsepy}{\pst@getlength{#1}\psk@fillsepy}
 \define@key[psset]{pst-fill}{fillsep}{%
   \pst@getlength{#1}\psk@fillsepx%
   \let\psk@fillsepy\psk@fillsepx}
@@ -80,7 +78,7 @@
   \define@key[psset]{pst-fill}{fillcycley}{\pst@getint{#1}\psk@fillcycley}
   \define@key[psset]{pst-fill}{fillcycle}{%
     \pst@getint{#1}\psk@fillcyclex\let\psk@fillcycley\psk@fillcyclex}
-  \psset{fillcycle=0}
+  \psset{fillcycle=2}
   \define@key[psset]{pst-fill}{fillmovex}{\pst@getlength{#1}\psk@fillmovex}
   \define@key[psset]{pst-fill}{fillmovey}{\pst@getlength{#1}\psk@fillmovey}
   \define@key[psset]{pst-fill}{fillmove}{%
@@ -94,6 +92,32 @@
 %%    \define@key[psset]{pst-fill}{PstDebug}{\pst@getint{#1}\psk@PstDebug}
     \psset{PstDebug=0}
 \fi
+
+\def\pstFillSetDefaults{%
+  \ifPSTlualatex
+  \psset{%
+      boxfillsize={(-15cm,-15cm)(15cm,15cm)},
+      boxfillcolor=black,
+      boxfillangle=0.001,
+      fillcycle=0,
+      fillsep=0,fillsize=auto,
+      fillmove=0pt,
+      fillloopadd=0,
+      PstDebug=0}%
+  \else
+  \psset{%
+      boxfillsize={(-15cm,-15cm)(15cm,15cm)},
+      boxfillcolor=black,
+      boxfillangle=0,
+      fillcycle=0,
+      fillsep=0,fillsize=auto,
+      fillmove=0pt,
+      fillloopadd=0,
+      PstDebug=0}%
+  \fi
+}
+
+\def\txfillDict{ fill@Dict begin }
 
 \newbox\pst@fillbox
 \def\psboxfill{\pst@killglue\pst@makebox\psboxfill@i}
@@ -127,7 +151,8 @@
     \pst@code
     mtrxc setmatrix
     moveto
-    0 setgray}%
+    0 setgray
+  }%
   \gdef\pst@code{}}
 
 \def\pst@AddFillBox#1 #2 #3 #4 {%
@@ -157,13 +182,11 @@
       \pst@@tempA
       \hss}%
     \pst@cntd\pst@cntb
-%% DG modification begin - Dec. 11, 1997 - Patch 2
     \ifx\PstTiling\@undefined
       \ifnum\psk@fillcycle=\z@\pst@ManualFillCycle\fi
     \else
       \ifnum\psk@fillcyclex=\z@\pst@ManualFillCycle\fi
     \fi
-%% DG modification end
     \global\setbox\pst@boxg=\vbox to\z@{%
       \offinterlineskip
       \vss
@@ -194,25 +217,29 @@
 
 \ifx\PstTiling\@undefined
   \pst@def{AutoFillCycle}<%
-    fill@Dict begin
     /c ED
     /n 0 def
     /s {
       /x x w c div n mul add def
       /n n c abs 1 sub lt { n 1 add } { 0 } ifelse def
     } def
-    end
   >
 \pst@def{BoxFill}<%
-  fill@Dict begin
   gsave
     gsave \tx@STV CM grestore dtransform CM idtransform
     abs /h ED abs /w ED
     pathbbox
+  \ifPSTlualatex
+    h div 2 add cvi /y2 ED
+    w div 2 add cvi /x2 ED
+    h div 2 sub cvi /y1 ED
+    w div 2 sub cvi /x1 ED
+  \else
     h div round 2 add cvi /y2 ED
     w div round 2 add cvi /x2 ED
     h div round 2 sub cvi /y1 ED
     w div round 2 sub cvi /x1 ED
+  \fi
     /y2 y2 y1 sub def
     /x2 x2 x1 sub def
     CP
@@ -235,22 +262,18 @@
     } repeat
     % Next line not useful... To see that, suppress clipping (DG)
     CP x y1 T moveto Box
-    end
   currentpoint currentfont grestore setfont moveto
   >
 \else%   Tiling is defined
   \pst@def{AutoFillCycleX}<
-    fill@Dict begin
     /cX ED
     /nX 0 def
     /CycleX {
       /x x w cX div nX mul add def
       /nX nX cX abs 1 sub lt { nX 1 add } { 0 } ifelse def
     } def 
-    end
   >
   \pst@def{AutoFillCycleY}<%
-    fill@Dict begin
     /cY ED
     /mY 0 def
     /nY 0 def
@@ -259,22 +282,28 @@
       nY cY abs 1 sub lt { /nY nY 1 add def /mY 1 def }
                        { /nY 0 def        /mY cY abs 1 sub neg def } ifelse
     } def
-    end
   >
   \pst@def{BoxFill}<
     \ifPSTlualatex
-      fill@Dict begin
       /save /gsave load def
       /restore /grestore load def
+      fill@Dict begin
     \fi
     gsave
     gsave \tx@STV CM grestore dtransform CM idtransform
     abs /h ED abs /w ED
     pathbbox 
+  \ifPSTlualatex
+    h div 2 add round /y2 ED
+    w div 2 add round /x2 ED
+    h div 1.9 sub round /y1 ED
+    w div 1.9 sub round /x1 ED
+  \else
     h div round 2 add cvi /y2 ED
     w div round 2 add cvi /x2 ED
     h div round 2 sub cvi /y1 ED
     w div round 2 sub cvi /x1 ED
+  \fi
     /CoefLoopX 0 def
     /CoefLoopY 0 def
     /CoefMoveX 0 def
@@ -342,7 +371,7 @@
     \begingroup
     \pst@stroke
     \pst@FlushCode
-    \pst@Verb{\psk@boxfillangle\space \tx@RotBegin}%
+    \pst@Verb{ \psk@boxfillangle\space \tx@RotBegin}%
     \pstVerb{  
          \pst@dict /Box [ /gsave cvx currentpoint /translate cvx \luaPSTbox\hbox{%
         \ifx\PstTiling\@undefined
@@ -381,9 +410,9 @@
       \pst@number{\dp\pst@fillbox}%
       \psk@fillsepy\space add add
       \tx@BoxFill
-    end 
+    end
   }%
-  \pst@Verb{\tx@RotEnd}%
+  \pst@Verb{\tx@RotEnd }%
   \endgroup}
 \else%%%%%%%%%%%%%%% latex->dvips definition
   \def\pst@AutoBoxFill{%
