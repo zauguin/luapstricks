@@ -3892,7 +3892,10 @@ local fid = font.define{
           local tokens, direct = assert(ps_tokens), ps_direct
           ps_tokens = nil
           local x, y = pdf.getpos()
+          local TeXDict = userdict.value.TeXDict.value
+          local saved_ocount = TeXDict.ocount
           local height = #operand_stack
+          TeXDict.ocount = height
           operand_stack[height + 1], operand_stack[height + 2] = ps_pos_x/65781.76, ps_pos_y/65781.76
           ps_pos_x, ps_pos_y = nil
           if direct then
@@ -3914,11 +3917,13 @@ local fid = font.define{
           flush_delayed()
           if not direct then
             systemdict.value.grestore()
+            height = TeXDict.ocount or height
             local new_height = #operand_stack
             assert(new_height >= height)
             for k = height + 1, new_height do
               operand_stack[k] = nil
             end
+            TeXDict.ocount = saved_ocount
           end
         end}
       }
