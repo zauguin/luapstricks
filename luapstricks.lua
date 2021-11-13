@@ -3898,9 +3898,11 @@ local fid = font.define{
           TeXDict.ocount = height
           operand_stack[height + 1], operand_stack[height + 2] = ps_pos_x/65781.76, ps_pos_y/65781.76
           ps_pos_x, ps_pos_y = nil
+          local graphics_height
           if direct then
             systemdict.value.moveto()
           else
+            graphics_height = #graphics_stack
             systemdict.value.gsave()
             systemdict.value.translate()
           end
@@ -3917,6 +3919,16 @@ local fid = font.define{
           flush_delayed()
           if not direct then
             systemdict.value.grestore()
+            if graphics_height ~= #graphics_stack then
+              if graphics_height < #graphics_stack then
+                texio.write_nl"luapstricks: PS block contains unbalanced gsave. grestore will be executed to compensate."
+                repeat
+                  systemdict.value.grestore()
+                until graphics_height == #graphics_stack
+              else
+                texio.write_nl"luapstricks: PS block contains unbalanced grestore."
+              end
+            end
             height = TeXDict.ocount or height
             local new_height = #operand_stack
             assert(new_height >= height)
