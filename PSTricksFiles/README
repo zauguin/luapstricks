@@ -1,3 +1,5 @@
+----- pst-geometrictools.tex
+fixes for use with lualatex 
 
 ----- psvectorian.pro
 suggested change   - Limit clipping using groups instead of resetting clip path

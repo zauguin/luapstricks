@@ -1,0 +1,1236 @@
+%% This is file `pst-geometrictools.tex',
+%%
+%% Thomas Söll
+%% 1.2 fixes by Herbert Voß
+%%
+%% This program can redistributed and/or modified under %%
+%% the terms of the LaTeX Project Public License        %%
+%% Distributed from CTAN archives in directory          %%
+%% macros/latex/base/lppl.txt; either version 1.3c of   %%
+%% the License, or (at your option) any later version.  %%
+%%
+%% DESCRIPTION:
+%%   `pst-geometrictools' is a PSTricks package to draw a protractor, a ruler, a compass and pencils 
+%%
+%%
+\csname PSTgeometrictoolsLoaded\endcsname
+\let\PSTgeometrictoolsLoaded\endinput
+% Requires PSTricks, pst-xkey, pst-node packages
+\ifx\PSTricksLoaded\endinput\else\input pstricks.tex\fi
+\ifx\PSTXKeyLoaded\endinput\else\input pst-xkey.tex\fi
+\ifx\PSTnodeLoaded\endinput\else\input pst-node.tex\fi
+\def\fileversion{1.2}
+\def\filedate{2021/11/13}
+\message{`PST' v\fileversion, \filedate}
+
+\edef\PstAtCode{\the\catcode`\@} \catcode`\@=11\relax
+\pst@addfams{pst-geometrictools}
+
+\define@boolkey[psset]{pst-geometrictools}[Pst@]{Ghost}[true]{}
+\define@key[psset]{pst-geometrictools}{ProLineCol}[cyan]{\pst@getcolor{#1}\ProLineCol}
+\define@key[psset]{pst-geometrictools}{ProFillCol}[gray!60]{\pst@getcolor{#1}\ProFillCol}
+\define@key[psset]{pst-geometrictools}{ProScale}[1]{\def\pst@ProScale{#1 }}%
+\define@key[psset]{pst-geometrictools}{OwnerTxt}[Euklid]{\def\pst@OwnerTxt{#1}}%
+\define@key[psset]{pst-geometrictools}{MadeTxt}[made in NES]{\def\pst@MadeTxt{#1}}%
+\define@key[psset]{pst-geometrictools}{PSfontO}[Symbol]{\def\pst@PSfontO{/#1 }}
+\define@key[psset]{pst-geometrictools}{fontsizeO}[10]{\def\pst@fontsizeO{#1 }}
+\define@key[psset]{pst-geometrictools}{PSfontM}[NimbusRomNo9L-Regu]{\def\pst@PSfontM{/#1 }}
+\define@key[psset]{pst-geometrictools}{fontsizeM}[6]{\def\pst@fontsizeM{#1 }}
+\define@key[psset]{pst-geometrictools}{country}[Germany]{\def\pst@country{#1}}
+\psset[pst-geometrictools]{ProScale=1,OwnerTxt={Euklid},MadeTxt={made in NES},
+  country=Germany,PSfontO=StandardSymL,PSfontM=NimbusRomNo9L-Regu,fontsizeO=10,fontsizeM=6,
+  ProFillCol=gray!60,ProLineCol=cyan,Ghost=false}
+
+
+\def\psProtractor{\def\pst@par{}\pst@object{psProtractor}}
+\def\psProtractor@i#1(#2){\@ifnextchar(%
+{\psProtractor@ii{#1}(#2)}%
+{\psProtractor@ii{#1}(#2)(#2)}}%
+\def\psProtractor@ii#1(#2)(#3){%-------------------------------    #1 Winkel,  #2 Ursprung P,  zweiter Punkt Q für Winkel
+\begin@SpecialObj
+\pst@killglue
+\begingroup%
+\pnode(#2){@PGD}%
+\pnode(#3){@QGD}%
+\use@par%
+\pst@getcoor{@QGD}\pst@tempB % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempB
+\pst@getcoor{@PGD}\pst@tempA % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempA
+\addto@pscode{%
+/sysfill {systemdict /fill get exec} def
+/Country (\pst@country) def
+    /cm {28.45274 mul} def %  ----------------------------------------  Definiere cm als Längeneinheit mit der multipliziert wird
+    \pst@tempA \tx@UserCoor /@y1 ED /@x1 ED % ----------  Definiere die Koordinaten des Ursprungs (zur Winkelberechnung benötigt)
+    \pst@tempB \tx@UserCoor /@y2 ED /@x2 ED % ----------  Definiere die Koordinaten des zweiten Punktes (zur Winkelberechnung benötigt)
+   @y1 @y2 sub @x1 @x2 sub Atan neg /@delta ED %------------   Winkelberechnung
+    \pst@tempA \pst@coor neg T % ------------------------------------   Tranformiere den Koordinatenursprung in P
+    @delta #1 add 180 add rotate % ------------------------------     Drehe das gesamte Geodreieck
+   \pst@ProScale dup scale % --------    Skaliere das ganze Geodreieck
+%-------------------------------------------------------------------------------------------------------------
+\ifPst@Ghost\else
+gsave
+%-------------------------------------------------------------------------------------------------------------
+%-------------- Äußere Begrenzung des Geodreiecks -----------------------------------------------
+gsave
+     newpath
+       -8 cm 0 moveto currentpoint 3 0 360 arc gsave 1 0 0 setrgbcolor fill grestore 
+       16 cm 0 rlineto
+       -8 cm -8 cm rlineto
+       closepath
+     gsave
+       0.7 setlinewidth
+       0.1 setgray
+       stroke
+    grestore
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%-------------- Gefüllter innerer Teil des Geodreiecks -----------------------------------------------
+gsave
+    newpath
+        -7.5 cm 0.5 22.5 tan mul cm moveto
+       15 cm 0 rlineto
+       -7.5 cm 7.5 cm rlineto
+    closepath
+    gsave
+         \pst@usecolor\ProFillCol
+%       [ /ca .1 /SetTransparency  pdfmark %    set  transparency
+%       0.1 .setopacityalpha sysfill
+        \tx@setTransparency fill 
+    grestore
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%-------------- Millimetereinteilung auf der Grundseite -------------------------------------------
+ /mmBlinie { newpath
+                   -7 cm 0 cm moveto
+                    0 cm 0.17 cm rlineto
+%                   closepath
+                     gsave
+                     0.5 setlinewidth
+                     0 setgray
+                     stroke
+                     grestore
+                      0.1 cm 0 cm translate
+                    } def
+gsave
+140 {mmBlinie} repeat
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%-------------- 0,5- cm-Einteilung auf der Grundseite ----------------------------------------------
+   /cmBlinie { newpath
+                   -7 cm 0 cm moveto
+                    0 cm 0.27 cm rlineto
+%                     closepath
+                     gsave
+                     0.55 setlinewidth
+                     0 setgray
+                     stroke
+                     grestore
+                      0.5 cm 0 cm translate
+                    } def
+gsave
+   29 {cmBlinie} repeat
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%-------------- mm-Einteilung von der Grundseite nach oben ------------------------------------
+/mmlinie { newpath
+                   -2.3 cm 0.3 cm moveto
+                    0.2 cm 0 rlineto
+                    2.2 cm 0.3 cm moveto
+                    0.2 cm 0 rlineto
+%                    closepath
+                     gsave
+                     0.5 setlinewidth
+                     0 setgray
+                     stroke
+                     grestore
+                      0 cm 0.1 cm translate
+                    } def
+gsave
+33 {mmlinie} repeat
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%-------------- 0,5 cm-Einteilung von der Grundseite nach oben --------------------------------
+/cmlinie { newpath
+                   -4.5 cm 0.5 cm moveto
+                    2 cm 0 rlineto
+                    0.75 cm 0 rmoveto
+                    1.5 cm 0 rlineto
+                    0.5 cm 0 rmoveto
+                    1.5 cm 0 rlineto
+                    0.75 cm 0 rmoveto
+                    2 cm 0 rlineto
+%                 closepath
+                     gsave
+                     0.6 setlinewidth
+                     0 setgray
+                     stroke
+                     grestore
+                      0 cm 0.5 cm translate
+                   } def
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- Clippen entlang eines Kreises  der 0,5 cm-Einteilung von der Grundseite nach oben ------------------------------------
+/kreisring { newpath
+                      0 0 translate
+                      0 0 4.2 cm 0 180 arc
+                     closepath
+                    } def
+               gsave
+                        kreisring clip
+                        7 {cmlinie} repeat
+              grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- farbiger und transparenter Halb-Ring -----------------------------------------------------------------------------
+   gsave
+                 newpath
+                      0 0 translate
+                      0 0 5.1 cm 6 174 arc
+                      0 0 4.8 cm 174 6 arcn
+                 closepath
+                   gsave
+                    \pst@usecolor\ProLineCol
+%                      [ /ca .4 /SetTransparency  pdfmark %    set  transparency
+%                       0.4 .setopacityalpha
+%                       sysfill
+        \tx@setTransparency fill 
+                 grestore
+   grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- 1-Grad-Winkeleinteilung an der linken Kathete -----------------------------------------------------------------
+ gsave
+   91 1 179 { /Wk exch def % ---------------------------------------------------- Schleifenvariable festlegen, die von 91° bis 179° geht
+                       {8 Wk sin Wk cos div 1 sub div} /xWS1 exch def %---------- xWS1=8/(tan(alpha)-1) --> SP der Geraden linke Kathete mit Ursprungsgeraden im Winkel alpha
+                       {7.8 Wk sin Wk cos div 1 sub div} /xWS2 exch def % ------- xWS2=7,8/(tan(alpha)-1) --> SP einer Parallelen zur Geraden linke Kathete mit Ursprungsgeraden im Winkel alpha
+                        newpath
+                        xWS1 cm xWS1 8 add cm moveto % --------------------------- zu xWS1 gehöriger y-Wert ist xWS1 + 8
+                        xWS2 cm xWS2 7.8 add cm % ----------------------------------- zu xWS2 gehöriger y-Wert ist xWS1 + 7,8
+                       lineto
+%                      closepath
+                       0.5 setlinewidth
+                       0 setgray
+                       stroke
+                   } for
+  grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- 5-Grad-Winkeleinteilung an der linken Kathete -----------------------------------------------------------------
+  gsave
+     95 5 175 { /Wk exch def
+                        {8 Wk sin Wk cos div 1 sub div} /xWS1 exch def
+                        {7.6 Wk sin Wk cos div 1 sub div} /xWS2 exch def
+                        newpath
+                        xWS1 cm xWS1 8 add cm moveto
+                        xWS2 cm xWS2 7.6 add cm
+                        lineto
+%                       closepath
+                        0.5 setlinewidth
+                        0 setgray
+                        stroke
+                      } for
+  grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- 10-Grad-Winkeleinteilung an der linken Kathete -----------------------------------------------------------------
+  gsave
+    100 10 170 { /Wk exch def
+                          {8 Wk sin Wk cos div 1 sub div} /xWS1 exch def
+                          {5.1 Wk cos mul  Wk cos div 1 sub div} /xWS2 exch def
+                          newpath
+                          xWS1 cm xWS1 8 add cm moveto
+                         5.1 Wk cos mul cm 5.1 Wk sin mul cm
+                         lineto
+%                       closepath
+                         0.5 setlinewidth
+                         0 setgray
+                        stroke
+                     } for
+  grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- 1-Grad-Winkeleinteilung an der rechten Kathete ---------------------------------------------------------------
+  gsave
+     1 1 89 { /Wk exch def
+                   {8 Wk sin Wk cos div 1 add div} /xWS1 exch def
+                   {7.8 Wk sin Wk cos div 1 add div} /xWS2 exch def
+                   newpath
+                   xWS1 cm xWS1 neg 8 add cm moveto
+                   xWS2 cm xWS2 neg 7.8 add cm
+                  lineto
+%                  closepath
+                  0.5 setlinewidth
+                  0 setgray
+                  stroke
+               } for
+  grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- 5-Grad-Winkeleinteilung an der rechten Kathete ---------------------------------------------------------------
+  gsave
+      5 5 85 { /Wk exch def
+                    {8 Wk sin Wk cos div 1 add div} /xWS1 exch def
+                    {7.6 Wk sin Wk cos div 1 add div} /xWS2 exch def
+                    newpath
+                    xWS1 cm xWS1 neg 8 add cm moveto
+                    xWS2 cm xWS2 neg 7.6 add cm
+                   lineto
+%                   closepath
+                   0.5 setlinewidth
+                   0 setgray
+                   stroke
+                } for
+  grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- 10-Grad-Winkeleinteilung an der rechten Kathete --------------------------------------------------------------
+  gsave
+      10 10 80 { /Wk exch def
+                        {8 Wk sin Wk cos div 1 add div} /xWS1 exch def
+                        {5.1 Wk cos mul  Wk cos div 1 add div} /xWS2 exch def
+                        newpath
+                        xWS1 cm xWS1 neg 8 add cm moveto
+                        5.1 Wk cos mul cm 5.1 Wk sin mul cm
+                        lineto
+%                        closepath
+                        0.5 setlinewidth
+                        0 setgray
+                        stroke
+                   } for
+  grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- 1-Grad-Winkeleinteilung auf Halbkreis ------------ ---------------------------------------------------------------
+  gsave
+          5 1 175 { /Wk exch def
+                           newpath
+                           4.3 Wk cos mul cm 4.3 Wk sin mul cm moveto
+                           4.45 Wk cos mul cm 4.45 Wk sin mul cm
+                           lineto
+%                           closepath
+                           0.5 setlinewidth
+                           0 setgray
+                           stroke
+                        } for
+  grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- 5-Grad-Winkeleinteilung auf Halbkreis ------------ ---------------------------------------------------------------
+  gsave
+         5 5 175 { /Wk exch def
+                          newpath
+                         4.3 Wk cos mul cm 4.3 Wk sin mul cm moveto
+                         4.5 Wk cos mul cm 4.5 Wk sin mul cm
+                         lineto
+%                         closepath
+                         0.5 setlinewidth
+                         0 setgray
+                         stroke
+                     } for
+  grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%-------------------------- Linke Diagonallinie-dashed -------------------------------------------------------------------------------
+  gsave
+              newpath /Wk 135 def
+               {8 Wk sin Wk cos div 1 sub div} /xWS1 exch def
+               0 0 moveto
+               4.3 Wk cos mul cm 4.3 Wk sin mul cm lineto
+%               closepath
+               gsave
+                 [2 sqrt 2 div 0.24 sub cm 0.24 cm] -0.12 cm setdash
+                 0.5 setlinewidth
+                 0 setgray stroke
+              grestore
+  grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%-------------------------- Rechte Diagonallinie-dashed -----------------------------------------------------------------------------
+ gsave
+              newpath /Wk 45 def
+               {8 Wk sin Wk cos div 1 add div} /xWS1 exch def
+               0 0 moveto
+               4.3 Wk cos mul cm 4.3 Wk sin mul cm lineto
+%               closepath
+             gsave
+               [2 sqrt 2 div 0.24 sub cm 0.24 cm] -0.12 cm setdash
+               0.5 setlinewidth
+               0 setgray stroke
+             grestore
+ grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------
+%---------------------------------------- Mittel-Linie -------------------------------------------------------------------------------------
+  gsave
+              newpath
+              0 0.5 cm moveto
+              0 3.5 cm lineto
+              0 5.1 cm moveto
+              0 6.0 cm lineto
+              0 6.4 cm moveto
+              0 8.0 cm lineto
+%              closepath
+              gsave
+              0.5 setlinewidth
+               0 setgray stroke
+              grestore
+  grestore
+%--------------------------------------------------------------------------------------------------------------------------------------------------
+%------------------------- Definition für horizontal-zentriertes - Setzen der cm- Zahlen (180° gedreht) ------------------------
+  /cmshow {% (string)  x y
+                      gsave
+                            moveto 180 rotate  % s
+                            /NimbusRomNo9L-Regu findfont 7 scalefont setfont
+                            dup % s s
+                            stringwidth pop 2 div neg 0 % s -dx/2
+                            rmoveto 0.2 setgray show
+                      grestore
+                 } bind def
+%-------------------------  Setzen der Zahlen für die cm-Einteilungen -----------------------------------------------------------------
+      0 1 7 { /MZ exch def MZ 2 string cvs MZ cm 0.47 cm cmshow } for %---------------- Zahlen 0 bis 7 (nach rechts)
+      1 1 7 { /MZ exch def MZ 2 string cvs MZ neg cm 0.47 cm cmshow } for %----------- Zahlen 1 bis 7 (nach links)
+      1 1 3 { /MZ exch def MZ 2 string cvs 2 cm MZ 0.1 add cm cmshow } for %---------- Zahlen 1 bis 3 (nach oben, rechte Seite)
+      1 1 3 { /MZ exch def MZ 2 string cvs -2 cm MZ 0.1 add cm cmshow } for %--------- Zahlen 1 bis 3 (nach oben, linke Seite)
+%--------------------------------------------------------------------------------------------------------------------------------------------------
+%------------------------- Definition für horizontal-zentriertes - Setzen der Winkel- Zahlen (mitgedreht) ----------------------
+  /cmRotshow {% ----------------------------------   (string),  Winkel,   x  y
+                             gsave
+                                    moveto 90 add rotate  % s
+                                    /NimbusRomNo9L-Regu findfont 7 scalefont setfont
+                                    dup % s s
+                                    stringwidth pop 2 div neg 0 % s -dx/2
+                                    rmoveto 0.2 setgray show
+                             grestore
+                          } bind def
+  gsave
+%-------------------------  Setzen der Zahlen für die Winkel-Einteilungen -------------------------------------------------------------------------------------------------
+      10 10 170 { /MZ exch def MZ 3 string cvs  MZ 5.03 cm MZ cos mul 5.03 cm MZ sin mul  cmRotshow } for % ------------------ äußerer Kreisbogen
+      10 10 170 { /MZ exch def 180 MZ sub 3 string cvs  MZ 4.75 cm MZ cos mul 4.75 cm MZ sin mul  cmRotshow } for % ------- innerer Kreisbogen
+ grestore
+%---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ /TSshow {% (string)  x y
+                         gsave
+                         moveto 180 rotate  % s
+                         \pst@PSfontO\space findfont \pst@fontsizeO scalefont setfont
+                         dup % s s
+                         stringwidth pop 2 div neg 0 % s -dx/2
+                         rmoveto 0.4 setgray show
+                         grestore
+                      } bind def
+   gsave
+      (\pst@OwnerTxt) 0 cm 4 cm TSshow
+   grestore
+%--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ /MadeShow {% (string)  x y
+                         gsave
+                         moveto 180 rotate  % s
+                         \pst@PSfontM\space findfont \pst@fontsizeM scalefont setfont
+                         dup % s s
+                         stringwidth pop 2 div neg 0 % s -dx/2
+                         rmoveto 0.7 setgray show
+                         grestore
+                      } bind def
+   gsave
+      (\pst@MadeTxt) 0 cm 6.25 cm MadeShow
+   grestore
+%---------------------------------------- Fahne -------------------------------------------------------------------------------------
+  gsave
+           /Fahne {
+                             newpath
+                             0 0 moveto
+                             0 1 rlineto
+                             1 0 rlineto
+                             0 -1 rlineto
+                             closepath
+                             setrgbcolor
+%                             [ /ca .5 /SetTransparency  pdfmark %    set  transparency
+%                              0.5 .setopacityalpha sysfill
+        \tx@setTransparency fill 
+                           } def
+Country (France) eq {
+      0.73 cm 6.1 cm translate
+      3 6 scale
+      1 0 0 Fahne
+      1 0 translate
+      1 1 1 Fahne
+      1 0 translate
+      0 0 1 Fahne
+      } if
+Country (Germany) eq {
+      0.775 cm 6.22 cm translate
+      7.5 1.5 scale
+      1 0.588 0 Fahne
+      0 -1 translate
+      0.75 0.07 0.11 Fahne
+      0 -1 translate
+      0 0 0 Fahne
+      } if
+  grestore
+%--------------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- Ende nur grestore von gsave ganz am Anfang ------------------
+grestore
+\fi
+}%
+\pnode(!
+    /cm {28.45274 mul} def %  ----------------------------------------  Definiere cm als Längeneinheit mit der multipliziert wird
+    \pst@tempA \tx@UserCoor /@y1 ED /@x1 ED % ----------  Definiere die Koordinaten des Ursprungs (zur Winkelberechnung benötigt)
+    \pst@tempB \tx@UserCoor /@y2 ED /@x2 ED % ----------  Definiere die Koordinaten des zweiten Punktes (zur Winkelberechnung benötigt)
+   @y1 @y2 sub @x1 @x2 sub Atan /@delta ED %------------   Winkelberechnung
+    @x1 cm @y1 cm  T % ------------------------------------   Tranformiere den Koordinatenursprung in P
+    @delta #1 add 180 add rotate % ------------------------------     Drehe den oberen Punkt des Geodreiecks
+   \pst@ProScale\space \pst@ProScale\space scale % --------    Skalieren!
+   0 8){GeodrC}%
+\pnode(!
+    @x1 cm @y1 cm  T % ------------------------------------   Tranformiere den Koordinatenursprung in P
+    @delta #1 add 180 add rotate % ------------------------------     Drehe die linke untere  Ecke des Geodreiecks
+   \pst@ProScale\space \pst@ProScale\space scale % --------    Skalieren!
+   -8 0){GeodrA}%
+\pnode(!
+    @x1 cm @y1 cm  T % ------------------------------------   Tranformiere den Koordinatenursprung in P
+    @delta #1 add 180 add rotate % ------------------------------     Drehe die rechte untere Ecke des Geodreiecks
+   \pst@ProScale\space \pst@ProScale\space scale % --------    Skalieren!
+   8 0){GeodrB}%
+\endgroup
+\end@SpecialObj
+\ignorespaces
+}%
+
+
+\definecolor{HolzCol}{rgb}{1,0.937,0.835}%
+\define@key[psset]{pst-geometrictools}{PenScale}[1]{\def\pst@PenScale{#1 }}%
+\define@key[psset]{pst-geometrictools}{PenLength}[5]{\def\pst@PenLength{#1 }}%
+\define@key[psset]{pst-geometrictools}{pencilColA}[red]{\pst@getcolor{#1}\pencilColA}
+\define@key[psset]{pst-geometrictools}{pencilColB}[HolzCol]{\pst@getcolor{#1}\pencilColB}
+\psset[pst-geometrictools]{PenLength=5,pencilColA=red,pencilColB=HolzCol,PenScale=1}
+\def\psPencil{\def\pst@par{}\pst@object{psPencil}}
+\def\psPencil@i#1(#2){%-------------------------------    #1 Winkel,  #2 Ursprung P
+\begin@SpecialObj
+\pst@killglue
+\begingroup
+\pnode(#2){@PGD}%
+\use@par
+\pst@getcoor{@PGD}\pst@tempA % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempA
+\addto@pscode{
+/sysfill {systemdict /fill get exec} def
+%/Country (\pst@country) def
+    /cm {28.45274 mul} def %  ----------------------------------------  Definiere cm als Längeneinheit mit der multipliziert wird
+    /Plength \pst@PenLength def
+%    \pst@tempA \tx@UserCoor /@y1 ED /@x1 ED % ----------  Definiere die Koordinaten des Ursprungs (zur Winkelberechnung benötigt)
+    \pst@tempA \pst@coor T % ------------------------------------   Tranformiere den Koordinatenursprung in P
+     #1 rotate % ------------------------------     Drehe das gesamte Geodreieck
+     \pst@PenScale dup scale % --------    Skaliere das ganze Geodreieck
+%-------------------------------------------------------------------------------------------------------------
+gsave
+%-------------------------------------------------------------------------------------------------------------
+%-------------- Unterer Holzteil des Stifts -------------------------------------------------------------
+gsave
+     newpath
+       0 cm 0 moveto
+       -0.3 cm 1 cm rlineto
+       0 cm 0.2 cm rlineto
+       0.6 cm 0 cm rlineto
+       0 cm -0.2 cm rlineto
+        closepath
+     gsave
+       \pst@usecolor\pencilColB
+       fill
+    grestore
+    gsave
+    0.4 setlinewidth
+    0.5 setgray
+    1 setlinejoin
+    stroke
+    grestore
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%-------------- langer farbiger Teil des Stifts ----------------------------------------------------------
+gsave
+     newpath
+       -0.3 cm 1 cm moveto
+       0 cm  Plength cm rlineto
+       0.6 cm 0 cm rlineto
+       0 cm  Plength neg cm rlineto
+       0.3 cm 1.13 cm 0.13 cm 270 180 arcn
+       0 cm 1.13 cm 0.17 cm 0 180 arcn
+       -0.3 cm 1.13 cm 0.13 cm 0 270 arcn
+       closepath
+     gsave
+       \pst@usecolor\pencilColA
+       fill
+    grestore
+     gsave
+       0.5 setlinewidth
+       0.1 setgray
+      stroke
+    grestore
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%--------------------------- Spitze in Farbe --------------------------------------------------------------
+gsave
+     newpath
+       0 cm 0 moveto
+       -0.1 cm 1 3 div cm rlineto
+       0.2 cm 0 cm rlineto
+     closepath
+     gsave
+       \pst@usecolor\pencilColA
+       fill
+    grestore
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%--------------------------- Striche im Stift --------------------------------------------------------------
+gsave
+     newpath
+       -0.17 cm 1.13 cm moveto
+       0 cm  Plength 0.13 sub cm rlineto
+       0.17 cm 1.13 cm moveto
+       0 cm  Plength 0.13 sub cm rlineto
+       closepath
+     gsave
+      0.5 setlinewidth
+      0.1 setgray
+       stroke
+    grestore
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%--------------------------- Elliptisches Stift-Ende in Holz --------------------------------------------
+gsave
+     newpath
+       0 cm Plength 1 add cm T
+       1 0.2 scale
+       0 cm 0 cm 0.3 cm 0 360 arc
+     closepath
+     gsave
+       \pst@usecolor\pencilColB
+       fill
+      grestore
+       gsave
+       0.5 setlinewidth
+       0.3 setgray
+      stroke
+    grestore
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%--------------------------- Elliptisches Stift-Ende in Farbe -------------------------------------------
+gsave
+     newpath
+       0 cm Plength 1 add cm T
+       1 0.2 scale
+       0 cm 0 cm 0.1 cm 0 360 arc
+     closepath
+     gsave
+       \pst@usecolor\pencilColA
+       fill
+      grestore
+       gsave
+       0.3 setlinewidth
+       0.3 setgray
+       stroke
+    grestore
+grestore
+%--------------------------------------------------------------------------------------------------------
+%--------------------------------------------------------------------------------------------------------
+grestore
+}%
+\endgroup
+\end@SpecialObj\ignorespaces
+}%
+
+
+\define@key[psset]{pst-geometrictools}{RulerFillCol}[cyan!60]{\pst@getcolor{#1}\RulerFillCol}
+\define@key[psset]{pst-geometrictools}{RulerScale}[1]{\def\pst@RulerScale{#1 }}%
+\psset[pst-geometrictools]{RulerFillCol=gray,RulerScale=1}
+
+\def\psRuler{\def\pst@par{}\pst@object{psRuler}}
+\def\psRuler@i#1(#2){\@ifnextchar(%
+    {\psRuler@ii{#1}(#2)}{\psRuler@ii{#1}(#2)(#2)}}%
+\def\psRuler@ii#1(#2)(#3){%-------------------------------    #1 Winkel,  #2 Ursprung P,  zweiter Punkt Q für Winkel
+\begin@SpecialObj
+\pst@killglue
+\begingroup%
+\pnode(#2){@PGD}%
+\pnode(#3){@QGD}%
+%\use@par%
+\pst@getcoor{@QGD}\pst@tempB % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempB
+\pst@getcoor{@PGD}\pst@tempA % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempA
+\addto@pscode{
+%/sysfill {systemdict /fill get exec} def
+    /cm {28.45274 mul} def %  --------------------------------------- Definiere cm als Längeneinheit mit der multipliziert wird
+    \pst@tempA \tx@UserCoor /@y1 ED /@x1 ED % ----------  Definiere die Koordinaten des Ursprungs (zur Winkelberechnung benötigt)
+    \pst@tempB \tx@UserCoor /@y2 ED /@x2 ED % ----------  Definiere die Koordinaten des zweiten Punktes (zur Winkelberechnung benötigt)
+   @y1 @y2 sub @x1 @x2 sub Atan /@delta ED %------------   Winkelberechnung
+    \pst@tempA \pst@coor T % ------------------------------------  Tranformiere den Koordinatenursprung in P
+    @delta #1 add 180 add rotate % ------------------------------    Drehe das gesamte Geodreieck
+   \pst@RulerScale dup scale % -----------------------------------    Skaliere das ganze Geodreieck
+%-------------------------------------------------------------------------------------------------------------
+gsave
+%-------------------------------------------------------------------------------------------------------------
+%-------------- Füllung der beiden inneren Bereiche und äußere Begrenzung des Lineals -----------------------------------------------
+gsave
+     newpath
+       -0.2 cm 0 moveto
+       30.4 cm 0 rlineto
+       0 cm -0.9 cm rlineto
+       -30.4 cm 0 cm rlineto
+       closepath
+        gsave
+         \pst@usecolor\RulerFillCol
+%       [ /ca .25 /SetTransparency  pdfmark %    set  transparency
+%       0.25 .setopacityalpha sysfill
+        \tx@setTransparency fill 
+    grestore
+grestore
+%-------------------------------------------------------------------------------------------------------------
+gsave
+     newpath
+       -0.2 cm 0 moveto
+       30.2 cm 0 lineto
+       0 cm -3 cm rlineto
+       -30.4 cm 0 cm rlineto
+     closepath
+       3.75 cm -1.5 cm moveto
+       3.5 cm -1.5 cm 0.25 cm 0 360 arc
+     closepath
+    gsave
+         \pst@usecolor\RulerFillCol
+%       [ /ca .15 /SetTransparency  pdfmark %    set  transparency
+%       0.15 .setopacityalpha sysfill
+        \tx@setTransparency fill 
+    grestore
+         gsave
+%         2 setlinejoin
+       0.7 setlinewidth
+       0.1 setgray
+      stroke
+    grestore
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%-------------- Millimetereinteilung auf der Grundseite -------------------------------------------
+ /mmBlinie { newpath
+                    0 cm 0 cm moveto
+                    0 cm -0.25 cm rlineto
+                     gsave
+                     0.5 setlinewidth
+                     0 setgray
+                     stroke
+                     grestore
+                      0.1 cm 0 cm translate
+                    } def
+gsave
+300 {mmBlinie} repeat
+grestore
+%-------------------------------------------------------------------------------------------------------------
+%-------------- 0,5- cm-Einteilung auf der Grundseite ----------------------------------------------
+   /cmBlinie { newpath
+                   0.5 cm 0 cm moveto
+                    0 cm -0.375 cm rlineto
+%                     closepath
+                     gsave
+                     0.55 setlinewidth
+                     0 setgray
+                     stroke
+                     grestore
+                      1 cm 0 cm translate
+                    } def
+gsave
+   30 {cmBlinie} repeat
+grestore
+%-------------- 1- cm-Einteilung auf der Grundseite ----------------------------------------------
+   /cmBlinie { newpath
+                   0 cm 0 cm moveto
+                    0 cm -0.5 cm rlineto
+%                     closepath
+                     gsave
+                     0.6 setlinewidth
+                     0 setgray
+                     stroke
+                     grestore
+                      1 cm 0 cm translate
+                    } def
+gsave
+   31 {cmBlinie} repeat
+grestore
+%--------------------------------------------------------------------------------------------------------------------------------------------------
+%------------------------- Definition für horizontal-zentriertes - Setzen der cm- Zahlen (180° gedreht) ------------------------
+  /cmshow {% (string)  x y
+                      gsave
+                            moveto   % s
+                            /NimbusRomNo9L-Regu findfont 8 scalefont setfont
+                            dup % s s
+                            stringwidth pop 2 div neg 0 % s -dx/2
+                            rmoveto 0.2 setgray show
+                      grestore
+                 } bind def
+%-------------------------  Setzen der Zahlen für die cm-Einteilungen -----------------------------------------------------------------
+      0 1 30 { /MZ exch def MZ 2 string cvs MZ cm -0.78 cm cmshow } for %---------------- Zahlen 0 bis 30 (nach rechts)
+%-------------------------------------------------------------------------------------------------------------
+%--------------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- Ende nur grestore von gsave ganz am Anfang ------------------
+grestore
+}%
+\endgroup%
+\end@SpecialObj\ignorespaces
+}%
+
+\definecolor{PoCRed}{rgb}{0.7,0.134,0.134}
+\define@boolkey[psset]{pst-geometrictools}[Pst@]{MCAngle}[true]{}
+\define@key[psset]{pst-geometrictools}{PoCLength}[5]{\def\pst@PoCLength{#1 }}
+\define@key[psset]{pst-geometrictools}{PoCAngle}[0]{\def\pst@PoCAngle{#1 }}
+\define@key[psset]{pst-geometrictools}{PoCFillCol}[PoCRed]{\pst@getcolor{#1}\PoCFillCol}
+\define@key[psset]{pst-geometrictools}{PoCMineCol}[black!80]{\pst@getcolor{#1}\PoCMineCol}
+\define@key[psset]{pst-geometrictools}{PoCScale}[1]{\def\pst@PoCScale{#1 }}%
+\define@key[psset]{pst-geometrictools}{RadVS}[RVS]{\def\pst@RadVS{#1}}%
+\define@key[psset]{pst-geometrictools}{AngleVS}[AVS]{\def\pst@AngleVS{#1}}%
+\define@key[psset]{pst-geometrictools}{RadMul}[1]{\def\pst@RadMul{#1 }}%
+\psset[pst-geometrictools]{PoCScale=1,PoCFillCol=PoCRed,PoCAngle=0,PoCMineCol=black!80,PoCLength=5,MCAngle=true,RadVS=RVS,AngleVS=AVS,RadMul=1}
+
+\def\psCompass{\def\pst@par{}\pst@object{psCompass}}%  Pair of Compasses
+\def\psCompass@i#1(#2){\@ifnextchar({\psCompass@ii{0}(#2)}{\psCompass@ii{#1}(#2)(#2)}}%
+\def\psCompass@ii#1(#2)(#3){%-------------------------------    #1 Winkel,  #2 Ursprung P,  zweiter Punkt Q für Winkel
+  \begin@SpecialObj
+  \pst@killglue
+%  \begingroup
+  \pnode(#2){@PGD}%
+  \pnode(#3){@QGD}%
+%  \use@par
+  \pst@getcoor{@QGD}\pst@tempB % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempB
+  \pst@getcoor{@PGD}\pst@tempA % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempA
+  \addto@pscode{%
+gsave
+     \pst@RadMul /faktor ED
+     \pst@PoCScale /skal ED
+     #1 skal div 2 div /Radius ED
+     gsave
+     skal dup scale % --------    Skaliere das ganze Geodreieck
+%    /sysfill {systemdict /fill get exec} def
+    /SLg \pst@PoCLength def
+    /cm {28.45274 mul} def %  ----------------------------------------  Definiere cm als Längeneinheit mit der multipliziert wird
+    \pst@tempA\tx@UserCoor /@y1 ED /@x1 ED % ----------  Definiere die Koordinaten des Ursprungs (zur Winkelberechnung benötigt)
+    \pst@tempB\tx@UserCoor /@y2 ED /@x2 ED % ----------  Definiere die Koordinaten des zweiten Punktes (zur Winkelberechnung benötigt)
+    \pst@tempA\pst@coor /@y3 ED /@x3 ED
+    @y1 @y2 sub dup mul @x1 @x2 sub dup mul add faktor dup mul mul /quadlg ED
+     quadlg 0 eq { 180 } { @y1 @y2 sub @x1 @x2 sub atan } ifelse /@delta ED %------------   Winkelberechnung
+     quadlg sqrt 2 div /RadiusPktB ED %------------   Radiusberechnung mit zweitem Punkt
+     SLg RadiusPktB Radius add  gt { RadiusPktB Radius add } { SLg } ifelse  /RadPoC ED
+    /hoehe SLg dup mul RadPoC dup mul sub sqrt  def
+    /phiS RadPoC hoehe atan def
+    @x3 @y3 T % -------------------------------------------------------------------------------    Transformiere den Koordinatenursprung in P
+    \pst@PoCAngle\space \ifPst@MCAngle\space @delta add 180 add \fi rotate % ------------------------------     Drehe das gesamte Geodreieck
+%-------------------------------------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------------------------------------
+%-------------- Linke Zirkelspitze-----------------------------------------------     0 cm 0 cm  0.15 cm 0 360 arc
+gsave
+     newpath
+     phiS neg rotate
+       0 cm 0 cm moveto
+       -0.1 cm 0.33 cm lineto
+       0.07 cm 0 cm rlineto
+       closepath
+    gsave
+         0.5 setgray
+         fill
+    grestore
+grestore
+%---------------------------------------- rechte Zirkel-Mine --------------------------------------
+gsave
+     newpath
+     phiS neg rotate
+       0 cm SLg cm T
+        phiS 2 mul rotate
+         0 cm SLg  neg cm moveto
+         0.06 cm 0.1 cm rlineto
+         0.013 cm 0.2 cm rlineto
+        -0.06 cm 0 cm rlineto
+       closepath
+     gsave
+       \pst@usecolor\PoCMineCol fill
+    grestore
+grestore
+%---------------------------------------- Spindel --------------------------------------
+gsave
+     newpath
+        phiS neg rotate
+        0 cm SLg cm moveto
+        0 cm SLg cm T
+        phiS rotate
+        -2 cm -1 phiS cos mul cm rmoveto
+        4 cm 0 cm rlineto
+    gsave
+         0.5 setgray
+                1.6 setlinewidth
+         stroke
+    grestore
+grestore
+gsave
+     newpath
+        phiS neg rotate
+        0 cm SLg cm moveto
+        0 cm SLg cm T
+        phiS rotate
+        -2 cm -1 phiS cos mul cm rmoveto
+        0.2 -0.75 rmoveto
+       189 { 0.5 1.5 rlineto
+        0.1 -1.5 rmoveto } repeat
+    gsave
+         0.2 setgray
+                0.2 setlinewidth
+         stroke
+    grestore
+grestore
+%---------------------------------------- Drehrad an der Spindel --------------------------------------
+gsave
+     newpath
+        phiS neg rotate
+        0 cm SLg cm moveto
+        0 cm SLg cm T
+        phiS rotate
+        0 cm -1.3 phiS cos mul cm rmoveto
+        0 cm 0.6 cm rlineto
+    gsave
+         0.5 setgray
+                0.08 cm setlinewidth
+         stroke
+    grestore
+grestore
+%gsave %%%%%%%%%%%%%%%%%%%%%%
+gsave
+     newpath
+        phiS neg rotate
+        0 cm SLg cm moveto
+        0 cm SLg cm T
+        phiS rotate
+        -0.04 cm -1.28 phiS cos mul cm rmoveto
+        20 { 0.08 cm 0 cm rlineto
+        -0.08 cm 0.03 cm rmoveto } repeat
+    gsave
+         0.3 setgray
+                0.2 setlinewidth
+         stroke
+    grestore
+grestore
+%gsave %%%%%%%%%%%%%%%%%%%%%%
+%---------------------------------------- Halterung zum Anfassen --------------------------------------
+gsave
+     newpath
+        phiS neg rotate
+        0 cm SLg cm moveto
+        0 cm SLg cm T
+        phiS rotate
+        0 cm 0.75 0.54 phiS sin mul add cm moveto
+        0 cm 0.2 cm rlineto
+    gsave
+         0.5 setgray
+                3 setlinewidth
+         stroke
+    grestore
+grestore
+gsave
+     newpath
+        phiS neg rotate
+        0 cm SLg cm moveto
+        0 cm SLg cm T
+        phiS rotate
+        0 cm 0.95 0.54 phiS sin mul add cm moveto
+        0 cm 0.05 cm rlineto
+    gsave
+         \pst@usecolor\PoCFillCol
+                5 setlinewidth
+         stroke
+    grestore
+grestore
+gsave
+     newpath
+        phiS neg rotate
+        0 cm SLg cm moveto
+        0 cm SLg cm T
+        phiS rotate
+        0 cm 1.0 0.54 phiS sin mul add cm moveto
+        0 cm 0.5 cm rlineto
+    gsave
+         0.5 setgray
+                5 setlinewidth
+         stroke
+    grestore
+grestore
+gsave
+     newpath
+        phiS neg rotate
+        0 cm SLg cm moveto
+        0 cm SLg cm T
+        phiS rotate
+        -0.08 cm 1.0 0.6 phiS sin mul add cm moveto
+        0 cm 0.48 cm rlineto
+        6 { 0.025 cm -0.48 cm rmoveto
+         0 cm 0.48 cm rlineto } repeat
+    gsave
+         0.65 setgray
+                0.15 setlinewidth
+         stroke
+    grestore
+grestore
+gsave
+     newpath
+        phiS neg rotate
+        0 cm SLg cm moveto
+        0 cm SLg cm T
+        phiS rotate
+        -0.075 cm 1.0 0.6 phiS sin mul add cm moveto
+        0 cm 0.48 cm rlineto
+        6 { 0.025 cm -0.48 cm rmoveto
+         0 cm 0.48 cm rlineto } repeat
+    gsave
+         0.25 setgray
+                0.2 setlinewidth
+         stroke
+    grestore
+grestore
+%---------------------------------------- Kreis um oberen Teil --------------------------------------
+gsave
+     newpath
+        phiS neg rotate
+        0 cm SLg cm moveto
+        0 cm SLg cm T
+        phiS rotate
+        0 cm 0.1 0.54 phiS sin mul add cm moveto
+        0.65 -50 PtoC exch cm exch cm  rmoveto
+        0 cm 0.1 0.54 phiS sin mul add cm  0.65 cm -50 230 arc
+    gsave
+         0.1 setgray
+                1.3 setlinewidth
+         stroke
+    grestore
+grestore
+%---------------------------------------- Kreis zwischen den Schenkeln --------------------------------------
+gsave
+     newpath
+        phiS neg rotate
+        0 cm SLg cm moveto
+        0 cm SLg cm  0.15 cm 0 360 arc
+      closepath
+    gsave
+         0.1 setgray
+         fill
+    grestore
+grestore
+%---------------------------------------- Schenkel des Zirkels ----------------------------------------------------
+gsave
+     newpath
+     phiS neg rotate
+       0 cm 0.3 cm moveto
+       -0.3 cm SLg 0.1 add cm lineto
+       0 cm SLg cm T
+        phiS 2 mul rotate
+       0.3 cm 0.1 cm moveto
+       0 cm SLg 0.3 sub neg cm lineto
+%       closepath
+     gsave
+       0.285 cm setlinewidth
+       2 setlinejoin
+       \pst@usecolor\PoCFillCol
+        stroke
+    grestore
+grestore
+gsave
+     newpath
+     phiS neg rotate
+       -0.17 cm SLg 0.6 mul cm moveto
+       -0.25 cm  SLg 0.85 mul cm lineto
+       0 cm SLg cm T
+        phiS 2 mul rotate
+       0.17 cm SLg -0.4 mul cm moveto
+       0.25 cm  SLg -0.15 mul cm lineto
+%       closepath
+     gsave
+       0.17 cm setlinewidth
+       2 setlinejoin
+       0.4 setgray
+        stroke
+    grestore
+grestore
+%---------------------------------------- Kreis an der linken Spitze --------------------------------------
+gsave
+     newpath
+        phiS neg rotate
+       -0.03 cm 0.8 cm moveto
+        -0.03 cm 0.8 cm 0.175 cm 0 360 arc
+      closepath
+    gsave
+         0.25 setgray
+         fill
+    grestore
+grestore
+gsave
+     newpath
+        phiS neg rotate
+       -0.03 cm 0.8 cm moveto
+        -0.03 cm 0.8 cm 0.025 cm 0 360 arc
+      closepath
+    gsave
+         0.8 setgray
+         fill
+    grestore
+grestore
+%---------------------------------------- Kreis an der rechten Spitze --------------------------------------
+gsave
+     newpath
+     phiS neg rotate
+       0 cm SLg cm T
+        phiS 2 mul rotate
+               0.03 cm 0 cm T
+         0 cm SLg 0.8 sub neg cm moveto
+         0 cm SLg 0.8 sub cm neg 0.175 cm 0 360 arc
+      closepath
+    gsave
+         0.25 setgray
+         fill
+    grestore
+grestore
+gsave
+     newpath
+     phiS neg rotate
+       0 cm SLg cm T
+        phiS 2 mul rotate
+               0.03 cm 0 cm T
+         0 cm SLg 0.8 sub neg cm moveto
+         0 cm SLg 0.8 sub cm neg 0.025 cm 0 360 arc
+      closepath
+    gsave
+         0.8 setgray
+         fill
+    grestore
+grestore
+%--------------------------------------------------------------------------------------------------------------------------------------------------
+%--------------- Ende nur grestore von gsave ganz am Anfang ------------------
+grestore
+grestore
+}%
+\pnode(!
+   \pst@tempA \tx@UserCoor /@@y1 ED /@@x1 ED
+   \pst@tempB \tx@UserCoor  /@@y2 ED /@@x2 ED
+    @@x1 @@x2 sub @@y1 @@y2 sub Pyth \pst@RadMul\space mul /\pst@RadVS\space exch def
+    @@y1 @@y2 sub dup mul @@x1 @@x2 sub dup mul add \pst@RadMul dup mul mul /quadlg ED
+    quadlg 0 eq { 180 } { @@y1 @@y2 sub @@x1 @@x2 sub atan } ifelse /\pst@AngleVS\space exch def  %------------   Winkelberechnung /\pst@AngleVS\space exch def
+  0 0){MoneyforNothing}%
+%\endgroup
+\end@SpecialObj\ignorespaces%
+}%
+
+%\define@boolkey[psset]{pst-geometrictools}[Pst@]{Ruler}[true]{}
+%\define@boolkey[psset]{pst-geometrictools}[Pst@]{Ppoint}[false]{}
+%\define@boolkey[psset]{pst-geometrictools}[Pst@]{LineOffset}[false]{}
+%\define@key[psset]{pst-geometrictools}{AddAngle}[0]{\def\pst@AddAngle{#1 }}%
+%\psset[pst-geometrictools]{Ruler=true,Ppoint=false,AddAngle=0,LineOffset=false}
+
+%% Distance between two points => #3
+\def\psDistAB(#1)(#2)#3{%
+   \pst@getcoor{#1}\pst@tempA
+   \pst@getcoor{#2}\pst@tempB
+\pnode(!
+   \pst@tempA \tx@UserCoor
+   \pst@tempB \tx@UserCoor
+  3 -1 roll sub dup mul 3 1 roll sub dup mul add sqrt
+  /#3 ED
+  0 0
+  ){XX}
+}
+%% calcule l'angle entre Ox et AB et le place en #3
+\def\psAngleAB(#1)(#2)#3{%
+   \pst@getcoor{#1}\pst@tempA
+   \pst@getcoor{#2}\pst@tempB
+\pnode(!
+   \pst@tempA \tx@UserCoor
+   \pst@tempB \tx@UserCoor
+   3 -1 roll sub 3 1 roll exch sub Atan
+  /#3 ED
+  0 0
+  ){YY}
+}%
+%% angle defined by three points
+\def\psAngleAOB(#1)(#2)(#3)#4{%
+   \pst@getcoor{#1}\pst@tempA
+   \pst@getcoor{#2}\pst@tempB
+   \pst@getcoor{#2}\pst@tempC
+\pnode(!
+   \pst@tempA \tx@UserCoor
+   \pst@tempB \tx@UserCoor
+   \pst@tempC \tx@UserCoor
+  4 copy exch 4 -1 roll mul
+  3 -2 roll mul add
+  4 -2 roll mul 4 -2 roll mul sub exch Atan
+   /#4 ED
+   0 0
+   ){ZZ}
+}
+
+% la nouvelle version de \psParallels
+\define@key[psset]{pst-geometrictools}{DistCoeff}[1]{\def\pst@DistCoeff{#1 }}%
+\psset[pst-geometrictools]{DistCoeff=1}
+%
+\def\psParallels{\def\pst@par{}\pst@object{psParallels}}
+\def\psParallels@i(#1)(#2)(#3){%
+\begin@SpecialObj %
+\pnode(#1){pointA}%
+\pnode(#2){pointB}%
+\pnode(#3){pointC}%
+\pcline[nodesep=-3](pointA)(pointB)
+\psdots(pointA)(pointB)(pointC)
+\uput[l](pointA){A}
+\uput[l](pointB){B}
+\uput[r](pointC){C}
+%
+\psProtractor[Ghost]{0}(pointA)%
+\psAngleAB(pointA)(pointB){alpha1}
+\psAngleAB(pointA)(GeodrA){alpha2}
+\psProtractor[Ghost]{alpha1 alpha2 sub}(pointA)%
+\psRuler{0}(GeodrB)(GeodrC)
+%
+\pstProjection[PointName={},PointSymbol=none]{pointA}{pointB}{pointC}[pointI]%
+\pstRotation[RotAngle=45,PointSymbol=none,PointName={}]{pointC}{pointI}[pointJ]%
+\pstInterLL[PointSymbol=none,PointName={}]{pointA}{pointB}{pointC}{pointJ}{pointK}%
+\pstTranslation[PointSymbol=none,PointName={},DistCoef=\pst@DistCoeff]{pointK}{pointC}{pointA}[pointA*]
+\psProtractor{alpha1 alpha2 sub}(pointA*)%
+\end@SpecialObj\ignorespaces%
+}%
+
+%\define@boolkey[psset]{pst-geometrictools}[Pst@]{Ruler}[true]{}
+%\define@boolkey[psset]{pst-geometrictools}[Pst@]{Ppoint}[false]{}
+%\define@boolkey[psset]{pst-geometrictools}[Pst@]{LineOffset}[false]{}
+%\define@key[psset]{pst-geometrictools}{AddAngle}[1]{\def\pst@AddAngle{#1 }}%
+%\psset[pst-geometrictools]{Ruler=true,Ppoint=false,AddAngle=0,LineOffset=false}
+%\def\psParallels{\def\pst@par{}\pst@object{psParallels}}
+%\def\psParallels@i(#1)(#2)(#3){%
+%\psset{saveNodeCoors,NodeCoorPrefix=n}%
+%\@ifundefined{rCounter}{\def\rCounter{1}}{}%
+%\begin@SpecialObj %
+%\pnode(#1){pointA}%
+%\pnode(#2){pointB}%
+%\pnode(#3){pointC}%
+%\pstProjection[PointName={},PointSymbol=none]{pointA}{pointB}{pointC}[pointI]%
+%\midAB(pointA)(pointB){pointM}%
+%\pstRotation[RotAngle=45,PointSymbol=none,PointName={}]{pointC}{pointI}[pointJ]%
+%\pstInterLL[PointSymbol=none,PointName={}]{pointA}{pointB}{pointC}{pointJ}{pointK}%
+%\AtoB(pointI)(pointC){IC}%
+%\AtoB(pointK)(pointC){KC}%
+%\AplusB(pointM)(KC){MT}%
+%\AplusB(pointB)(KC){BT}%
+%\psProtractor[Ghost]{0}(pointM)(pointB)%
+%\pnode(GeodrB){ProB}%
+%\pnode(GeodrC){ProC}%
+%\psLDNode(ProB)(ProC){-1cm}{pointE}%
+%\ifPst@Ruler\psRuler{0}(pointE)(GeodrC)\fi%
+%\AplusB(ProB)(KC){ProB*}%
+%\pst@Verb{ nKCx nKCy Pyth /laenge exch def %
+%nKCx laenge div \pst@number\pslinewidth\space 2 div 0.35 \pst@ProScale mul add mul 28.45274 div 2 sqrt mul /delX exch def %
+%nKCy laenge div \pst@number\pslinewidth\space 2 div 0.35 \pst@ProScale mul add mul 28.45274 div 2 sqrt mul /delY exch def
+%}%
+%\pnode(!nProB*x delX add nProB*y delY add ){GProB*}%
+%\pnode(!/AddA \pst@AddAngle def nProB*x  AddA 0 eq { delX add } { AddA 180 eq { delX sub } { 0 add } ifelse } ifelse nProB*y AddA 0 eq { delY add } { AddA 180 eq { delY sub } { 0 add } ifelse } ifelse ){GProBC*}%
+%\pnode(!nMTx  delX add nMTy  delY add){GMT*}%
+%\pnode(!/AddA \pst@AddAngle def npointCx  AddA 0 eq { delX add } { AddA 180 eq { delX sub } { 0 add } ifelse } ifelse npointCy AddA 0 eq { delY add } { AddA 180 eq { delY sub } { 0 add } ifelse } ifelse ){pointC*}%
+%\psLNode(pointM)(GMT*){\rCounter}{MPro}%
+%\psLNode(ProB)(GProB*){\rCounter}{BPro}%
+%\ifPst@Ppoint
+%\ifPst@LineOffset
+%\pst@Verb{ nICx nICy Pyth /laenge exch def %
+%nICx laenge div \pst@number\pslinewidth\space 2 div 0.35 \pst@ProScale mul add mul 28.45274 div 2 sqrt mul /delX exch def %
+%nICy laenge div \pst@number\pslinewidth\space 2 div 0.35 \pst@ProScale mul add mul 28.45274 div 2 sqrt mul /delY exch def %
+%}%
+%\pnode(!/AddA \pst@AddAngle def nProB*x  AddA 0 eq { delX add } { AddA 180 eq { delX sub } { 0 add } ifelse } ifelse nProB*y AddA 0 eq { delY add } { AddA 180 eq { delY sub } { 0 add } ifelse } ifelse ){GProBC*}%
+%\pnode(!/AddA \pst@AddAngle def npointCx  AddA 0 eq { delX add } { AddA 180 eq { delX sub } { 0 add } ifelse } ifelse npointCy AddA 0 eq { delY add } { AddA 180 eq { delY sub } { 0 add } ifelse } ifelse ){pointC*}%
+%\psProtractor{\pst@AddAngle}(pointC*)(GProBC*)\else%
+%\psProtractor{\pst@AddAngle}(pointC)(ProB*)\fi%
+%\else
+%\psProtractor{\pst@AddAngle}(MPro)(BPro)\fi % Um die Liniendicke 0.8pt nach rechts versetzt
+%\psLNode(pointC)(ProB*){0.98}{ProB**}%
+%\psLNode(pointC)(ProB**){2}{C*}%
+%\end@SpecialObj\ignorespaces%
+%}%
+
+\catcode`\@=\PstAtCode\relax
+\endinput 
