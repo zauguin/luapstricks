@@ -1,7 +1,7 @@
 %% This is file `pst-geometrictools.tex',
 %%
 %% Thomas Söll
-%% 1.2, 1.3 fixes by Herbert Voß
+%% fixes for lualatex by Herbert Vo0 
 %%
 %% This program can redistributed and/or modified under %%
 %% the terms of the LaTeX Project Public License        %%
@@ -16,14 +16,17 @@
 \csname PSTgeometrictoolsLoaded\endcsname
 \let\PSTgeometrictoolsLoaded\endinput
 % Requires PSTricks, pst-xkey, pst-node packages
-\ifx\PSTricksLoaded\endinput\else\input pstricks.tex\fi
-\ifx\PSTXKeyLoaded\endinput\else\input pst-xkey.tex\fi
-\ifx\PSTnodeLoaded\endinput\else\input pst-node.tex\fi
-\def\fileversion{1.3}
-\def\filedate{2021/11/16}
+\ifx\PSTricksLoaded\endinput  \else\input pstricks.tex\fi
+\ifx\PSTXKeyLoaded\endinput   \else\input pst-xkey.tex\fi
+\ifx\PSTEuclideLoaded\endinput\else\input pst-eucl.tex\fi
+\ifx\PSTnodeLoaded\endinput   \else\input pst-node.tex\fi
+\def\fileversion{1.2}
+\def\filedate{2021/11/17}
 \message{`PST' v\fileversion, \filedate}
 
 \edef\PstAtCode{\the\catcode`\@} \catcode`\@=11\relax
+
+
 \pst@addfams{pst-geometrictools}
 
 \define@boolkey[psset]{pst-geometrictools}[Pst@]{Ghost}[true]{}
@@ -47,41 +50,41 @@
 {\psProtractor@ii{#1}(#2)}%
 {\psProtractor@ii{#1}(#2)(#2)}}%
 \def\psProtractor@ii#1(#2)(#3){%-------------------------------    #1 Winkel,  #2 Ursprung P,  zweiter Punkt Q für Winkel
-  \begin@SpecialObj
-  \pst@killglue
-  \begingroup
-  \pnode(#2){@PGD}%
-  \pnode(#3){@QGD}%
-  \use@par
-  \pst@getcoor{@QGD}\pst@tempB % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempB
-  \pst@getcoor{@PGD}\pst@tempA % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempA
-  \addto@pscode{%
-    /sysfill {systemdict /fill get exec} def
-    /Country (\pst@country) def
+\begin@SpecialObj
+\pst@killglue
+\begingroup%
+\pnode(#2){@PGD}%
+\pnode(#3){@QGD}%
+\use@par%
+\pst@getcoor{@QGD}\pst@tempB % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempB
+\pst@getcoor{@PGD}\pst@tempA % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempA
+\addto@pscode{%
+/sysfill {systemdict /fill get exec} def
+/Country (\pst@country) def
     /cm {28.45274 mul} def %  ----------------------------------------  Definiere cm als Längeneinheit mit der multipliziert wird
     \pst@tempA \tx@UserCoor /@y1 ED /@x1 ED % ----------  Definiere die Koordinaten des Ursprungs (zur Winkelberechnung benötigt)
     \pst@tempB \tx@UserCoor /@y2 ED /@x2 ED % ----------  Definiere die Koordinaten des zweiten Punktes (zur Winkelberechnung benötigt)
-    @y1 @y2 sub @x1 @x2 sub Atan neg /@delta ED %------------   Winkelberechnung
-    \pst@tempA \pst@coor neg T % ------------------------------------   Tranformiere den Koordinatenursprung in P
+   @y1 @y2 sub @x1 @x2 sub Atan /@delta ED %------------   Winkelberechnung
+    \pst@tempA \pst@coor T % ------------------------------------   Tranformiere den Koordinatenursprung in P
     @delta #1 add 180 add rotate % ------------------------------     Drehe das gesamte Geodreieck
-    \pst@ProScale dup scale % --------    Skaliere das ganze Geodreieck
+   \pst@ProScale dup scale % --------    Skaliere das ganze Geodreieck
 %-------------------------------------------------------------------------------------------------------------
-    \ifPst@Ghost\else
-%      gsave
+\ifPst@Ghost\else
+gsave
 %-------------------------------------------------------------------------------------------------------------
 %-------------- Äußere Begrenzung des Geodreiecks -----------------------------------------------
-%      gsave
-%      newpath
-%       -8 cm 0 moveto currentpoint 3 0 360 arc gsave 1 0 0 setrgbcolor fill grestore 
-%       16 cm 0 rlineto
-%       -8 cm \ifPSTlualatex 8 \else -8 \fi cm rlineto
-%       closepath
-%       gsave
-%       0.7 setlinewidth
-%       0.1 setgray
-%       stroke
-%    grestore
-%  grestore
+gsave
+     newpath
+       -8 cm 0 moveto
+       16 cm 0 rlineto
+       -8 cm 8 cm rlineto
+       closepath
+     gsave
+       0.7 setlinewidth
+       0.1 setgray
+       stroke
+    grestore
+grestore
 %-------------------------------------------------------------------------------------------------------------
 %-------------- Gefüllter innerer Teil des Geodreiecks -----------------------------------------------
 gsave
@@ -93,8 +96,7 @@ gsave
     gsave
          \pst@usecolor\ProFillCol
 %       [ /ca .1 /SetTransparency  pdfmark %    set  transparency
-%       0.1 .setopacityalpha sysfill
-        \tx@setTransparency fill 
+       0.1 .setopacityalpha sysfill
     grestore
 grestore
 %-------------------------------------------------------------------------------------------------------------
@@ -188,9 +190,8 @@ grestore
                    gsave
                     \pst@usecolor\ProLineCol
 %                      [ /ca .4 /SetTransparency  pdfmark %    set  transparency
-%                       0.4 .setopacityalpha
-%                       sysfill
-        \tx@setTransparency fill 
+                       0.4 .setopacityalpha
+                       sysfill
                  grestore
    grestore
 %---------------------------------------------------------------------------------------------------------------------------------------------
@@ -430,8 +431,7 @@ grestore
                              closepath
                              setrgbcolor
 %                             [ /ca .5 /SetTransparency  pdfmark %    set  transparency
-%                              0.5 .setopacityalpha sysfill
-        \tx@setTransparency fill 
+                              0.5 .setopacityalpha sysfill
                            } def
 Country (France) eq {
       0.73 cm 6.1 cm translate
@@ -476,10 +476,8 @@ grestore
     @delta #1 add 180 add rotate % ------------------------------     Drehe die rechte untere Ecke des Geodreiecks
    \pst@ProScale\space \pst@ProScale\space scale % --------    Skalieren!
    8 0){GeodrB}%
-\pspolygon(GeodrA)(GeodrB)(GeodrC)%
-\endgroup
-\end@SpecialObj
-\ignorespaces
+\endgroup%
+\end@SpecialObj\ignorespaces
 }%
 
 
@@ -630,18 +628,19 @@ grestore
 
 \def\psRuler{\def\pst@par{}\pst@object{psRuler}}
 \def\psRuler@i#1(#2){\@ifnextchar(%
-    {\psRuler@ii{#1}(#2)}{\psRuler@ii{#1}(#2)(#2)}}%
+{\psRuler@ii{#1}(#2)}%
+{\psRuler@ii{#1}(#2)(#2)}}%
 \def\psRuler@ii#1(#2)(#3){%-------------------------------    #1 Winkel,  #2 Ursprung P,  zweiter Punkt Q für Winkel
 \begin@SpecialObj
 \pst@killglue
 \begingroup%
 \pnode(#2){@PGD}%
 \pnode(#3){@QGD}%
-%\use@par%
+\use@par%
 \pst@getcoor{@QGD}\pst@tempB % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempB
 \pst@getcoor{@PGD}\pst@tempA % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempA
 \addto@pscode{
-%/sysfill {systemdict /fill get exec} def
+/sysfill {systemdict /fill get exec} def
     /cm {28.45274 mul} def %  --------------------------------------- Definiere cm als Längeneinheit mit der multipliziert wird
     \pst@tempA \tx@UserCoor /@y1 ED /@x1 ED % ----------  Definiere die Koordinaten des Ursprungs (zur Winkelberechnung benötigt)
     \pst@tempB \tx@UserCoor /@y2 ED /@x2 ED % ----------  Definiere die Koordinaten des zweiten Punktes (zur Winkelberechnung benötigt)
@@ -663,8 +662,7 @@ gsave
         gsave
          \pst@usecolor\RulerFillCol
 %       [ /ca .25 /SetTransparency  pdfmark %    set  transparency
-%       0.25 .setopacityalpha sysfill
-        \tx@setTransparency fill 
+       0.25 .setopacityalpha sysfill
     grestore
 grestore
 %-------------------------------------------------------------------------------------------------------------
@@ -681,8 +679,7 @@ gsave
     gsave
          \pst@usecolor\RulerFillCol
 %       [ /ca .15 /SetTransparency  pdfmark %    set  transparency
-%       0.15 .setopacityalpha sysfill
-        \tx@setTransparency fill 
+       0.15 .setopacityalpha sysfill
     grestore
          gsave
 %         2 setlinejoin
@@ -772,24 +769,24 @@ grestore
 \psset[pst-geometrictools]{PoCScale=1,PoCFillCol=PoCRed,PoCAngle=0,PoCMineCol=black!80,PoCLength=5,MCAngle=true,RadVS=RVS,AngleVS=AVS,RadMul=1}
 
 \def\psCompass{\def\pst@par{}\pst@object{psCompass}}%  Pair of Compasses
-\def\psCompass@i#1(#2){\@ifnextchar({\psCompass@ii{0}(#2)}{\psCompass@ii{#1}(#2)(#2)}}%
+\def\psCompass@i#1(#2){\@ifnextchar(%
+{\psCompass@ii{0}(#2)}%
+{\psCompass@ii{#1}(#2)(#2)}}%
 \def\psCompass@ii#1(#2)(#3){%-------------------------------    #1 Winkel,  #2 Ursprung P,  zweiter Punkt Q für Winkel
-  \begin@SpecialObj
-  \pst@killglue
-%  \begingroup
-  \pnode(#2){@PGD}%
-  \pnode(#3){@QGD}%
-%  \use@par
-  \pst@getcoor{@QGD}\pst@tempB % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempB
-  \pst@getcoor{@PGD}\pst@tempA % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempA
-  \addto@pscode{%
-gsave
+\begin@SpecialObj
+\pst@killglue
+\begingroup%
+\pnode(#2){@PGD}%
+\pnode(#3){@QGD}%
+\use@par%
+\pst@getcoor{@QGD}\pst@tempB % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempB
+\pst@getcoor{@PGD}\pst@tempA % --------------------------   Hohle die Koordinaten und speichere sie in \pst@tempA
+\addto@pscode{%
      \pst@RadMul /faktor ED
      \pst@PoCScale /skal ED
      #1 skal div 2 div /Radius ED
-     gsave
      skal dup scale % --------    Skaliere das ganze Geodreieck
-%    /sysfill {systemdict /fill get exec} def
+    /sysfill {systemdict /fill get exec} def
     /SLg \pst@PoCLength def
     /cm {28.45274 mul} def %  ----------------------------------------  Definiere cm als Längeneinheit mit der multipliziert wird
     \pst@tempA\tx@UserCoor /@y1 ED /@x1 ED % ----------  Definiere die Koordinaten des Ursprungs (zur Winkelberechnung benötigt)
@@ -804,6 +801,7 @@ gsave
     @x3 @y3 T % -------------------------------------------------------------------------------    Transformiere den Koordinatenursprung in P
     \pst@PoCAngle\space \ifPst@MCAngle\space @delta add 180 add \fi rotate % ------------------------------     Drehe das gesamte Geodreieck
 %-------------------------------------------------------------------------------------------------------------
+gsave
 %-------------------------------------------------------------------------------------------------------------
 %-------------- Linke Zirkelspitze-----------------------------------------------     0 cm 0 cm  0.15 cm 0 360 arc
 gsave
@@ -830,7 +828,8 @@ gsave
         -0.06 cm 0 cm rlineto
        closepath
      gsave
-       \pst@usecolor\PoCMineCol fill
+       \pst@usecolor\PoCMineCol
+         fill
     grestore
 grestore
 %---------------------------------------- Spindel --------------------------------------
@@ -879,7 +878,7 @@ gsave
          stroke
     grestore
 grestore
-%gsave %%%%%%%%%%%%%%%%%%%%%%
+gsave
 gsave
      newpath
         phiS neg rotate
@@ -895,7 +894,7 @@ gsave
          stroke
     grestore
 grestore
-%gsave %%%%%%%%%%%%%%%%%%%%%%
+gsave
 %---------------------------------------- Halterung zum Anfassen --------------------------------------
 gsave
      newpath
@@ -1089,7 +1088,6 @@ grestore
 %--------------------------------------------------------------------------------------------------------------------------------------------------
 %--------------- Ende nur grestore von gsave ganz am Anfang ------------------
 grestore
-grestore
 }%
 \pnode(!
    \pst@tempA \tx@UserCoor /@@y1 ED /@@x1 ED
@@ -1098,7 +1096,7 @@ grestore
     @@y1 @@y2 sub dup mul @@x1 @@x2 sub dup mul add \pst@RadMul dup mul mul /quadlg ED
     quadlg 0 eq { 180 } { @@y1 @@y2 sub @@x1 @@x2 sub atan } ifelse /\pst@AngleVS\space exch def  %------------   Winkelberechnung /\pst@AngleVS\space exch def
   0 0){MoneyforNothing}%
-%\endgroup
+\endgroup%
 \end@SpecialObj\ignorespaces%
 }%
 
