@@ -1061,7 +1061,7 @@ systemdict = {kind = 'dict', value = {
         break
       end
     end
-    if not mark_pos then error'Unmatched mark' end
+    if not mark_pos then error'unmatchedmark' end
     local dict = lua.newtable(0, (#operand_stack-mark_pos) // 2)
     for i = mark_pos + 1, #operand_stack - 1, 2 do
       push(operand_stack[i])
@@ -1084,14 +1084,14 @@ systemdict = {kind = 'dict', value = {
         return push(height-i)
       end
     end
-    error'Unmatched mark'
+    error'unmatchedmark'
   end,
   cleartomark = function()
     local entry
     repeat
       entry = pop()
     until (not entry) or type(entry) == 'table' and entry.kind == 'mark'
-    if not entry then error'Unmatched mark' end
+    if not entry then error'unmatchedmark' end
   end,
 
   ['if'] = function()
