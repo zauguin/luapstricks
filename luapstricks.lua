@@ -502,8 +502,16 @@ end
 local execute_ps, execute_tok
 
 local dictionary_stack
+
+-- About the bbox entry:
+--   - If the bounding box is not currently tracked, it is set to nil
+--   - Otherwise it's a linked list linked with the .next field. Every entry is a "matrix level"
+--   - if .bbox[1] is nil, the current matrix level does not have a set bounding box yet
+--   - Otherside it's {min_x, min_y, max_x, max_y}
+--   - If a .bbox.matrix entry is present then it describes the matrix which should be applied before the bbox gets added to the next "matrix level"
 local graphics_stack = {{
   matrix = {10, 0, 0, 10, 0, 0}, -- Chosen for consistency with GhostScript's pdfwrite. Must be the same as defaultmatrix
+  bbox = nil,
   linewidth = nil,
   current_path = nil,
   current_point = nil,
@@ -654,6 +662,12 @@ local function flush_delayed_table(delayed, state, force_start)
                                                                       delayed_matrix[5], delayed_matrix[6])
   if cm_string == "1.00000 0.00000 0.00000 1.00000 0.00000 0.00000 cm" then
     cm_string = nil
+  else
+    local bbox = state.bbox
+    if bbox then
+      state.bbox = { matrix = delayed_matrix, next = bbox }
+      delayed.matrix = {} -- Will be initialized in reset_delayed
+    end
   end
 
   -- Before flushing, make sure that the current graphics state has started.
@@ -684,6 +698,27 @@ local function flush_delayed(force_start)
     flush_delayed_table(graphics_stack[i+1].saved_delayed, graphics_stack[i]) -- No need for force_start here
   end
   return flush_delayed_table(delayed, graphics_stack[#graphics_stack], force_start)
+end
+
+-- Only call after flush_delayed
+local function register_point(state, x, y)
+  local bbox = state.bbox
+  if not bbox then return end
+  local min_x, min_y, max_x, max_y = bbox[1], bbox[2], bbox[3], bbox[4]
+  if min_x then
+    if x < min_x then
+      bbox[1] = x
+    elseif x > max_x then
+      bbox[3] = x
+    end
+    if y < min_y then
+      bbox[2] = y
+    elseif y > max_y then
+      bbox[4] = y
+    end
+  else
+    bbox[1], bbox[2], bbox[3], bbox[4] = x, y, x, y
+  end
 end
 
 function drawarc(xc, yc, r, a1, a2)
@@ -2234,12 +2269,20 @@ systemdict = {kind = 'dict', value = {
     local current_path = state.current_path
     if not current_path then return end
     current_path[#current_path+1] = 'f*'
+    flush_delayed()
+    local x
     for i = 1, #current_path do
-      if type(current_path[i]) == 'number' then
-        current_path[i] = string.format('%.5f', current_path[i])
+      local value = current_path[i]
+      if type(value) == 'number' then
+        current_path[i] = string.format('%.5f', value)
+        if x then
+          register_point(state, x, value)
+          x = nil
+        else
+          x = value
+        end
       end
     end
-    flush_delayed()
     pdfprint((table.concat(current_path, ' '):gsub('%.?0+ ', ' ')))
     state.current_path, state.current_point = nil
   end,
@@ -2248,12 +2291,20 @@ systemdict = {kind = 'dict', value = {
     local current_path = state.current_path
     if not current_path then return end
     current_path[#current_path+1] = 'f'
+    flush_delayed()
+    local x
     for i = 1, #current_path do
-      if type(current_path[i]) == 'number' then
-        current_path[i] = string.format('%.5f', current_path[i])
+      local value = current_path[i]
+      if type(value) == 'number' then
+        current_path[i] = string.format('%.5f', value)
+        if x then
+          register_point(state, x, value)
+          x = nil
+        else
+          x = value
+        end
       end
     end
-    flush_delayed()
     pdfprint((table.concat(current_path, ' '):gsub('%.?0+ ', ' ')))
     state.current_path, state.current_point = nil
   end,
@@ -2262,12 +2313,20 @@ systemdict = {kind = 'dict', value = {
     local current_path = state.current_path
     if not current_path then return end
     current_path[#current_path+1] = 'S'
+    flush_delayed()
+    local x
     for i = 1, #current_path do
-      if type(current_path[i]) == 'number' then
-        current_path[i] = string.format('%.5f', current_path[i])
+      local value = current_path[i]
+      if type(value) == 'number' then
+        current_path[i] = string.format('%.5f', value)
+        if x then
+          register_point(state, x, value)
+          x = nil
+        else
+          x = value
+        end
       end
     end
-    flush_delayed()
     pdfprint((table.concat(current_path, ' '):gsub('%.?0+ ', ' ')))
     state.current_path, state.current_point = nil
   end,
@@ -2340,6 +2399,9 @@ systemdict = {kind = 'dict', value = {
       local y = pop_num()
       local x = pop_num()
       pdfprint((string.format('%.5f %.5f %.5f %.5f re S', x, y, w, h):gsub('%.?0+ ', ' ')))
+      local state = graphics_stack[#graphics_stack]
+      register_point(state, x, y)
+      register_point(state, x + w, y + h)
     else
       error'Unsupported rectstroke variant'
     end
@@ -2356,6 +2418,9 @@ systemdict = {kind = 'dict', value = {
       local y = pop_num()
       local x = pop_num()
       pdfprint((string.format('%.5f %.5f %.5f %.5f re f', x, y, w, h):gsub('%.?0+ ', ' ')))
+      local state = graphics_stack[#graphics_stack]
+      register_point(state, x, y)
+      register_point(state, x + w, y + h)
     else
       error'Unsupported rectfill variant'
     end
@@ -2799,7 +2864,8 @@ systemdict = {kind = 'dict', value = {
   end,
 
   gsave = function()
-    graphics_stack[#graphics_stack+1] = table.copy(graphics_stack[#graphics_stack])
+    local bbox = graphics_stack[#graphics_stack].bbox
+    graphics_stack[#graphics_stack+1] = table.copy(graphics_stack[#graphics_stack], bbox and {[bbox] = {}})
     graphics_stack[#graphics_stack].saved_delayed = delayed
     delayed = {
       text = {},
@@ -2807,12 +2873,36 @@ systemdict = {kind = 'dict', value = {
     }
   end,
   grestore = function()
-    local saved_delayed = graphics_stack[#graphics_stack].saved_delayed
+    local state = graphics_stack[#graphics_stack]
+    local saved_delayed = state.saved_delayed
     if saved_delayed then
       delayed = saved_delayed
     else
       pdfprint'Q'
       reset_delayed(delayed)
+    end
+    local bbox = state.bbox
+    if bbox then
+      while bbox.next do
+        state.bbox = bbox.next
+        if bbox[1] then
+          local matrix = bbox.matrix
+          if matrix then
+            register_point(state, matrix_transform(bbox[1], bbox[2], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6]))
+            register_point(state, matrix_transform(bbox[3], bbox[4], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6]))
+          else
+            register_point(state, bbox[1], box[2])
+            register_point(state, bbox[3], box[4])
+          end
+        end
+        bbox = bbox.next
+      end
+      if bbox[1] then
+        local next_state = graphics_stack[#graphics_stack-1]
+        assert(not bbox.matrix)
+        register_point(next_state, bbox[1], bbox[2])
+        register_point(next_state, bbox[3], bbox[4])
+      end
     end
     graphics_stack[#graphics_stack] = nil
   end,
@@ -3362,6 +3452,28 @@ systemdict = {kind = 'dict', value = {
       push(tok)
       push(true)
     end
+  end,
+
+  ['.trackbbox'] = function()
+    local state = graphics_stack[#graphics_stack]
+    flush_delayed()
+    state.bbox = { next = state.bbox, start = true }
+  end,
+  ['.trackedbbox'] = function()
+    local state = graphics_stack[#graphics_stack]
+    local bbox = state.bbox
+    if not (bbox and bbox.start) then
+      error'trackedbbox without matching trackbbox'
+    end
+    state.bbox = bbox.next
+    if bbox[1] then
+      register_point(state, bbox[1], bbox[2])
+      register_point(state, bbox[3], bbox[4])
+    end
+    push(bbox[1] or 0)
+    push(bbox[2] or 0)
+    push(bbox[3] or 0)
+    push(bbox[4] or 0)
   end,
 
   revision = 1000,
