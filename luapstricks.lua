@@ -700,10 +700,7 @@ local function flush_delayed(force_start)
   return flush_delayed_table(delayed, graphics_stack[#graphics_stack], force_start)
 end
 
--- Only call after flush_delayed
-local function register_point(state, x, y)
-  local bbox = state.bbox
-  if not bbox then return end
+local function register_point_bbox(bbox, x, y)
   local min_x, min_y, max_x, max_y = bbox[1], bbox[2], bbox[3], bbox[4]
   if min_x then
     if x < min_x then
@@ -719,6 +716,29 @@ local function register_point(state, x, y)
   else
     bbox[1], bbox[2], bbox[3], bbox[4] = x, y, x, y
   end
+end
+
+-- Only call after flush_delayed
+local function register_point(state, x, y)
+  local bbox = state.bbox
+  if not bbox then return end
+  return register_point_bbox(bbox, x, y)
+end
+
+local function merge_bbox(bbox, after)
+  if bbox[1] then
+    local matrix = bbox.matrix
+    if matrix then
+      register_point_bbox(after, matrix_transform(bbox[1], bbox[2], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6]))
+      register_point_bbox(after, matrix_transform(bbox[1], bbox[4], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6]))
+      register_point_bbox(after, matrix_transform(bbox[3], bbox[2], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6]))
+      register_point_bbox(after, matrix_transform(bbox[3], bbox[4], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6]))
+    else
+      register_point_bbox(after, bbox[1], bbox[2])
+      register_point_bbox(after, bbox[3], bbox[4])
+    end
+  end
+  return after
 end
 
 function drawarc(xc, yc, r, a1, a2)
@@ -2881,27 +2901,12 @@ systemdict = {kind = 'dict', value = {
       pdfprint'Q'
       reset_delayed(delayed)
     end
-    local bbox = state.bbox
-    if bbox then
-      while bbox.next do
-        state.bbox = bbox.next
-        if bbox[1] then
-          local matrix = bbox.matrix
-          if matrix then
-            register_point(state, matrix_transform(bbox[1], bbox[2], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6]))
-            register_point(state, matrix_transform(bbox[3], bbox[4], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5], matrix[6]))
-          else
-            register_point(state, bbox[1], box[2])
-            register_point(state, bbox[3], box[4])
-          end
-        end
-        bbox = bbox.next
-      end
-      if bbox[1] then
-        local next_state = graphics_stack[#graphics_stack-1]
-        assert(not bbox.matrix)
-        register_point(next_state, bbox[1], bbox[2])
-        register_point(next_state, bbox[3], bbox[4])
+    local upper_state = graphics_stack[#graphics_stack-1]
+    local upper_bbox = upper_state.bbox
+    if upper_bbox then
+      local bbox = assert(state.bbox)
+      while upper_bbox ~= bbox do
+        bbox = merge_bbox(bbox, bbox.next or upper_bbox)
       end
     end
     graphics_stack[#graphics_stack] = nil
@@ -3459,17 +3464,22 @@ systemdict = {kind = 'dict', value = {
     flush_delayed()
     state.bbox = { next = state.bbox, start = true }
   end,
+  -- Trackedbbox should only be invoked if the current matrix is essentially the same
+  -- as in the corresponding .trackbbox, otherwise everything gets messed up.
+  -- This isn't checked, mostly because we don't want a check to be too sensitive.
   ['.trackedbbox'] = function()
     local state = graphics_stack[#graphics_stack]
     local bbox = state.bbox
-    if not (bbox and bbox.start) then
+    if not bbox then
       error'trackedbbox without matching trackbbox'
     end
-    state.bbox = bbox.next
-    if bbox[1] then
-      register_point(state, bbox[1], bbox[2])
-      register_point(state, bbox[3], bbox[4])
+    while not bbox.start do
+      if not bbox.next then
+        error'Illegal nesting of trackbbox/trackedbbox and gsave/grestore'
+      end
+      bbox = merge_bbox(bbox, bbox.next)
     end
+    state.bbox = bbox.next and merge_bbox(bbox, bbox.next)
     push(bbox[1] or 0)
     push(bbox[2] or 0)
     push(bbox[3] or 0)
