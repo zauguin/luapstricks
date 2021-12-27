@@ -4074,6 +4074,34 @@ pop
 %
 %------------------------------- pspicture ------------------------------
 %
+\def\ps@margin@left{0.5 }
+\let\ps@margin@right\ps@margin@left
+\let\ps@margin@top\ps@margin@left
+\let\ps@margin@bottom\ps@margin@left
+
+\def\ps@readmargin#1 #2 #3 #4 #5\@nil{%
+    \ifx\\#2#3#4\\%
+        \def\ps@margin@left{#1 }%
+        \let\ps@margin@right\ps@margin@left
+        \let\ps@margin@top\ps@margin@left
+        \let\ps@margin@bottom\ps@margin@left
+    \else
+    \ifx\\#3#4\\%
+        \def\ps@margin@left{#1 }%
+        \let\ps@margin@right\ps@margin@left
+        \def\ps@margin@bottom{#2 }%
+        \let\ps@margin@top\ps@margin@bottom
+    \else
+        \def\ps@margin@left{#1 }%
+        \def\ps@margin@bottom{#2 }%
+        \def\ps@margin@right{#3 }%
+        \def\ps@margin@top{#4 }%
+    \fi\fi
+\typeout{>>>>>>>>>\ps@margin@left,\ps@margin@bottom,\ps@margin@right,\ps@margin@top}%
+}%
+\define@key[psset]{pstricks}{margin}[0.5]{\ps@readmargin#1 {} {} {} {} \@nil}
+\psset[pstricks]{margin=0.5}
+%
 \newcount\psimagectr
 \psimagectr=0
 %
@@ -4081,8 +4109,10 @@ pop
 \def\pst@picture{\@ifnextchar[{\pst@@picture}{\pst@@picture[]}}
 \def\pst@@picture[#1]{\@ifnextchar({\pst@@picture@i[#1]}{\pst@@picture@@i[#1]}}%
 \def\pst@@picture@@i[#1]{%
-  \IfFileExists{\jobname-\the\numexpr\psimagectr+1.psaux}{\input{\jobname-\the\numexpr\psimagectr+1.psaux}}{\def\pscoor{(10,10)}}%
-%  \typeout{>>>\pscoor}%
+  \def\pscoor{(10,10)}%
+  \typeout{>>>Check for file \jobname-\the\numexpr\psimagectr+1.psaux}%
+  \IfFileExists{\jobname-\the\numexpr\psimagectr+1.psaux}{\input{\jobname-\the\numexpr\psimagectr+1.psaux}}{}%
+  \typeout{>>>\pscoor}%
   \edef\@temp{[#1]\pscoor}%
   \expandafter\pst@@picture@i\@temp}
 %
@@ -4091,7 +4121,6 @@ pop
   {\pst@@@picture[#1](0,0)(#3,#4)}}
 %
 \def\pst@@@picture[#1](#2,#3)(#4,#5){%
-%  \pstVerb{ .trackbbox }%
   \pssetxlength\pst@dima{#2}%
   \pssetylength\pst@dimb{#3}%
   \pssetxlength\pst@dimc{#4}%
@@ -4118,28 +4147,40 @@ pop
   \ifshowgrid\ifnum\showgridp@s=0\psgrid[style=gridstyle]\fi\fi
 % ----------- 1.10/12 end hv -------------------
   \ignorespaces%			% 2008-12-07
+  \pstVerb{ .trackbbox }\global\advance\psimagectr by 1
   \ifPst@pgffunctions\pstVerb{ pgffunctions }\fi% hv 2013-04-17
 }
 
 \def\pic@coor{(0,0)(0,0)(10,10)}
 \def\endpspicture{%
-%  \pstVerb{
-%    .trackedbbox        % xmin ymin xmax ymax
-%    /YMAX exch def /XMAX exch def /YMIN exch def /XMIN exch def
-%    XMIN YMIN XMAX XMIN sub YMAX YMIN sub
-%    rectstroke 
-%    (\jobname.psaux) (w) file /CoorFile exch def
-%    (\\def\\pscoor{\string\() CoorFile exch writestring
-%    XMIN 20 string cvs CoorFile exch writestring
-%    (pt, ) CoorFile exch writestring
-%    YMIN 20 string cvs CoorFile exch writestring
-%    (pt\string\)\string\() CoorFile exch writestring
-%    XMAX XMIN sub 20 string cvs CoorFile exch writestring
-%    (pt, ) CoorFile exch writestring
-%    YMAX YMIN sub 20 string cvs CoorFile exch writestring
-%    (pt\string\)}) CoorFile exch writestring
-%    CoorFile closefile
-%  }%  
+\iftrue
+  \pstVerb{
+     .trackedbbox        % xmin ymin xmax ymax
+     % Die Koordinaten sind relativ zur Seite, also verschieben wir sie
+     % zum aktuellen Punkt.
+     currentpoint matrix translate dup invertmatrix dup 4 1 roll
+     transform
+     /YMAX exch def /XMAX exch def
+     transform
+     /YMIN exch def /XMIN exch def
+%     XMIN YMIN XMAX XMIN sub YMAX YMIN sub
+     % Um jetzt an diesen Koordinaten zu zeichnen, ist das natürlich
+     % ungünstig und wir müssen zurück schieben... (Oder den Code
+     % umordnen, aber warum einfach wenns auch kompliziert geht ;P)
+%     gsave currentpoint translate newpath rectstroke grestore %  nur für den test
+     (\jobname-\the\psimagectr.psaux) (w) file /CoorFile exch def
+     (\\gdef\\pscoor{\string\() CoorFile exch writestring
+     XMIN \ps@margin@left sub 20 string cvs CoorFile exch writestring
+     (pt, ) CoorFile exch writestring
+     YMIN \ps@margin@bottom sub 20 string cvs CoorFile exch writestring
+     (pt\string\)\string\() CoorFile exch writestring
+     XMAX \ps@margin@right add 20 string cvs CoorFile exch writestring
+     (pt, ) CoorFile exch writestring
+     YMAX \ps@margin@top add 20 string cvs CoorFile exch writestring
+     (pt\string\)}\% ) CoorFile exch writestring
+     CoorFile closefile
+   }%  
+  \fi
   \ifshowgrid\ifnum\showgridp@s>0
     \psgrid[xunit=\sh@wgridXunit,yunit=\sh@wgridYunit,style=gridstyle]\fi\fi
   \pst@killglue
