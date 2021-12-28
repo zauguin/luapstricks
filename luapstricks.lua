@@ -1371,7 +1371,11 @@ systemdict = {kind = 'dict', value = {
           local after = node.direct.getnext(n)
           local head = node.direct.getlist(parent)
           node.direct.setnext(n, nil)
-          node.direct.setlist(parent, subbox.box)
+          node.direct.setlist(parent, n)
+          local state = graphics_stack[#graphics_stack]
+          local w, h, d = node.direct.dimensions(n)
+          register_point(state, 0, -d/65781.76)
+          register_point(state, w/65781.76, h/65781.76)
           vf.node(parent)
           node.direct.setnext(n, after)
           node.direct.setlist(parent, head)
@@ -3848,7 +3852,16 @@ local register_texbox do
   function register_texbox(box)
     id = id + 1
     box = setmetatable({box = node.direct.todirect(box)}, meta)
-    local op = function() flush_delayed() vf.push() vf.node(box.box) vf.pop() end
+    local op = function()
+      flush_delayed()
+      local state = graphics_stack[#graphics_stack]
+      local w, h, d = node.direct.dimensions(box.box)
+      register_point(state, 0, -d/65781.76)
+      register_point(state, w/65781.76, h/65781.76)
+      vf.push()
+      vf.node(box.box)
+      vf.pop()
+    end
     lua_node_lookup[op] = box
     dict[id] = op
     return id
