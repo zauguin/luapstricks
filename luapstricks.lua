@@ -931,6 +931,7 @@ local function generic_show(str, ax, ay)
   local w = 0
   if fonttype == 0x1CA then
     local characters = assert(font.getfont(fid)).characters
+    local max_d, max_h = 0, 0
     flush_delayed()
     if pdfprint ~= gobble then
       vf.push()
@@ -945,12 +946,29 @@ local function generic_show(str, ax, ay)
         end
       end
       local char = characters[b]
-      w = w + (char and char.width or 0)
-    end
-    if pdfprint ~= gobble then
-      vf.pop()
+      if char then
+        w = w + (char.width or 0)
+        if char.depth and char.depth > max_d then
+          max_d = char.depth
+        end
+        if char.height and char.height > max_h then
+          max_h = char.height
+        end
+      end
     end
     w = w/65781.76
+    if pdfprint ~= gobble then
+      max_d = max_d/65781.76
+      max_h = max_h/65781.76
+      register_point(state, 0, -max_d)
+      if ax then
+        local count = #str
+        register_point(state, w + count * ax, max_h + count * ay)
+      else
+        register_point(state, w, max_h)
+      end
+      vf.pop()
+    end
   elseif fonttype == 3 then
     for b in string.bytes(str) do
       systemdict.value.gsave()
