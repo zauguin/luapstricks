@@ -4124,7 +4124,8 @@ do
   local ps_rgb = 'rgb ' * l.C(l.P(1)^0) * l.Cc' setrgbcolor' * l.Cc'rgb '
   local ps_cmyk = 'cmyk ' * l.C(l.P(1)^0) * l.Cc' setcmykcolor' * l.Cc'cmyk '
   local ps_gray = 'gray ' * l.C(l.P(1)^0) * l.Cc' setgray' * l.Cc'gray '
-  local pscolor = ps_rgb + ps_gray + ps_gray
+  local ps_hsb = 'hsb ' * l.C(l.P(1)^0) * l.Cc' sethsbcolor' * l.Cc'hsb '
+  local pscolor = ps_rgb + ps_gray + ps_gray + ps_hsb
   local pdf_rgb = l.Cmt(l.C(number * whitespace * number * whitespace * number / 0) * whitespace * 'rg'
                 * whitespace * l.C(number * whitespace * number * whitespace * number / 0) * whitespace * 'RG' * -1, function(s, p, a, b)
                   if a == b then
