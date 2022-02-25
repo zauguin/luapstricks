@@ -24,6 +24,9 @@ if luatexbase then
   }
 end
 
+local setwhatsitfield = node.setwhatsitfield or node.setfield
+local late_lua_sub = node.subtype'late_lua'
+
 local pdfprint = vf.pdf -- Set later to have the right mode
 local function gobble() end
 
@@ -4100,16 +4103,17 @@ local modes = tex.getmodevalues()
 local func = luatexbase.new_luafunction'luaPST'
 token.set_lua('luaPST', func, 'protected')
 lua.get_functions_table()[func] = function()
-  local context = string.format('%s:%i', status.filename, status.linenumber)
+  local readstate = status.readstate or status
+  local context = string.format('%s:%i', readstate.filename, readstate.linenumber)
   local direct = token.scan_keyword'direct'
   local tokens = token.scan_argument(true)
-  local n = node.new('whatsit', 'late_lua')
-  function n.data()
+  local n = node.new('whatsit', late_lua_sub)
+  setwhatsitfield(n, 'data', function()
     assert(not ps_tokens)
     ps_tokens = tokens
     ps_direct = direct
     ps_context = context
-  end
+  end)
   local nn = node.new('glyph')
   nn.subtype = 256
   nn.font, nn.char = fid, 0x1F3A8
