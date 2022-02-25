@@ -3997,20 +3997,57 @@ function execute_string(str, context)
   end
 end
 
+--[[
+  local readstate = status.readstate or status
+  local context = string.format('%s:%i', readstate.filename, readstate.linenumber)
+  local tokens = token.scan_argument(true)
+  local n = node.new('whatsit', late_lua_sub)
+  setwhatsitfield(n, 'data', function()
+    assert(not ps_tokens)
+    ps_tokens = tokens
+    ps_context = context
+  end)
+  local nn = node.new('glyph')
+  nn.subtype = 256
+  nn.font, nn.char = fid, 0x1F3A8
+  n.next = nn
+  if tex.nest.ptr == 0 then
+    -- Main vertical list. Here we might appear before the page starts properly
+    -- and should not freeze page specifications. Since we don't have any outer dimensions,
+    -- we can ensure this by sneaking our node into the current page list whithout going though
+    -- build_page.
+    tex.triggerbuildpage() -- First ensure that everything else is contributed properly.
+    tex.lists.page_head = node.insert_after(tex.lists.page_head, nil, n)
+  else
+    node.write(n)
+  end
+end
+]]
 local func = luatexbase.new_luafunction'luaPSTheader'
 token.set_lua('luaPSTheader', func, 'protected')
 lua.get_functions_table()[func] = function()
-  local stack_depth = #operand_stack
-  local filename = token.scan_argument()
-  local f = io.open(kpse.find_file(filename, 'PostScript header'), 'r')
-  local src = f:read'a'
-  f:close()
-  execute_string(src, filename)
-  if #operand_stack ~= stack_depth then
-    error'Unexpected values on operand stack'
-  end
+  local is_inline = token.scan_keyword'inline'
+  local readstate = status.readstate or status
+  local context = is_inline and string.format('%s:%i', readstate.filename, readstate.linenumber)
+  local data = token.scan_argument(true)
+  local n = node.new('whatsit', late_lua_sub)
+  setwhatsitfield(n, 'data', function()
+    if not is_inline then
+      context = data
+      local f = io.open(kpse.find_file(data, 'PostScript header'), 'r')
+      data = f:read'a'
+      f:close()
+    end
+    local stack_depth = #operand_stack
+    execute_string(data, context)
+    if #operand_stack ~= stack_depth then
+      error'Unexpected values on operand stack'
+    end
+  end)
+  node.write(n)
 end
 
+--[[
 local func = luatexbase.new_luafunction'showPS'
 token.set_lua('showPS', func, 'protected')
 lua.get_functions_table()[func] = function()
@@ -4020,6 +4057,7 @@ lua.get_functions_table()[func] = function()
   execute_ps(tokens)
   systemdict.value.stack()
 end
+]]
 
 local ps_tokens, ps_direct, ps_context, ps_pos_x, ps_pos_y
 local fid = font.define{
