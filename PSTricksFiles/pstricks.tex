@@ -457,6 +457,8 @@
   \def\pstdriver{LuaLaTeX}%
   \def\pstverb{\luaPST}%
   \def\pstVerb{\luaPST direct}%
+  \def\pstVerb{\luaPST direct}%
+  \def\pstVerbset{\luaPSTheader inline}%
   \def\pstunit{1bp}%
   \def\pstverbscale{}%
   \def\pstnodescale{}%
@@ -468,6 +470,7 @@
 \else
   \def\pstVerb#1{\pst@configerr\pstVerb}%
   \def\pstverb#1{\pst@configerr\pstverb}%
+  \def\pstVerbset{\pstVerb}%
   \def\pstverbscale{\pst@configerr\pstverbscale}%
   \def\pstrotate{\pst@configerr\pstrotate}%
   \def\pstheader#1{\pst@configerr\pstheader}%
@@ -483,6 +486,7 @@
   \def\pstheader##1{}%
   \def\pstverb##1{}%
   \def\pstVerb##1{}%
+  \def\pstVerbset##1{}%
   \PSTricksfalse%
 }
 \@ifundefined{pst@def}{\def\pst@def#1<#2>{\@namedef{tx@#1}{#2 }}}{}
@@ -495,6 +499,7 @@
 \def\pst@dict{tx@Dict begin }
 \def\pst@theheaders{pstricks.pro, pst-algparser.pro}
 \def\pst@Verb#1{\pstVerb{\pst@dict #1 end}}
+\def\pst@Verbset#1{\pstVerbset{\pst@dict #1 end}}
 \def\tx@Atan{Atan }
 \def\tx@Div{Div }
 \def\tx@NET{NET }
@@ -757,11 +762,11 @@
 \def\@degrees[#1]{%
   \pst@checknum{#1}\pst@tempg
   \edef\pst@angleunit{360 \pst@tempg div mul }%
-  \pstVerb{tx@Dict begin startGlobal /pst@angleunit {\pst@angleunit} def endGlobal end}%
+  \pstVerbset{tx@Dict begin startGlobal /pst@angleunit {\pst@angleunit} def endGlobal end}%
   \ignorespaces}
 %
 \def\radians{\def\pst@angleunit{57.2956 mul }%
-  \pstVerb{tx@Dict begin startGlobal /pst@angleunit {\pst@angleunit} def endGlobal end}}%
+  \pstVerbset{tx@Dict begin startGlobal /pst@angleunit {\pst@angleunit} def endGlobal end}}%
 \def\pst@angleunit{}%
 %
 \def\SpecialCoor{%
@@ -3737,14 +3742,14 @@ pop
 \def\psset@@rot#1\@nil{%
   \def\next##1@#1=##2@##3\@nil{%
     \ifx##2\relax\pst@getangle{#1}\psk@rot \else\def\psk@rot{##2}\fi%
-    \pst@Verb{ gsave  STV CP T /ps@rot \ifx\psk@rot\@empty 0 \else \psk@rot \fi def grestore }% (MJS)
+    \pst@Verbset{ gsave  STV CP T /ps@rot \ifx\psk@rot\@empty 0 \else \psk@rot \fi def grestore }% (MJS)
   }%
   \expandafter\next\pst@rottable @#1=\relax @\@nil}
 %
 \def\psset@@@rot#1#2\@nil{%
   \psset@@rot#2\@nil%
   \edef\psk@rot{\pst@rotlist \ifx\psk@rot\@empty\else\space ps@rot add \fi}%
-  \pst@Verb{ gsave  STV CP T /ps@rot \ifx\psk@rot\@empty 0 \else \psk@rot \fi def grestore }}% (MJS)
+  \pst@Verbset{ gsave  STV CP T /ps@rot \ifx\psk@rot\@empty 0 \else \psk@rot \fi def grestore }}% (MJS)
 %
 %\def\psset@@rot#1\@nil{%
 %\def\ps@next##1@#1=##2@##3\@nil{%
@@ -3904,7 +3909,7 @@ pop
       \def\psk@uputref{##3}%
     \fi}%
   \expandafter\next\pst@refangletable @#1=\relax"@\@nil%
-  \pst@Verb{ gsave STV CP T /ps@refangle \psk@refangle\space def grestore }%ADDED (MJS)
+  \pst@Verbset{ gsave STV CP T /ps@refangle \psk@refangle\space def grestore }%ADDED (MJS)
 }
 %
 \def\pst@refangletable{%
@@ -4239,7 +4244,7 @@ pop
 \@namedef{endpspicture*}{\endpspicture}
 %
 \ifx\pstcustomize\relax \input pstricks.con \fi
-\pstVerb{0.8 setlinewidth 0 setgray}%    default setting (needed for lualatex)
+\pstVerbset{0.8 setlinewidth 0 setgray}%    default setting (needed for lualatex)
 
 \catcode`\@=\PstAtCode\relax
 %
