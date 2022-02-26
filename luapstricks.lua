@@ -4053,7 +4053,11 @@ lua.get_functions_table()[func] = function()
     operand_stack[height + 1], operand_stack[height + 2] = x/65781.76, y/65781.76
     systemdict.value.moveto()
 
+    local saved_pdfprint = pdfprint
+    pdfprint = function(s) return pdf.print('direct', s .. '\n') end
     execute_string(data, context)
+    flush_delayed()
+    pdfprint = saved_pdfprint
     if #operand_stack ~= stack_depth then
       error'Unexpected values on operand stack'
     end
