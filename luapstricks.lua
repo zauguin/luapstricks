@@ -4047,6 +4047,12 @@ lua.get_functions_table()[func] = function()
       f:close()
     end
     local stack_depth = #operand_stack
+
+    local x, y = pdf.getpos()
+    local height = #operand_stack
+    operand_stack[height + 1], operand_stack[height + 2] = x/65781.76, y/65781.76
+    systemdict.value.moveto()
+
     execute_string(data, context)
     if #operand_stack ~= stack_depth then
       error'Unexpected values on operand stack'
