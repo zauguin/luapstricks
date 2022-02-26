@@ -2105,8 +2105,12 @@ systemdict = {kind = 'dict', value = {
     local state = graphics_stack[#graphics_stack]
     local current_path = state.current_path
     if current_path then
-      local i = #current_path + 1
-      current_path[i], current_path[i+1], current_path[i+2] = x, y, 'm'
+      local i = #current_path
+      if i ~= 1 and current_path[i] == 'm' then
+        current_path[i-2], current_path[i-1] = x, y
+      else
+        current_path[i+1], current_path[i+2], current_path[i+3] = x, y, 'm'
+      end
       local current_point = state.current_point
       current_point[1], current_point[2] = x, y
     else
@@ -2121,8 +2125,12 @@ systemdict = {kind = 'dict', value = {
     local x = pop_num()
     local current_point = state.current_point
     x, y = current_point[1] + x, current_point[2] + y
-    local i = #current_path + 1
-    current_path[i], current_path[i+1], current_path[i+2] = x, y, 'm'
+    local i = #current_path
+    if i ~= 1 and current_path[i] == 'm' then
+      current_path[i-2], current_path[i-1] = x, y
+    else
+      current_path[i+1], current_path[i+2], current_path[i+3] = x, y, 'm'
+    end
     current_point[1], current_point[2] = x, y
   end,
   lineto = function()
