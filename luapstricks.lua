@@ -4164,36 +4164,20 @@ lua.get_functions_table()[func] = function()
   local direct = token.scan_keyword'direct'
   local tokens = token.scan_argument(true)
   local n = node.new('whatsit', late_lua_sub)
-  setwhatsitfield(n, 'data', function()
+  setwhatsitfield(n, 'data', function(n)
     assert(not ps_tokens)
     ps_tokens = tokens
     ps_direct = direct
     ps_context = context
+
+    local nn = node.new('glyph')
+    nn.subtype = 256
+    nn.font, nn.char = fid, 0x1F3A8
+    local list = node.new('hlist')
+    list.head = nn
+    node.insert_after(n, n, list)
   end)
-  local nn = node.new('glyph')
-  nn.subtype = 256
-  nn.font, nn.char = fid, 0x1F3A8
-  n.next = nn
-  local modename = modes[math.abs(tex.nest.top.mode)]
-  if 'horizontal' ~= modename then
-    n = node.hpack(n) -- Glyphs can only appear in hmode
-    if 'math' == modename then
-      local d = node.new'disc'
-      d.penalty = 10000
-      d.replace = n
-      n = d
-    end
-  end
-  if tex.nest.ptr == 0 then
-    -- Main vertical list. Here we might appear before the page starts properly
-    -- and should not freeze page specifications. Since we don't have any outer dimensions,
-    -- we can ensure this by sneaking our node into the current page list whithout going though
-    -- build_page.
-    tex.triggerbuildpage() -- First ensure that everything else is contributed properly.
-    tex.lists.page_head = node.insert_after(tex.lists.page_head, nil, n)
-  else
-    node.write(n)
-  end
+  node.write(n)
 end
 
 do
