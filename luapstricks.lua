@@ -4175,6 +4175,7 @@ lua.get_functions_table()[func] = function()
     nn.font, nn.char = fid, 0x1F3A8
     local list = node.new('hlist')
     list.head = nn
+    list.direction = 0
     node.insert_after(n, n, list)
   end)
   node.write(n)
