@@ -1641,6 +1641,56 @@ systemdict = {kind = 'dict', value = {
     push(a<b)
   end,
 
+  -- The following two are GhostScript extensions
+  max = function()
+    local b, arg2 = pop()
+    local a, arg1 = pop(arg2)
+    local ta, tb = type(a), type(b)
+    if ta == 'table' and a.kind == 'executable' then
+      a = a.value ta = type(a)
+    end
+    if tb == 'table' and b.kind == 'executable' then
+      b = b.value tb = type(b)
+    end
+    if ta == 'number' then
+      if tb ~= 'number' then
+        ps_error('typecheck', arg1, arg2)
+      end
+    elseif ta == 'table' and ta.kind == 'string' then
+      if tb ~= 'table' or tb.kind ~= 'string' then
+        ps_error('typecheck', arg1, arg2)
+      end
+      a, b = a.value, b.value
+    else
+      ps_error('typecheck', arg1, arg2)
+    end
+    push(a > b and a or b)
+  end,
+  min = function()
+    local b, arg2 = pop()
+    local a, arg1 = pop(arg2)
+    local ta, tb = type(a), type(b)
+    if ta == 'table' and a.kind == 'executable' then
+      a = a.value ta = type(a)
+    end
+    if tb == 'table' and b.kind == 'executable' then
+      b = b.value tb = type(b)
+    end
+    if ta == 'number' then
+      if tb ~= 'number' then
+        ps_error('typecheck', arg1, arg2)
+      end
+    elseif ta == 'table' and ta.kind == 'string' then
+      if tb ~= 'table' or tb.kind ~= 'string' then
+        ps_error('typecheck', arg1, arg2)
+      end
+      a, b = a.value, b.value
+    else
+      ps_error('typecheck', arg1, arg2)
+    end
+    push(a < b and a or b)
+  end,
+
   add = function()
     local b, arg2 = pop_num()
     local a = pop_num(arg2)
