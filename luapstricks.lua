@@ -1,5 +1,5 @@
 ---- luapstricks.lua
--- Copyright 2021 Marcel Krüger <tex@2krueger.de>
+-- Copyright 2021--2022 Marcel Krüger <tex@2krueger.de>
 --
 -- This work may be distributed and/or modified under the
 -- conditions of the LaTeX Project Public License, either version 1.3
@@ -18,8 +18,8 @@
 if luatexbase then
   luatexbase.provides_module {
     name = 'luapstricks',
-    version = 'v0.4',
-    date = '2021-12-29',
+    version = 'v0.5',
+    date = '2022-04-20',
     description = 'PSTricks backend for LuaLaTeX',
   }
 end

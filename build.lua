@@ -14,7 +14,7 @@ tdsroot = "lualatex"
 
 uploadconfig = {
   pkg = module,
-  version = "v0.4",
+  version = "v0.5",
   author = "Marcel Krüger",
   license = "lppl1.3",
   summary = "A PSTricks backend for LuaLaTeX",
