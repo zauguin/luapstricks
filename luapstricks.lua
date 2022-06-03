@@ -4055,32 +4055,6 @@ function execute_string(str, context)
   end
 end
 
---[[
-  local readstate = status.readstate or status
-  local context = string.format('%s:%i', readstate.filename, readstate.linenumber)
-  local tokens = token.scan_argument(true)
-  local n = node.new('whatsit', late_lua_sub)
-  setwhatsitfield(n, 'data', function()
-    assert(not ps_tokens)
-    ps_tokens = tokens
-    ps_context = context
-  end)
-  local nn = node.new('glyph')
-  nn.subtype = 256
-  nn.font, nn.char = fid, 0x1F3A8
-  n.next = nn
-  if tex.nest.ptr == 0 then
-    -- Main vertical list. Here we might appear before the page starts properly
-    -- and should not freeze page specifications. Since we don't have any outer dimensions,
-    -- we can ensure this by sneaking our node into the current page list whithout going though
-    -- build_page.
-    tex.triggerbuildpage() -- First ensure that everything else is contributed properly.
-    tex.lists.page_head = node.insert_after(tex.lists.page_head, nil, n)
-  else
-    node.write(n)
-  end
-end
-]]
 local func = luatexbase.new_luafunction'luaPSTheader'
 token.set_lua('luaPSTheader', func, 'protected')
 lua.get_functions_table()[func] = function()
@@ -4115,17 +4089,55 @@ lua.get_functions_table()[func] = function()
   node.write(n)
 end
 
---[[
-local func = luatexbase.new_luafunction'showPS'
-token.set_lua('showPS', func, 'protected')
-lua.get_functions_table()[func] = function()
-  local command = token.scan_argument(true)
-  -- This will break if any graphics commands are used.
-  local tokens = parse_ps(command)
-  execute_ps(tokens)
-  systemdict.value.stack()
+-- If x, y shall be present iff direct ~= 'immediate'
+local function outer_execute(tokens, direct, context, x, y)
+  local TeXDict = userdict.value.TeXDict.value
+  local saved_ocount = TeXDict.ocount
+  local height = #operand_stack
+  TeXDict.ocount = height
+  local graphics_height
+  if direct ~= 'immediate' then
+    operand_stack[height + 1], operand_stack[height + 2] = x/65781.76, y/65781.76
+    if direct then
+      systemdict.value.moveto()
+    else
+      graphics_height = #graphics_stack
+      systemdict.value.gsave()
+      systemdict.value.translate()
+    end
+  end
+  local success, err = pcall(execute_string, tokens, context)
+  if not success then
+    if type(err) == 'table' and err.pserror then
+      tex.error(string.format('luapstricks: %q error occured while executing PS code from %q', err.pserror, err.context), {
+        string.format('The error occured while executing the PS command %q.\n%s', err.tok, err.trace)
+      })
+    else
+      error(err, 0)
+    end
+  end
+  flush_delayed()
+  if not direct then
+    systemdict.value.grestore()
+    if graphics_height ~= #graphics_stack then
+      if graphics_height < #graphics_stack then
+        texio.write_nl"luapstricks: PS block contains unbalanced gsave. grestore will be executed to compensate."
+        repeat
+          systemdict.value.grestore()
+        until graphics_height == #graphics_stack
+      else
+        texio.write_nl"luapstricks: PS block contains unbalanced grestore."
+      end
+    end
+    height = TeXDict.ocount or height
+    local new_height = #operand_stack
+    assert(new_height >= height)
+    for k = height + 1, new_height do
+      operand_stack[k] = nil
+    end
+    TeXDict.ocount = saved_ocount
+  end
 end
-]]
 
 local ps_tokens, ps_direct, ps_context, ps_pos_x, ps_pos_y
 local fid = font.define{
@@ -4151,54 +4163,9 @@ local fid = font.define{
     [1] = {
       commands = {
         {'lua', function()
-          local tokens, direct = assert(ps_tokens), ps_direct
-          ps_tokens = nil
-          local x, y = pdf.getpos()
-          local TeXDict = userdict.value.TeXDict.value
-          local saved_ocount = TeXDict.ocount
-          local height = #operand_stack
-          TeXDict.ocount = height
-          operand_stack[height + 1], operand_stack[height + 2] = ps_pos_x/65781.76, ps_pos_y/65781.76
-          ps_pos_x, ps_pos_y = nil
-          local graphics_height
-          if direct then
-            systemdict.value.moveto()
-          else
-            graphics_height = #graphics_stack
-            systemdict.value.gsave()
-            systemdict.value.translate()
-          end
-          local success, err = pcall(execute_string, tokens, ps_context)
-          if not success then
-            if type(err) == 'table' and err.pserror then
-              tex.error(string.format('luapstricks: %q error occured while executing PS code from %q', err.pserror, err.context), {
-                string.format('The error occured while executing the PS command %q.\n%s', err.tok, err.trace)
-              })
-            else
-              error(err, 0)
-            end
-          end
-          flush_delayed()
-          if not direct then
-            systemdict.value.grestore()
-            if graphics_height ~= #graphics_stack then
-              if graphics_height < #graphics_stack then
-                texio.write_nl"luapstricks: PS block contains unbalanced gsave. grestore will be executed to compensate."
-                repeat
-                  systemdict.value.grestore()
-                until graphics_height == #graphics_stack
-              else
-                texio.write_nl"luapstricks: PS block contains unbalanced grestore."
-              end
-            end
-            height = TeXDict.ocount or height
-            local new_height = #operand_stack
-            assert(new_height >= height)
-            for k = height + 1, new_height do
-              operand_stack[k] = nil
-            end
-            TeXDict.ocount = saved_ocount
-          end
+          local tokens, x, y = assert(ps_tokens), ps_pos_x, ps_pos_y
+          ps_tokens, ps_pos_x, ps_pos_y = nil
+          return outer_execute(tokens, ps_direct, ps_context, x, y)
         end}
       }
     },
@@ -4211,24 +4178,35 @@ token.set_lua('luaPST', func, 'protected')
 lua.get_functions_table()[func] = function()
   local readstate = status.readstate or status
   local context = string.format('%s:%i', readstate.filename, readstate.linenumber)
-  local direct = token.scan_keyword'direct'
+  local direct = token.scan_keyword'immediate' and 'immediate' or token.scan_keyword'direct' and 'direct'
+  local file = token.scan_keyword'file'
   local tokens = token.scan_argument(true)
-  local n = node.new('whatsit', late_lua_sub)
-  setwhatsitfield(n, 'data', function(n)
-    assert(not ps_tokens)
-    ps_tokens = tokens
-    ps_direct = direct
-    ps_context = context
+  if file then
+    context = tokens
+    local f = io.open(kpse.find_file(tokens, 'PostScript header'), 'r')
+    tokens = f:read'a'
+    f:close()
+  end
+  if direct == 'immediate' then
+    outer_execute(tokens, direct, context)
+  else
+    local n = node.new('whatsit', late_lua_sub)
+    setwhatsitfield(n, 'data', function(n)
+      assert(not ps_tokens)
+      ps_tokens = tokens
+      ps_direct = direct
+      ps_context = context
 
-    local nn = node.new('glyph')
-    nn.subtype = 256
-    nn.font, nn.char = fid, 0x1F3A8
-    local list = node.new('hlist')
-    list.head = nn
-    list.direction = 0
-    node.insert_after(n, n, list)
-  end)
-  node.write(n)
+      local nn = node.new('glyph')
+      nn.subtype = 256
+      nn.font, nn.char = fid, 0x1F3A8
+      local list = node.new('hlist')
+      list.head = nn
+      list.direction = 0
+      node.insert_after(n, n, list)
+    end)
+    node.write(n)
+  end
 end
 
 do
