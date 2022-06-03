@@ -29,6 +29,13 @@ local late_lua_sub = node.subtype'late_lua'
 
 local pdfprint = vf.pdf -- Set later to have the right mode
 local function gobble() end
+local function no_pdfprint_allowed()
+  pdfprint = gobble -- Don't warn more than once for each code block
+  tex.error("luapstricks: Graphics in immediate code segment", {
+      "There was an attempt to trigger drawing commands in an immediate code block. \z
+      This isn't allowed and will therefore be ignored."
+  })
+end
 
 local pi = math.pi
 local two_pi = 2*pi
@@ -4153,7 +4160,10 @@ lua.get_functions_table()[func] = function()
     f:close()
   end
   if direct == 'immediate' then
+    local saved_pdfprint = pdfprint
+    pdfprint = no_pdfprint_allowed
     outer_execute(tokens, direct, context)
+    pdfprint = saved_pdfprint
   else
     local n = node.new('whatsit', late_lua_sub)
     setwhatsitfield(n, 'data', function(n)
