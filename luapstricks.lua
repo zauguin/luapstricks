@@ -4055,40 +4055,6 @@ function execute_string(str, context)
   end
 end
 
-local func = luatexbase.new_luafunction'luaPSTheader'
-token.set_lua('luaPSTheader', func, 'protected')
-lua.get_functions_table()[func] = function()
-  local is_inline = token.scan_keyword'inline'
-  local readstate = status.readstate or status
-  local context = is_inline and string.format('%s:%i', readstate.filename, readstate.linenumber)
-  local data = token.scan_argument(true)
-  local n = node.new('whatsit', late_lua_sub)
-  setwhatsitfield(n, 'data', function()
-    if not is_inline then
-      context = data
-      local f = io.open(kpse.find_file(data, 'PostScript header'), 'r')
-      data = f:read'a'
-      f:close()
-    end
-    local stack_depth = #operand_stack
-
-    local x, y = pdf.getpos()
-    local height = #operand_stack
-    operand_stack[height + 1], operand_stack[height + 2] = x/65781.76, y/65781.76
-    systemdict.value.moveto()
-
-    local saved_pdfprint = pdfprint
-    pdfprint = function(s) return pdf.print('direct', s .. '\n') end
-    execute_string(data, context)
-    flush_delayed()
-    pdfprint = saved_pdfprint
-    if #operand_stack ~= stack_depth then
-      error'Unexpected values on operand stack'
-    end
-  end)
-  node.write(n)
-end
-
 -- If x, y shall be present iff direct ~= 'immediate'
 local function outer_execute(tokens, direct, context, x, y)
   local TeXDict = userdict.value.TeXDict.value
@@ -4172,7 +4138,6 @@ local fid = font.define{
   },
 }
 
-local modes = tex.getmodevalues()
 local func = luatexbase.new_luafunction'luaPST'
 token.set_lua('luaPST', func, 'protected')
 lua.get_functions_table()[func] = function()
@@ -4208,6 +4173,9 @@ lua.get_functions_table()[func] = function()
     node.write(n)
   end
 end
+tex.runtoks(function()
+  tex.sprint[[\protected\def\luaPSTheader{\luaPST direct file}]]
+end)
 
 do
   func = luatexbase.new_luafunction'luaPSTcolor'
