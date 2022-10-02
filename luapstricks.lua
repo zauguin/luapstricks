@@ -3016,11 +3016,16 @@ systemdict = {kind = 'dict', value = {
       texio.write_nl('term and log', ps_to_string(operand_stack[i]))
     end
   end,
+  pstack = function()
+    for i=#operand_stack, 1, -1 do
+      texio.write_nl('term and log', ps_to_string(require'inspect'(operand_stack[i])))
+    end
+  end,
   ['='] = function()
     texio.write_nl('term and log', ps_to_string(pop()))
   end,
   ['=='] = function() -- FIXME: Should give a better representation
-    texio.write_nl('term and log', ps_to_string(pop()))
+    texio.write_nl('term and log', require'inspect'((pop())))
   end,
 
   stringwidth = function()
@@ -4155,7 +4160,11 @@ lua.get_functions_table()[func] = function()
   local tokens = token.scan_argument(true)
   if file then
     context = tokens
-    local f = io.open(kpse.find_file(tokens, 'PostScript header'), 'r')
+    local resolved, msg = kpse.find_file(tokens, 'PostScript header')
+    if not resolved then
+      return tex.error(string.format('luapstricks: Unable to open %q: %s', tokens, msg))
+    end
+    local f = io.open(resolved, 'r')
     tokens = f:read'a'
     f:close()
   end
