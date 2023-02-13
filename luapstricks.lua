@@ -3946,12 +3946,14 @@ local register_texbox do
     local op = function()
       flush_delayed()
       local state = graphics_stack[#graphics_stack]
-      local w, h, d = node.direct.dimensions(box.box)
+      local copied = node.direct.copy(box.box)
+      local w, h, d = node.direct.dimensions(copied)
       register_point(state, 0, -d/65781.76)
       register_point(state, w/65781.76, h/65781.76)
       vf.push()
-      vf.node(box.box)
+      vf.node(copied)
       vf.pop()
+      node.direct.free(copied)
     end
     lua_node_lookup[op] = box
     dict[id] = op
