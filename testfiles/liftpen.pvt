@@ -2,6 +2,7 @@
 \DeclareDocumentMetadata{uncompress}
 
 \documentclass{standalone}
+\input regression-test
 \usepackage{pstricks}
 \pagestyle{empty}
 \begin{document}

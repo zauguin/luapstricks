@@ -2,6 +2,7 @@
 \DeclareDocumentMetadata{uncompress}
 
 \documentclass{standalone}
+\input regression-test
 \usepackage{libertinus}
 \usepackage{pstricks}
 \pagestyle{empty}

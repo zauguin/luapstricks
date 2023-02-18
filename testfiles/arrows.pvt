@@ -1,6 +1,7 @@
 \RequirePackage{pdfmanagement-testphase}
 \DeclareDocumentMetadata{uncompress}
 \documentclass[parskip=half-,DIV=13]{scrartcl}
+\input regression-test
 \usepackage{pstricks}
 \usepackage{libertinus}
 \usepackage{multido,array,listings}

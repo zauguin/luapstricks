@@ -2,6 +2,7 @@
 \DeclareDocumentMetadata{uncompress}
 
 \documentclass[parskip=half-,DIV=13]{scrartcl}
+\input regression-test
 %\usepackage{luapstricks}
 \usepackage{pstricks-add}
 \pagestyle{empty}

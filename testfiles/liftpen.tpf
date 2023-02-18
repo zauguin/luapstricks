@@ -389,24 +389,476 @@ endobj
 5 0 obj
 << /ExtGState 1 0 R /Font << /F17 8 0 R >> /ProcSet [ /PDF /Text ] >>
 endobj
+10 0 obj
+<< /Type /Metadata /Subtype /XML /Length 10287 >>      
+stream
+<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:pdf="http://ns.adobe.com/pdf/1.3/"
+    xmlns:xmpRights="http://ns.adobe.com/xap/1.0/rights/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"
+    xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+    xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/"
+    xmlns:stEvt="http://ns.adobe.com/xap/1.0/sType/ResourceEvent#"
+    xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
+    xmlns:pdfuaid="http://www.aiim.org/pdfua/ns/id/"
+    xmlns:pdfx="http://ns.adobe.com/pdfx/1.3/"
+    xmlns:pdfxid="http://www.npes.org/pdfx/ns/id/"
+    xmlns:prism="http://prismstandard.org/namespaces/basic/3.0/"
+    xmlns:stFnt="http://ns.adobe.com/xap/1.0/sType/Font#"
+    xmlns:Iptc4xmpCore="http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/"
+    xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/"
+    xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#"
+    xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#"
+    xmlns:pdfaType="http://www.aiim.org/pdfa/ns/type#"
+    xmlns:pdfaField="http://www.aiim.org/pdfa/ns/field#">
+   <pdfaExtension:schemas>
+    <rdf:Bag>
+     <rdf:li rdf:parseType="Resource">
+      <pdfaSchema:schema>PDF/A Identification Schema</pdfaSchema:schema>
+      <pdfaSchema:prefix>pdfaid</pdfaSchema:prefix>
+      <pdfaSchema:namespaceURI>http://www.aiim.org/pdfa/ns/id/</pdfaSchema:namespaceURI>
+      <pdfaSchema:property>
+       <rdf:Seq>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>year</pdfaProperty:name>
+         <pdfaProperty:valueType>Integer</pdfaProperty:valueType>
+         <pdfaProperty:category>internal</pdfaProperty:category>
+         <pdfaProperty:description>Year of standard</pdfaProperty:description>
+        </rdf:li>
+       </rdf:Seq>
+      </pdfaSchema:property>
+     </rdf:li>
+     <rdf:li rdf:parseType="Resource">
+      <pdfaSchema:schema>PDF/UA Universal Accessibility Schema</pdfaSchema:schema>
+      <pdfaSchema:prefix>pdfuaid</pdfaSchema:prefix>
+      <pdfaSchema:namespaceURI>http://www.aiim.org/pdfua/ns/id/</pdfaSchema:namespaceURI>
+      <pdfaSchema:property>
+       <rdf:Seq>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>part</pdfaProperty:name>
+         <pdfaProperty:valueType>Integer</pdfaProperty:valueType>
+         <pdfaProperty:category>internal</pdfaProperty:category>
+         <pdfaProperty:description>Part of ISO 14289 standard</pdfaProperty:description>
+        </rdf:li>
+       </rdf:Seq>
+      </pdfaSchema:property>
+     </rdf:li>
+     <rdf:li rdf:parseType="Resource">
+      <pdfaSchema:schema>PDF/X ID Schema</pdfaSchema:schema>
+      <pdfaSchema:prefix>pdfxid</pdfaSchema:prefix>
+      <pdfaSchema:namespaceURI>http://www.npes.org/pdfx/ns/id/</pdfaSchema:namespaceURI>
+      <pdfaSchema:property>
+       <rdf:Seq>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>GTS_PDFXVersion</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>internal</pdfaProperty:category>
+         <pdfaProperty:description>ID of PDF/X standard</pdfaProperty:description>
+        </rdf:li>
+       </rdf:Seq>
+      </pdfaSchema:property>
+     </rdf:li>
+     <rdf:li rdf:parseType="Resource">
+      <pdfaSchema:schema>PRISM Basic Metadata</pdfaSchema:schema>
+      <pdfaSchema:prefix>prism</pdfaSchema:prefix>
+      <pdfaSchema:namespaceURI>http://prismstandard.org/namespaces/basic/3.0/</pdfaSchema:namespaceURI>
+      <pdfaSchema:property>
+       <rdf:Seq>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>complianceProfile</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>internal</pdfaProperty:category>
+         <pdfaProperty:description>PRISM specification compliance profile to which this document adheres</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>publicationName</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>Publicationname</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>aggregationType</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>Publicationtype</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>bookEdition</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>Edition of the book in which the document was published</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>volume</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>Publication volume number</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>number</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>Publication issue number within a volume</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>pageRange</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>Page range for the document within the print version of its publication</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>issn</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>ISSN for the printed publication in which the document was published</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>eIssn</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>ISSN for the electronic publication in which the document was published</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>isbn</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>ISBNforthepublicationinwhichthedocumentwaspublished</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>doi</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>Digital Object Identifier for the document</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>url</pdfaProperty:name>
+         <pdfaProperty:valueType>URL</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>URL at which the document can be found</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>byteCount</pdfaProperty:name>
+         <pdfaProperty:valueType>Integer</pdfaProperty:valueType>
+         <pdfaProperty:category>internal</pdfaProperty:category>
+         <pdfaProperty:description>Approximate file size in octets</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>pageCount</pdfaProperty:name>
+         <pdfaProperty:valueType>Integer</pdfaProperty:valueType>
+         <pdfaProperty:category>internal</pdfaProperty:category>
+         <pdfaProperty:description>Number of pages in the print version of the document</pdfaProperty:description>
+        </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>subtitle</pdfaProperty:name>
+         <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+         <pdfaProperty:category>external</pdfaProperty:category>
+         <pdfaProperty:description>Document'ssubtitle</pdfaProperty:description>
+        </rdf:li>
+       </rdf:Seq>
+      </pdfaSchema:property>
+     </rdf:li>
+    </rdf:Bag>
+   </pdfaExtension:schemas>
+   <pdf:Producer>luahbtex-1.15.0</pdf:Producer>
+   <pdf:PDFVersion>1.5</pdf:PDFVersion>
+   <dc:type>
+    <rdf:Bag>
+     <rdf:li>Text</rdf:li>
+    </rdf:Bag>
+   </dc:type>
+   <dc:language>
+    <rdf:Bag>
+     <rdf:li>en-US</rdf:li>
+    </rdf:Bag>
+   </dc:language>
+   <dc:date>
+    <rdf:Seq>
+     <rdf:li>2001-01-01T20:59:59-00:00</rdf:li>
+    </rdf:Seq>
+   </dc:date>
+   <dc:format>application/pdf</dc:format>
+   <dc:source>liftpen.tex</dc:source>
+   <xmp:CreatorTool>LaTeX</xmp:CreatorTool>
+   <xmp:CreateDate>2001-01-01T20:59:59-00:00</xmp:CreateDate>
+   <xmp:ModifyDate>2001-01-01T20:59:59-00:00</xmp:ModifyDate>
+   <xmp:MetadataDate>2001-01-01T20:59:59-00:00</xmp:MetadataDate>
+   <xmpMM:DocumentID>uuid:4b2d5855-97a0-4e13-8696-19c8418ac8b1</xmpMM:DocumentID>
+   <xmpMM:InstanceID>uuid:0a57c455-157a-4141-8c19-6237d832fc80</xmpMM:InstanceID>
+   <prism:complianceProfile>three</prism:complianceProfile>
+   <prism:pageCount>0</prism:pageCount>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>
+endstream
+endobj
+13 0 obj
+<< /Length 2206 >>       
+stream
+/opacity1 gs
+0 g 0 G
+0 g 0 G
+BT
+/F18 9.96264 Tf
+1 0 0 1 181.794 -8026.933 Tm [<0068>96<0032004B0054>-32<00510060001C00600076>-383<0054001C003B00320035>]TJ
+/F15 9.96264 Tf
+1 0 0 1 0 -8048.851 Tm [<0047>]TJ
+/F29 6.97385 Tf
+1 0 0 1 2.64 -8047.079 Tm [<001B>]TJ
+/F15 9.96264 Tf
+1 0 0 1 7.025 -8048.851 Tm [<0068>]TJ
+1 0 0 1 12.557 -8050.998 Tm [<0031>]TJ
+1 0 0 1 18.096 -8048.851 Tm [<0073>-395<0072>27<001C0062>-394<006D004D001C002300480032>-395<00690051>-395<003B006D003200620062>-396<0069003F0032>-395<006900510069001C0048>-395<004D>27<006D004B>28<0023>-27<00320060>-395<00510037>-395<0054001C003B00320062>-396<002B0051006000600032002B006900480076>82<0058>-629<001B0062>-396<0069003F003200600032>-395<0072>27<001C0062>-394<00620051004B0032>-395<006D004D005400600051>-28<002B0032006200620032002F>-395<002F001C0069001C>]TJ
+1 0 0 1 0 -8060.806 Tm [<0069003F001C0069>-333<0062003F0051006D0048002F>-333<003F001C>28<0070>28<0032>-333<0023>-28<00320032004D>-333<001C002F002F0032002F>-333<00690051>-333<0069003F0032>-333<007D004D001C0048>-333<0054001C003B0032>-333<0069003F00420062>-333<0032007400690060001C>-333<0054001C003B0032>-333<003F001C0062>-333<0023>-28<00320032004D>-333<001C002F002F0032002F>-333<00690051>-333<00600032002B003200420070>28<0032>-333<004200690058>]TJ
+1 0 0 1 14.944 -8072.762 Tm [<00410037>-364<0076>27<0051006D>-363<006000320060006D004D>-364<0069003F0032>-364<002F0051>-28<002B006D004B0032004D>27<0069>-363<0055007200420069003F0051006D0069>-364<001C00480069003200600042004D003B>-364<004200690056>-364<0069003F00420062>-364<0062006D006000540048006D0062>-364<0054001C003B0032>-364<0072004200480048>-364<003B0051>-364<001C>27<0072>28<001C>28<0076>83<002D>-371<0023>-28<0032002B001C006D00620032>-364<0047>]TJ
+/F29 6.97385 Tf
+1 0 0 1 405.098 -8070.989 Tm [<001B>]TJ
+/F15 9.96264 Tf
+1 0 0 1 409.483 -8072.762 Tm [<0068>]TJ
+1 0 0 1 415.015 -8074.909 Tm [<0031>]TJ
+1 0 0 1 420.554 -8072.762 Tm [<0073>-364<004D0051>27<0072>]TJ
+1 0 0 1 0 -8084.717 Tm [<0046004D0051>28<00720062>-333<003F0051>28<0072>-333<004B001C004D>28<0076>-333<0054001C003B00320062>-333<00690051>-333<003200740054>-28<0032002B0069>-333<003700510060>-333<0069003F00420062>-333<002F0051>-28<002B006D004B0032004D>28<00690058>]TJ
+ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Contents 13 0 R /Resources 11 0 R /MediaBox [ 0 0 449.088 110.551 ] /Parent 9 0 R >>
+endobj
+11 0 obj
+<< /ExtGState 1 0 R /Font << /F18 14 0 R /F15 15 0 R /F29 16 0 R >> /ProcSet [ /PDF /Text ] >>
+endobj
 1 0 obj
 << /opacity1 <</ca 1/CA 1>> /PSExtG1 <</CA 1.0>> /PSExtG2 <</SA true>> /PSExtG3 <</ca 1.0>>  >>
 endobj
-10 0 obj
-[ 58 [ 556 ] 83 [ 556 ] 107 [ 556 556 ] 122 [ 556 ] ]
+17 0 obj
+[ 27 [ 843 ] ]
 endobj
-12 0 obj
+19 0 obj
+<< /Length 4 >>          
+[BINARY STREAM]
+endobj
+20 0 obj
+<< /Subtype /CIDFontType0C /Length 621 >>        
+[BINARY STREAM]
+endobj
+18 0 obj
+<< /Type /FontDescriptor /FontName /BYLSJL+LMRoman7-Regular /Flags 4 /FontBBox [ -483 -292 1562 1124 ] /Ascent 1124 /CapHeight 683 /Descent -292 /ItalicAngle 0 /StemV 108 /XHeight 431 /FontFile3 20 0 R /CIDSet 19 0 R >>
+endobj
+21 0 obj
+<< /Length 687 >>        
+stream
+%!PS-Adobe-3.0 Resource-CMap
+%%DocumentNeededResources: ProcSet (CIDInit)
+%%IncludeResource: ProcSet (CIDInit)
+%%BeginResource: CMap (TeX-BYLSJL-LMRoman7-Regular-0)
+%%Title: (TeX-BYLSJL-LMRoman7-Regular-0 TeX BYLSJL-LMRoman7-Regular 0)
+%%Version: 1.000
+%%EndComments
+/CIDInit /ProcSet findresource begin
+12 dict begin
+begincmap
+/CIDSystemInfo
+<< /Registry (TeX)
+/Ordering (BYLSJL-LMRoman7-Regular)
+/Supplement 0
+>> def
+/CMapName /TeX-Identity-BYLSJL-LMRoman7-Regular def
+/CMapType 2 def
+1 begincodespacerange
+<0000> <FFFF>
+endcodespacerange
+0 beginbfrange
+endbfrange
+1 beginbfchar
+<001B> <0041>
+endbfchar
+endcmap
+CMapName currentdict /CMap defineresource pop
+end
+end
+%%EndResource
+%%EOF
+endstream
+endobj
+16 0 obj
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /BYLSJL+LMRoman7-Regular /DescendantFonts [ 22 0 R ] /ToUnicode 21 0 R >>
+endobj
+22 0 obj
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /BYLSJL+LMRoman7-Regular /FontDescriptor 18 0 R /W 17 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+23 0 obj
+[ 27 [ 750 500 ] 35 [ 556 ] 43 [ 444 ] 45 [ 278 ] 47 [ 556 ] 49 [ 681 444 ] 55 [ 306 ] 59 [ 500 ] 63 [ 556 ] 65 [ 361 278 ] 70 [ 528 625 278 ] 75 [ 833 ] 77 [ 556 ] 81 [ 500 ] 84 [ 556 389 389 ] 88 [ 278 ] 96 [ 392 ] 98 [ 394 ] 104 [ 722 389 ] 109 [ 556 ] 112 [ 528 ] 114 [ 722 750 528 ] 118 [ 528 ] 125 [ 556 ] ]
+endobj
+25 0 obj
 << /Length 16 >>         
 [BINARY STREAM]
 endobj
-13 0 obj
+26 0 obj
+<< /Subtype /CIDFontType0C /Length 4699 >>       
+[BINARY STREAM]
+endobj
+24 0 obj
+<< /Type /FontDescriptor /FontName /DPEAJR+LMRoman10-Regular /Flags 4 /FontBBox [ -430 -290 1417 1127 ] /Ascent 1127 /CapHeight 683 /Descent -290 /ItalicAngle 0 /StemV 93 /XHeight 431 /FontFile3 26 0 R /CIDSet 25 0 R >>
+endobj
+27 0 obj
+<< /Length 1159 >>       
+stream
+%!PS-Adobe-3.0 Resource-CMap
+%%DocumentNeededResources: ProcSet (CIDInit)
+%%IncludeResource: ProcSet (CIDInit)
+%%BeginResource: CMap (TeX-DPEAJR-LMRoman10-Regular-0)
+%%Title: (TeX-DPEAJR-LMRoman10-Regular-0 TeX DPEAJR-LMRoman10-Regular 0)
+%%Version: 1.000
+%%EndComments
+/CIDInit /ProcSet findresource begin
+12 dict begin
+begincmap
+/CIDSystemInfo
+<< /Registry (TeX)
+/Ordering (DPEAJR-LMRoman10-Regular)
+/Supplement 0
+>> def
+/CMapName /TeX-Identity-DPEAJR-LMRoman10-Regular def
+/CMapType 2 def
+1 begincodespacerange
+<0000> <FFFF>
+endcodespacerange
+0 beginbfrange
+endbfrange
+34 beginbfchar
+<001B> <0041>
+<001C> <0061>
+<0023> <0062>
+<002B> <0063>
+<002D> <002C>
+<002F> <0064>
+<0031> <0045>
+<0032> <0065>
+<0037> <0066>
+<003B> <0067>
+<003F> <0068>
+<0041> <0049>
+<0042> <0069>
+<0046> <006B>
+<0047> <004C>
+<0048> <006C>
+<004B> <006D>
+<004D> <006E>
+<0051> <006F>
+<0054> <0070>
+<0055> <0028>
+<0056> <0029>
+<0058> <002E>
+<0060> <0072>
+<0062> <0073>
+<0068> <0054>
+<0069> <0074>
+<006D> <0075>
+<0070> <0076>
+<0072> <0077>
+<0073> <0058>
+<0074> <0078>
+<0076> <0079>
+<007D> <00660069>
+endbfchar
+endcmap
+CMapName currentdict /CMap defineresource pop
+end
+end
+%%EndResource
+%%EOF
+endstream
+endobj
+15 0 obj
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /DPEAJR+LMRoman10-Regular /DescendantFonts [ 28 0 R ] /ToUnicode 27 0 R >>
+endobj
+28 0 obj
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /DPEAJR+LMRoman10-Regular /FontDescriptor 24 0 R /W 23 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+29 0 obj
+[ 28 [ 559 ] 50 [ 527 ] 53 [ 350 ] 59 [ 575 ] 75 [ 958 ] 81 [ 575 ] 84 [ 639 ] 96 [ 474 ] 104 [ 800 ] 118 [ 607 ] ]
+endobj
+31 0 obj
+<< /Length 15 >>         
+[BINARY STREAM]
+endobj
+32 0 obj
+<< /Subtype /CIDFontType0C /Length 1743 >>       
+[BINARY STREAM]
+endobj
+30 0 obj
+<< /Type /FontDescriptor /FontName /ASNJMO+LMRoman10-Bold /Flags 4 /FontBBox [ -486 -295 1607 1133 ] /Ascent 1133 /CapHeight 686 /Descent -295 /ItalicAngle 0 /StemV 106 /XHeight 444 /FontFile3 32 0 R /CIDSet 31 0 R >>
+endobj
+33 0 obj
+<< /Length 804 >>        
+stream
+%!PS-Adobe-3.0 Resource-CMap
+%%DocumentNeededResources: ProcSet (CIDInit)
+%%IncludeResource: ProcSet (CIDInit)
+%%BeginResource: CMap (TeX-ASNJMO-LMRoman10-Bold-0)
+%%Title: (TeX-ASNJMO-LMRoman10-Bold-0 TeX ASNJMO-LMRoman10-Bold 0)
+%%Version: 1.000
+%%EndComments
+/CIDInit /ProcSet findresource begin
+12 dict begin
+begincmap
+/CIDSystemInfo
+<< /Registry (TeX)
+/Ordering (ASNJMO-LMRoman10-Bold)
+/Supplement 0
+>> def
+/CMapName /TeX-Identity-ASNJMO-LMRoman10-Bold def
+/CMapType 2 def
+1 begincodespacerange
+<0000> <FFFF>
+endcodespacerange
+0 beginbfrange
+endbfrange
+10 beginbfchar
+<001C> <0061>
+<0032> <0065>
+<0035> <0021>
+<003B> <0067>
+<004B> <006D>
+<0051> <006F>
+<0054> <0070>
+<0060> <0072>
+<0068> <0054>
+<0076> <0079>
+endbfchar
+endcmap
+CMapName currentdict /CMap defineresource pop
+end
+end
+%%EndResource
+%%EOF
+endstream
+endobj
+14 0 obj
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /ASNJMO+LMRoman10-Bold /DescendantFonts [ 34 0 R ] /ToUnicode 33 0 R >>
+endobj
+34 0 obj
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /ASNJMO+LMRoman10-Bold /FontDescriptor 30 0 R /W 29 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+35 0 obj
+[ 58 [ 556 ] 83 [ 556 ] 107 [ 556 556 ] 122 [ 556 ] ]
+endobj
+37 0 obj
+<< /Length 16 >>         
+[BINARY STREAM]
+endobj
+38 0 obj
 << /Subtype /CIDFontType0C /Length 899 >>        
 [BINARY STREAM]
 endobj
-11 0 obj
-<< /Type /FontDescriptor /FontName /WRDHXF+TeXGyreHeros-Regular /Flags 4 /FontBBox [ -529 -284 1353 1148 ] /Ascent 1148 /CapHeight 729 /Descent -284 /ItalicAngle 0 /StemV 93 /XHeight 524 /FontFile3 13 0 R /CIDSet 12 0 R >>
+36 0 obj
+<< /Type /FontDescriptor /FontName /WRDHXF+TeXGyreHeros-Regular /Flags 4 /FontBBox [ -529 -284 1353 1148 ] /Ascent 1148 /CapHeight 729 /Descent -284 /ItalicAngle 0 /StemV 93 /XHeight 524 /FontFile3 38 0 R /CIDSet 37 0 R >>
 endobj
-14 0 obj
+39 0 obj
 << /Length 763 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
@@ -447,42 +899,67 @@ end
 endstream
 endobj
 8 0 obj
-<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /WRDHXF+TeXGyreHeros-Regular /DescendantFonts [ 15 0 R ] /ToUnicode 14 0 R >>
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /WRDHXF+TeXGyreHeros-Regular /DescendantFonts [ 40 0 R ] /ToUnicode 39 0 R >>
 endobj
-15 0 obj
-<< /Type /Font /Subtype /CIDFontType0 /BaseFont /WRDHXF+TeXGyreHeros-Regular /FontDescriptor 11 0 R /W 10 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+40 0 obj
+<< /Type /Font /Subtype /CIDFontType0 /BaseFont /WRDHXF+TeXGyreHeros-Regular /FontDescriptor 36 0 R /W 35 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
 endobj
 9 0 obj
-<< /Type /Pages  /Count 1 /Kids [ 6 0 R ] >>
+<< /Type /Pages  /Count 2 /Kids [ 6 0 R 12 0 R ] >>
 endobj
-16 0 obj
-<< /Type /Catalog /Pages 9 0 R /Lang (en-US) >>
+41 0 obj
+<< /Type /Catalog /Pages 9 0 R /Lang (en-US)/Metadata 10 0 R >>
 endobj
-17 0 obj
-<< /Producer (LuaTeX-1.15.0) /Creator (TeX) /CreationDate (D:20160520110000+02'00') /ModDate (D:20160520110000+02'00') /Trapped /False /PTEX.FullBanner (This is LuaHBTeX, Version 1.15.0 (TeX Live 2022)) >>
+42 0 obj
+<< /Producer (LuaTeX)/Creator (TeX)/CreationDate (D:20010101205959-00'00')/ModDate (D:20010101205959-00'00') /Trapped /False >>
 endobj
 xref
-0 18
+0 43
 0000000002 65535 f 
-0000007450 00000 n 
+0000020321 00000 n 
 0000000003 00000 f 
 0000000004 00000 f 
 0000000000 00000 f 
 0000007365 00000 n 
 0000007251 00000 n 
 0000000020 00000 n 
-0000009752 00000 n 
-0000010111 00000 n 
-0000007561 00000 n 
-0000008690 00000 n 
-0000007631 00000 n 
-0000007707 00000 n 
-0000008929 00000 n 
-0000009908 00000 n 
-0000010171 00000 n 
-0000010235 00000 n 
+0000035236 00000 n 
+0000035595 00000 n 
+0000007450 00000 n 
+0000020210 00000 n 
+0000020093 00000 n 
+0000017827 00000 n 
+0000032697 00000 n 
+0000029211 00000 n 
+0000022215 00000 n 
+0000020432 00000 n 
+0000021232 00000 n 
+0000020463 00000 n 
+0000020527 00000 n 
+0000021468 00000 n 
+0000022368 00000 n 
+0000022567 00000 n 
+0000027756 00000 n 
+0000022897 00000 n 
+0000022973 00000 n 
+0000027992 00000 n 
+0000029365 00000 n 
+0000029565 00000 n 
+0000031599 00000 n 
+0000029697 00000 n 
+0000029772 00000 n 
+0000031833 00000 n 
+0000032848 00000 n 
+0000033045 00000 n 
+0000034174 00000 n 
+0000033115 00000 n 
+0000033191 00000 n 
+0000034413 00000 n 
+0000035392 00000 n 
+0000035662 00000 n 
+0000035742 00000 n 
 trailer
-<< /Size 18 /Root 16 0 R /Info 17 0 R /ID [ <EBE2DCACBB8167E4E1A28FE8C89F4E10> <EBE2DCACBB8167E4E1A28FE8C89F4E10> ] >>
+<< /Size 43 /Root 41 0 R /Info 42 0 R /ID [ <2350CAD05F8A7AF0AA4058486855344F> <2350CAD05F8A7AF0AA4058486855344F> ] >>
 startxref
-10457
+35886
 %%EOF

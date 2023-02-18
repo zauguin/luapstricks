@@ -2,6 +2,7 @@
 \DeclareDocumentMetadata{uncompress}
 
 \documentclass{article}
+\input regression-test
 %\usepackage{luapstricks}
 \usepackage{pstricks}
 
