@@ -18,8 +18,8 @@
 if luatexbase then
   luatexbase.provides_module {
     name = 'luapstricks',
-    version = 'v0.7',
-    date = '2022-10-07',
+    version = 'v0.8',
+    date = '2023-02-17',
     description = 'PSTricks backend for LuaLaTeX',
   }
 end
