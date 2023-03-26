@@ -1,5 +1,5 @@
 ---- luapstricks.lua
--- Copyright 2021--2022 Marcel Krüger <tex@2krueger.de>
+-- Copyright 2021--2023 Marcel Krüger <tex@2krueger.de>
 --
 -- This work may be distributed and/or modified under the
 -- conditions of the LaTeX Project Public License, either version 1.3
@@ -13,7 +13,7 @@
 -- 
 -- The Current Maintainer of this work is M. Krüger
 --
--- This work consists of the file luapstricks.lua.
+-- This work consists of the files luapstricks.lua and luapstricks-plugin-pstmarble.lua
 
 if luatexbase then
   luatexbase.provides_module {
@@ -916,6 +916,17 @@ local function num_to_base(num, base, ...)
   end
   return num_to_base(remaining, base, digit, ...)
 end
+
+local plugin_interface = {
+  push = push,
+  pop = pop,
+  pop_num = pop_num,
+  pop_dict = pop_dict,
+  pop_array = pop_array,
+  pop_key = pop_key,
+  pop_proc = pop_proc,
+  exec = nil, -- execute_tok, -- filled in later
+}
 
 local systemdict
 local function generic_show(str, ax, ay)
@@ -3846,7 +3857,22 @@ systemdict = {kind = 'dict', value = {
     {kind = 'name', value = 'yacute'},
     {kind = 'name', value = 'thorn'},
     {kind = 'name', value = 'ydieresis'},
-  }}
+  }},
+
+  -- In internal interface to allow package specific commands to be defined in separate file.
+  -- This does not provide a stable interface for external extensions
+  ['.loadplugin'] = function()
+    local name = pop_key()
+    local found = kpse.find_file(string.format('luapstricks-plugin-%s', name), 'lua')
+    if not found then
+      push(false)
+    end
+    local loader = assert(loadfile(found))
+    local plugin, version = loader('luapstricks', 0, plugin_interface)
+    push{kind = 'dict', value = plugin}
+    push(version)
+    push(true)
+  end,
 }}
 systemdict.value.systemdict = systemdict
 dictionary_stack = {systemdict, globaldict, userdict, userdict.value.TeXDict}
@@ -4040,6 +4066,7 @@ function execute_tok(tok, suppress_proc)
     return push(tok)
   end
 end
+plugin_interface.exec = execute_tok
 
 function execute_ps(tokens)
   for i=1, #tokens do

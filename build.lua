@@ -4,8 +4,8 @@ typesetexe = "lualatex"
 stdengine = "luatex"
 checkengines = {"luatex"}
 
-installfiles = {"luapstricks.lua", "PSTricksDotFont.otf"}
-sourcefiles = {"luapstricks.lua", "pstricks.tex", "PSTricksDotFont.otf"}
+installfiles = {"luapstricks.lua", "luapstricks-plugin-*.lua", "PSTricksDotFont.otf"}
+sourcefiles = {"luapstricks.lua", "luapstricks-plugin-*.lua", "pstricks.tex", "PSTricksDotFont.otf"}
 binaryfiles = {"*.zip", "*.pdf", "PSTricksDotFont.otf"}
 testsuppdir = "PSTricksFiles"
 -- typesetfiles = {"luapstricks.tex"}
