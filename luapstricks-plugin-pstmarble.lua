@@ -280,6 +280,85 @@ local function ct_dispatch(fallback)
   end
 end
 
+local function sharpen(x)
+  x = x - 0.5
+  if abs(x) >= 1e-8 then
+    x = x / abs(x)^.66 * .63
+  end
+  return x + 0.5
+end
+
+local newtable = lua.newtable
+local function Vmap2(v1, v2, func)
+  local result = newtable(#v2, 0)
+  for i=1, #v1 do
+    result[i] = func(v1[i], v2[i])
+  end
+  return result
+end
+
+local function paper_shading(rgb, pwr, paper)
+  return Vmap2(rgb, paper, function(c1, c2)
+    if c2 >= c1 then
+      local a = 1 - c1/c2
+      if a >= 1e-30 then
+        a = a^pwr
+      end
+      return (1 - a) * c2
+    else
+      local a = (1 - c1) / (1 - c2)
+      if a >= 1e-30 then 
+        a = a^(2-pwr)
+      end
+      return 1 - a * (1 - c2)
+    end
+  end)
+end
+
+local function actions2rgb(fallback)
+  return function(px, py, actions, acnt, paper)
+    local dispatch = ct_dispatch(fallback)
+    local cdx = acnt
+    for cdx = acnt, 1, -1 do
+      local action = actions[cdx]
+      local kind = action.kind
+      if kind == 'executable' then
+        action = action.value
+        kind = action.kind
+      end
+      assert(kind == 'array')
+      action = action.value
+      local count = #action
+      local ct = action[count].value
+      if ct == 'drop' then
+        assert(count == 8)
+        local cx, cy = action[1], action[2]
+        local rad2 = action[3]
+        local bgc, rgb = action[4].value, action[5].value
+        local sr2, gc = action[6], action[7]
+
+        local a2 = (px - cx)^2 + (py - cy)^2
+        local disc = a2 < 1e-10 and 0 or 1 - rad2 / a2
+        if disc <= 0 then
+          if gc ~= 0 then
+            rgb = paper_shading(rgb, exp(a2 * sr2) * gc, paper)
+          end
+          if disc > -0.001 then
+            local a = sharpen((-disc)^.5)
+            rgb = Vmap2(rgb, bgc, function(v1, v2) return v1 * a + v2 * (1-a) end)
+          end
+          return rgb
+        else
+          local a = disc^.5
+          px, py = (px - cx) * a + cx, (py - cy) * a + cy
+        end
+      else
+        px, py = dispatch(ct, px, py, action, count - 1)
+      end
+    end
+  end
+end
+
 return {
   spread = function()
     local rad2 = pop_num() -- rad^2
@@ -290,6 +369,33 @@ return {
     px, py = spread(px, py, cx, cy, rad2)
     push(px)
     push(py)
+  end,
+  ['.actions2rgb'] = function() -- px py actions acnt paper fallback .composite-map exec
+    local _, fallback = pop_proc()
+    local actions2rgb = actions2rgb(fallback)
+    push(function()
+      local paper = pop_array().value
+      local acnt = pop_num()
+      local actions = pop_array().value
+
+      local py = pop_num()
+      local px = pop_num()
+
+      local rgb = actions2rgb(px, py, actions, acnt, paper)
+      if rgb then
+        push{kind = 'array', value = rgb}
+        push(true)
+      else
+        push(false)
+      end
+    end)
+  end,
+  ['.paper-shading'] = function() -- rgb pwr paper
+    local paper = pop_array().value
+    local pwr = pop_num()
+    local rgb = pop_array().value
+    rgb = paper_shading(rgb, pwr, paper)
+    push{kind = 'array', value = rgb}
   end,
   ['.composite-map'] = function() -- acnt idx actions fallback .composite-map exec
     local _, fallback = pop_proc()
