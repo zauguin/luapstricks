@@ -3873,6 +3873,36 @@ systemdict = {kind = 'dict', value = {
     push(version)
     push(true)
   end,
+
+  ['.build-image'] = function()
+    local y = pop_num()
+    local x = pop_num()
+    local image = pop_array().value
+    for i = 1, x*y do
+      local rgb = image[i].value
+      image[i] = string.pack('BBB', (rgb[1] * 255 + .5) // 1, (rgb[2] * 255 + .5) // 1, (rgb[3] * 255 + .5) // 1)
+    end
+    local i = img.scan {
+      stream = table.concat(image),
+      attr = string.format("/Type /XObject /Subtype /Image /Width %i /Height %i /BitsPerComponent 8 /ColorSpace /DeviceRGB", x, y),
+      notype = true,
+      nobbox = true,
+      bbox = {0, 0, 65781.76, 65781.76}
+    }
+    push(function()
+      flush_delayed()
+      local state = graphics_stack[#graphics_stack]
+      register_point(state, 0, 0)
+      register_point(state, 1, 1)
+      vf.push()
+      local n = node.new'hlist'
+      n.dir = 'TLT'
+      n.head = img.node(i)
+      vf.node(node.direct.todirect(n))
+      node.free(n)
+      vf.pop()
+    end)
+  end,
 }}
 systemdict.value.systemdict = systemdict
 dictionary_stack = {systemdict, globaldict, userdict, userdict.value.TeXDict}
