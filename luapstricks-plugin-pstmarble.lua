@@ -27,6 +27,7 @@ local pop_num = plugininterface.pop_num
 local pop_proc = plugininterface.pop_proc
 local exec = plugininterface.exec
 
+local newtable = lua.newtable
 local abs = math.abs
 local exp = math.exp
 local cos = math.cos
@@ -288,7 +289,6 @@ local function sharpen(x)
   return x + 0.5
 end
 
-local newtable = lua.newtable
 local function Vmap2(v1, v2, func)
   local result = newtable(#v2, 0)
   for i=1, #v1 do
@@ -316,8 +316,8 @@ local function paper_shading(rgb, pwr, paper)
 end
 
 local function actions2rgb(fallback)
+  local dispatch = ct_dispatch(fallback)
   return function(px, py, actions, acnt, paper)
-    local dispatch = ct_dispatch(fallback)
     local cdx = acnt
     for cdx = acnt, 1, -1 do
       local action = actions[cdx]
@@ -410,6 +410,30 @@ local function do_shadings(rgb, fx, fy, shadings, paper)
   end
 
   return rgb
+end
+
+local function do_raster(dispatch)
+  local actions2rgb = actions2rgb(dispatch)
+  return function(lox, hix, loy, hiy, oversample, actions, acnt, shadings, paper, scl, background)
+    local sampleover = 1 / oversample
+    local width = (hix - lox) // sampleover
+    local height = (hiy - loy) // sampleover
+    local raster = newtable(width * height, 0)
+
+    local factor = sampleover / scl
+
+    for y = 0, height do
+      local fy = loy / scl + y * factor
+      for x = 0, width do
+        local fx = lox / scl + x * factor
+
+	local rgb = actions2rgb(fx, fy, actions, acnt, paper) or background
+        rgb = do_shadings(rgb, fx, fy, shadings, paper)
+	raster[1 + y*(width+1) + x] = {kind = 'array', value = rgb}
+      end
+    end
+    return raster, width + 1, height + 1
+  end
 end
 
 return {
@@ -612,5 +636,27 @@ return {
     local rgb = pop_array().value
     rgb = do_shadings(rgb, fx, fy, shadings, paper)
     push{kind = 'array', value = rgb}
+  end,
+  ['.do-raster'] = function()
+    local _, fallback = pop_proc()
+    local do_raster = do_raster(fallback)
+    push(function()
+      local background = pop_array().value
+      local scl = pop_num()
+      local paper = pop_array().value
+      local shadings = pop_array().value
+      local acnt = pop_num()
+      local actions = pop_array().value
+      local oversample = pop_num()
+      local hiy = pop_num()
+      local loy = pop_num()
+      local hix = pop_num()
+      local lox = pop_num()
+
+      local raster, width, height = do_raster(lox, hix, loy, hiy, oversample, actions, acnt, shadings, paper, scl, background)
+      push{kind = 'array', value = raster}
+      push(width)
+      push(height)
+    end)
   end,
 }, 0
