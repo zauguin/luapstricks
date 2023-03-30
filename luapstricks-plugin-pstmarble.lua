@@ -359,6 +359,59 @@ local function actions2rgb(fallback)
   end
 end
 
+-- At this point, fx and fy contain the raster coordinates;
+-- [ r g b ] is on top of the stack.
+local function do_shadings(rgb, fx, fy, shadings, paper)
+  local scnt = #shadings
+  if scnt > 0 then
+    for idx = 1, scnt do
+      local shading = shadings[idx]
+      local kind = shading.kind
+      if kind == 'executable' then
+        shading = shading.value
+        kind = shading.kind
+      end
+      assert(kind == 'array')
+      shading = shading.value
+      local count = #shading
+      local ct = shading[count].value
+      if ct == 'jiggle-shade' then
+        assert(count == 9)
+        local dx, dy = shading[1], shading[2]
+        local freq, ofst = shading[3], shading[4]
+        local major, mf = shading[5], shading[6]
+        local mdls, pw = shading[7], shading[8]
+
+	local a = symmod(fy * dx + fx * dy + ofst, mdls)
+        local af = a * freq
+
+        if mf ~= 0 then
+          local g = g1(mdls, a, mf, af, major, pw, freq)
+	  rgb = paper_shading(rgb, max(cos(rad(g * freq)) * mf + 1, 0), paper)
+        end
+      elseif ct == 'wriggle-shade' then
+        assert(count == 9)
+        local cx, cy = shading[1], shading[2]
+        local freq, ofst = shading[3], shading[4]
+        local major, mf = shading[5], shading[6]
+        local mdls, pw = shading[7], shading[8]
+
+        local a = symmod(((fx - cx)^2 + (fy - cy)^2)^.5 + ofst, mdls)
+        local af = a * freq
+
+        if mf ~= 0 then
+          local g = g1(mdls, a, mf, af, major, pw, freq)
+	  rgb = paper_shading(rgb, max(cos(rad(g * freq)) * mf + 1, 0), paper)
+        end
+      else
+	print(string.format('unrecognized shade token %s', ct))
+      end
+    end
+  end
+
+  return rgb
+end
+
 return {
   spread = function()
     local rad2 = pop_num() -- rad^2
@@ -550,5 +603,14 @@ return {
     y = y + eps * x
     push(x)
     push(y)
+  end,
+  ['.do-shadings'] = function()
+    local paper = pop_array().value
+    local shadings = pop_array().value
+    local fy = pop_num()
+    local fx = pop_num()
+    local rgb = pop_array().value
+    rgb = do_shadings(rgb, fx, fy, shadings, paper)
+    push{kind = 'array', value = rgb}
   end,
 }, 0
