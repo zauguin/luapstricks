@@ -1,0 +1,76 @@
+# Basic tools used for management
+l3build
+latexmk
+#
+# Required to build plain and LaTeX formats:
+# TeX90 plain for unpacking, pdfLaTeX, LuaLaTeX and XeTeX for tests
+latex-bin
+luahbtex
+tex
+#
+# Assuming a 'basic' font set up, metafont is required to avoid
+# warnings with some packages and errors with others
+metafont
+mfware
+texlive-scripts
+#
+# The documented PSTricks packages
+pstricks
+pstricks-add
+pst-3d
+pst-arrow
+pst-calculate
+pst-eucl
+pst-fun
+pst-func
+pst-grad
+pst-math
+pst-node
+pst-plot
+pst-slpe
+pst-tools
+#
+# Packages used in the documentation
+amsfonts
+amsmath
+biblatex
+bookmark
+booktabs
+caption
+colortbl
+epstopdf-pkg
+eso-pic
+fancyvrb
+float
+geometry
+hyperref
+iftex
+infwarerr
+koma-script
+kvoptions
+latex-lab
+libertinus-fonts
+libertinus-otf
+listings
+lualatex-math
+manfnt
+multido
+multirow
+paralist
+pgf
+psnfss
+ragged2e
+setspace
+showexpl
+siunitx
+subfig
+tex-gyre
+tools
+unicode-math
+varwidth
+xcolor
+xkeyval
+xstring
+xurl
+makeindex
+biber

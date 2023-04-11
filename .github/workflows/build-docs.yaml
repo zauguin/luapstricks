@@ -1,0 +1,56 @@
+name: Build PST package documentation
+
+on:
+  push:
+    branches:
+      - "*"
+
+jobs:
+  texlive-cache:
+    runs-on: ubuntu-20.04
+    name: Update TeX Live
+    outputs:
+      cache_key: ${{ steps.texlive.outputs.cache_key }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Install TeX Live
+        id: texlive
+        uses: zauguin/install-texlive@experiment
+        with:
+          package_file: .github/tl_packages
+          profile: .github/texlive.profile
+  build-docs:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        include:
+          - path: generic/pstricks-add
+            document: pstricks-add-doc
+    name: "${{ matrix.document }}"
+    needs: texlive-cache
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          path: luapstricks
+      - name: Restore TeX Live from cache
+        uses: actions/cache/restore@v3
+        with:
+          path: ~/texlive
+          key: ${{ needs.texlive-cache.outputs.cache_key }}
+          fail-on-cache-miss: true
+      - run: echo $HOME/texlive/bin/x86_64-linux >> $GITHUB_PATH
+      - run: l3build install
+        working-directory: luapstricks
+      - run: cp -R "$HOME/texlive/texmf-dist/doc/${{ matrix.path }}" document_dir
+      - run: cp -R "$HOME/texlive/texmf-dist/doc/generic/pstricks/pst-doc.pdf" document_dir
+      - name: Run latexmk
+        working-directory: document_dir
+        run: "latexmk -pdflua ${{ matrix.document }}"
+      - name: Save resulting document 
+        uses: actions/upload-artifact@v3
+        with:
+          name: documentation
+          retention-days: 1
+          path: document_dir/${{ matrix.document }}.pdf
