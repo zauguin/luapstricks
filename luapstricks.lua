@@ -3865,7 +3865,7 @@ systemdict = {kind = 'dict', value = {
     local name = pop_key()
     local found = kpse.find_file(string.format('luapstricks-plugin-%s', name), 'lua')
     if not found then
-      push(false)
+      return push(false)
     end
     local loader = assert(loadfile(found))
     local plugin, version = loader('luapstricks', 0, plugin_interface)
