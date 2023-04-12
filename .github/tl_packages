@@ -18,6 +18,7 @@ texlive-scripts
 pstricks
 pstricks-add
 pst-3d
+pst-3dplot
 pst-arrow
 pst-calculate
 pst-eucl

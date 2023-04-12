@@ -27,6 +27,10 @@ jobs:
         include:
           - path: generic/pstricks-add
             document: pstricks-add-doc
+          - path: generic/pst-3d
+            document: pst-3d-doc
+          - path: generic/pst-3dplot
+            document: pst-3dplot-doc
     name: "${{ matrix.document }}"
     needs: texlive-cache
     steps:
