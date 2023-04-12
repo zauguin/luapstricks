@@ -11,6 +11,9 @@ testsuppdir = "PSTricksFiles"
 -- typesetfiles = {"luapstricks.tex"}
 
 tdsroot = "lualatex"
+tdslocations = {
+  "fonts/opentype/public/luapstricks/PSTricksDotFont.otf",
+}
 
 uploadconfig = {
   pkg = module,
