@@ -1,0 +1,83 @@
+--- pst-soroban-doc.tex	2007-10-16 19:35:10.000000000 +0200
++++ pst-soroban-doc.tex	2023-04-13 16:18:11.480434368 +0200
+@@ -1,7 +1,7 @@
++\DocumentMetadata{}
+ \documentclass[a4paper]{article}
+ 
+ \usepackage[T1]{fontenc}
+-\usepackage[latin1]{inputenc}
+ \usepackage{lmodern,url}
+ 
+ \newcommand{\ttsl}[1]{\texttt{\textsl{#1}}}
+@@ -74,16 +74,16 @@
+ \hline
+ \textbf{line}& \textbf{PStricks} & \textbf{tikz/pgf}\\
+ \hline
+-\verb§ 1§ & \verb§\psset{unit=0.25mm}§ & \verb§\ladj{0.25}§\\
+-\verb§ 2§ & \verb§\begin{pspicture}(-2,-2)(122,76)§ & \verb§\begin{pspicture}§\\
+-\verb§ 3§ & \verb§\tige{1}{0}{1}                  § & \verb§\tige{1}{0}{1}     §\\
+-\verb§ 4§ & \verb§\tige{2}{3}{0}                  § & \verb§\tige{2}{3}{0}     §\\
+-\verb§ 5§ & \verb§\tige{3}{2}{0}                  § & \verb§\tige{3}{2}{0}     §\\
+-\verb§ 6§ & \verb§\tige{4}{1}{1}                  § & \verb§\tige{4}{1}{1}     §\\
+-\verb§ 7§ & \verb§\tige{5}{4}{0}                  § & \verb§\tige{5}{4}{0}     §\\
+-\verb§ 8§ & \verb§\tige{6}{5}{0}                  § & \verb§\tige{6}{5}{0}     §\\
+-\verb§ 9§ & \verb§\cadre{6}                       § & \verb§\cadre{6}          §\\
+-\verb§10§ & \verb§\end{pspicture}                 § & \verb§\end{pspicture}  §\\
++\verb+ 1+ & \verb+\psset{unit=0.25mm}+ & \verb+\ladj{0.25}+\\
++\verb+ 2+ & \verb+\begin{pspicture}(-2,-2)(122,76)+ & \verb+\begin{pspicture}+\\
++\verb+ 3+ & \verb+\tige{1}{0}{1}                  + & \verb+\tige{1}{0}{1}     +\\
++\verb+ 4+ & \verb+\tige{2}{3}{0}                  + & \verb+\tige{2}{3}{0}     +\\
++\verb+ 5+ & \verb+\tige{3}{2}{0}                  + & \verb+\tige{3}{2}{0}     +\\
++\verb+ 6+ & \verb+\tige{4}{1}{1}                  + & \verb+\tige{4}{1}{1}     +\\
++\verb+ 7+ & \verb+\tige{5}{4}{0}                  + & \verb+\tige{5}{4}{0}     +\\
++\verb+ 8+ & \verb+\tige{6}{5}{0}                  + & \verb+\tige{6}{5}{0}     +\\
++\verb+ 9+ & \verb+\cadre{6}                       + & \verb+\cadre{6}          +\\
++\verb+10+ & \verb+\end{pspicture}                 + & \verb+\end{pspicture}  +\\
+ \hline
+ \end{tabular}
+ \vspace{6pt}
+@@ -101,7 +101,7 @@
+ 
+ To draw a rod, one uses the command \verb+\tige+. The syntax is:
+ \begin{center}
+-\verb§\tige[§\ttsl{<st>}\verb§]{§\ttsl{<nu>}\verb§}{§\ttsl{<val>}\verb§}{§\ttsl{<un>}\verb§}§
++\verb+\tige[+\ttsl{<st>}\verb+]{+\ttsl{<nu>}\verb+}{+\ttsl{<val>}\verb+}{+\ttsl{<un>}\verb+}+
+ \end{center}
+ 
+ The \ttsl{<nu>} argument numbers the rods from left to right. \ttsl{<val>} is the 
+@@ -142,7 +142,7 @@
+ In this example, there is no frame but only parts of it above and below; this is 
+ created with the \verb+\barres+ command. The syntaxes for the frame and top/bottom lines are:
+ \begin{center}
+-\verb§\cadre[§\ttsl{<st>}\verb§]{§\ttsl{<nb>}\verb§}§ and \verb§\barres[§\ttsl{<st>}\verb§]{§\ttsl{<nb>}\verb§}§.
++\verb+\cadre[+\ttsl{<st>}\verb+]{+\ttsl{<nb>}\verb+}+ and \verb+\barres[+\ttsl{<st>}\verb+]{+\ttsl{<nb>}\verb+}+.
+ \end{center}
+ 
+ The optional \ttsl{<st>} arguments are the same as the one of \verb+\tige+, the \ttsl{<nb>} 
+@@ -150,7 +150,7 @@
+ 
+ If one wants to colour a specific bid , one can achieve this with \verb+\binoire+:
+ \begin{center}
+-\verb§\binoire[§\ttsl{<st>}\verb§]{§\ttsl{<nu>}\verb§}{§\ttsl{<pos>}\verb§}{§\ttsl{<col>}\verb§}§
++\verb+\binoire[+\ttsl{<st>}\verb+]{+\ttsl{<nu>}\verb+}{+\ttsl{<pos>}\verb+}{+\ttsl{<col>}\verb+}+
+ \end{center}
+ 
+ \ttsl{<st>} and \ttsl{<nu>} arguments are the same as for \verb+\tige+; the \ttsl{<col>} 
+@@ -215,7 +215,7 @@
+ 
+ The \verb+\barbil+ command allows to cross a bid (see example below); the syntax is:
+ \begin{center}
+-\verb§\barbil[§\ttsl{<st>}\verb§]{§\ttsl{<nu>}\verb§}{§\ttsl{<pos>}\verb§}§
++\verb+\barbil[+\ttsl{<st>}\verb+]{+\ttsl{<nu>}\verb+}{+\ttsl{<pos>}\verb+}+
+ \end{center}
+ The arguments \ttsl{<st>}, \ttsl{<nu>} and \ttsl{<pos>} have the same meaning 
+ as those of \verb+\binoire+.
+@@ -224,7 +224,7 @@
+ to print in black and white.
+ This is done by changing the values of the \verb+\colbil+ (for the bids) and 
+ \verb+\coltig+ (for the rods) commands; by default these are yellow and 
+-``brun´´ (new brown colour).
++``brun'' (new brown colour).
+ 
+ \begin{center}
+ \begin{minipage}[][][c]{5cm}

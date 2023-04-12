@@ -1,0 +1,25 @@
+--- pst-coil-doc.tex	2011-08-15 01:07:19.000000000 +0200
++++ pst-coil-doc.tex	2023-04-13 01:35:30.634157507 +0200
+@@ -1,3 +1,4 @@
++\DocumentMetadata{}
+ %% $Id: pst-coil-doc.tex 539 2011-07-12 08:22:33Z herbert $
+ \documentclass[11pt,english,BCOR10mm,DIV12,bibliography=totoc,parskip=false,smallheadings
+     headexclude,footexclude,oneside,dvipsnames,svgnames]{pst-doc}
+@@ -8,6 +9,7 @@
+ \SpecialCoor
+ \let\pstFV\fileversion
+ \let\belowcaptionskip\abovecaptionskip
++\addbibresource{pst-coil-doc.bib}
+ %
+ \def\bgImage{%
+ \begin{pspicture}(6,2)
+@@ -570,8 +572,7 @@
+ \nocite{*}
+ \bgroup
+ \RaggedRight
+-\bibliographystyle{plain}
+-\bibliography{pst-coil-doc}
++\printbibliography
+ \egroup
+ 
+ \printindex

@@ -1,0 +1,35 @@
+--- pst-poly-doc.tex	2009-12-21 00:16:59.000000000 +0100
++++ pst-poly-doc.tex	2023-04-13 15:00:42.753989151 +0200
+@@ -1,8 +1,10 @@
++\DocumentMetadata{}
+ \documentclass[11pt,english,BCOR10mm,DIV12,bibliography=totoc,parskip=false,smallheadings
+     headexclude,footexclude,oneside]{pst-doc}
+ \usepackage[utf8]{inputenc}
+ \usepackage{pst-poly}
+ \let\pstDocFV\fileversion
++\addbibresource{pst-poly-doc.bib}
+ 
+ \def\bgImage{\PstPolygon[unit=3,linecolor=red,PolyOffset=2,linewidth=0.001,
+     PolyNbSides=72,PolyEpicycloid]}
+@@ -595,9 +597,9 @@
+ \PstPolygon[PolyName=B,PolyNbSides=5,linewidth=2pt,PstPicture=false,unit=2.5]
+ \multido{\iA=1+1,\iB=2+1}{5}{%
+   \setcounter{Letter}{\the\multidocount}%
+-  \ncline{A\iA}{B\iA}\ncput*{\bf\alph{Letter}}%
++  \ncline{A\iA}{B\iA}\ncput*{\bfseries\alph{Letter}}%
+   \ifnum\iB>5 \def\iB{1}\fi%
+-  \pcline[linestyle=none](B\iA)(B\iB)\ncput*{\bf\iA}}
++  \pcline[linestyle=none](B\iA)(B\iB)\ncput*{\bfseries\iA}}
+ \end{pspicture}
+ \end{LTXexample}
+ 
+@@ -610,8 +612,7 @@
+ \nocite{*}
+ \bgroup
+ \RaggedRight
+-\bibliographystyle{plain}
+-\bibliography{pst-poly-doc}
++\printbibliography
+ \egroup
+ 
+ \printindex

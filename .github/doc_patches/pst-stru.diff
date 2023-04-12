@@ -1,0 +1,56 @@
+--- pst-stru-doc.tex	2015-10-11 23:21:12.000000000 +0200
++++ pst-stru-doc.tex	2023-04-13 17:14:12.705246171 +0200
+@@ -1,7 +1,7 @@
++\DocumentMetadata{}
+ \documentclass[english,11pt]{article}
+ %
+ \usepackage[T1]{fontenc}
+-\usepackage[latin9]{inputenc}
+ \listfiles
+ \usepackage[scaled=0.85]{luximono}
+ \usepackage{lmodern}
+@@ -39,7 +39,7 @@
+ \usepackage{babel}
+ \usepackage{makeidx,luximono}
+ \makeindex
+-\usepackage[dvips,colorlinks,linktocpage]{hyperref} % PDF-support
++\usepackage[colorlinks,linktocpage]{hyperref} % PDF-support
+ %
+ \lstset{explpreset={numbers=left,numberstyle=\tiny,numbersep=.3em,
+   xleftmargin=1em,columns=flexible,language=PSTricks,keywordstyle=\small\ttfamily\bfseries,
+@@ -53,7 +53,7 @@
+ \title{\texttt{pst-stru}:\newline Structural schemes v0.12}
+ \author{Giuseppe Matarazzo\thanks{%
+ Thanks to Manuel Luque who inspired and initially supported this work.\newline
+-Documentation revised by Herbert Voß\newline
++Documentation revised by Herbert VoÃŸ\newline
+ This program can be redistributed and/or modified under the terms
+ of the LaTeX Project Public License Distributed from CTAN archives
+ in directory macros/latex/base/lppl.txt.}}
+@@ -185,7 +185,7 @@
+ \uput[180](A1){\Large A$_1$}\uput[0](B1){\Large B$_1$}
+ %-----------------------------------------
+ % Parameters
+-% #1 m = 0.5       y = mùx + n       (1)
++% #1 m = 0.5       y = mâˆ™x + n       (1)
+ % #2 n = -1
+ %----------- line 1 -------  --------------------------
+ \pscustom[linecolor=blue,linewidth=1pt,fillstyle=solid,fillcolor=yellow]{
+@@ -201,7 +201,7 @@
+ \begin{pspicture}(-1,-1)(5,1)
+ %-----------------------------------------
+ % Parameters
+-% #1 m = 0.25       y = mùx + n      (2)
++% #1 m = 0.25       y = mâˆ™x + n      (2)
+ % #2 n = 0
+ %----------- line 2 -------  --------------------------
+ \pnode(0,0) {A2}
+@@ -220,7 +220,7 @@
+ \begin{pspicture}(-1,-1)(5,1)
+ %-----------------------------------------
+ % Parameters
+-% #1 m = -0.5      y = mùx + n      (2)
++% #1 m = -0.5      y = mâˆ™x + n      (2)
+ % #2 n = 1
+ %----------- line 2 ------- Triangular load --------------------------
+   \pnode(0,0){A3}\pnode(4,0){B3}

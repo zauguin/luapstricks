@@ -1,0 +1,23 @@
+--- pst-am-doc.tex	2009-12-12 02:04:00.000000000 +0100
++++ pst-am-doc.tex	2023-04-13 00:09:07.061814224 +0200
+@@ -1,8 +1,9 @@
++\DocumentMetadata{}
+ %% $Id: pst-am-doc.tex 166 2009-12-08 14:48:53Z herbert $
+ \documentclass[11pt,english,BCOR10mm,DIV12,bibliography=totoc,parskip=false,smallheadings
+     headexclude,footexclude,oneside]{pst-doc}
+-\usepackage[latin9]{inputenc}
+ \usepackage{pst-am}
++\addbibresource{pst-am-doc.bib}
+ \let\pstAmFV\fileversion
+ %
+ \begin{filecontents*}{pst-am-doc.eps}
+@@ -513,8 +514,7 @@
+ \nocite{*}
+ \bgroup
+ \RaggedRight
+-\bibliographystyle{plain}
+-\bibliography{pst-am-doc}
++\printbibliography
+ \egroup
+ 
+ \printindex

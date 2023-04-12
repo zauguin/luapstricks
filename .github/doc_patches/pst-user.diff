@@ -1,0 +1,8 @@
+--- pst-user.orig.tex	2023-04-13 02:01:37.783445190 +0200
++++ pst-user.tex	2023-04-13 02:02:01.216816740 +0200
+@@ -1,3 +1,5 @@
++\DocumentMetadata{}
++\RequirePackage{xcolor}
+ %% BEGIN pst-user.tex
+ %%
+ %% LaTeX file pst-user.tex. Source for the PSTricks User's Guide.

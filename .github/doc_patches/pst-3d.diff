@@ -5,21 +5,19 @@
  %% $Id: pst-3d-doc.tex 289 2010-02-13 14:35:35Z herbert $
  \documentclass[11pt,english,BCOR10mm,DIV12,bibliography=totoc,parskip=false,smallheadings
      headexclude,footexclude,oneside,dvipsnames,svgnames]{pst-doc}
-@@ -8,10 +9,11 @@
+@@ -8,10 +9,7 @@
  \SpecialCoor
  \let\pstFV\fileversion
  \let\belowcaptionskip\abovecaptionskip
 +\addbibresource{pst-3d-doc.bib}
  %
- \makeatletter
+-\makeatletter
 -\renewcommand*\l@subsection{\bprot@dottedtocline{2}{1.5em}{3.6em}}
 -\renewcommand*\l@subsubsection{\bprot@dottedtocline{3}{3.8em}{4.5em}}
-+%\renewcommand*\l@subsection{\bprot@dottedtocline{2}{1.5em}{3.6em}}
-+%\renewcommand*\l@subsubsection{\bprot@dottedtocline{3}{3.8em}{4.5em}}
- \makeatother
+-\makeatother
  \def\bgImage{}
  \lstset{explpreset={pos=l,width=-99pt,overhang=0pt,hsep=\columnsep,vsep=\bigskipamount,rframe={}},
-@@ -770,8 +772,7 @@
+@@ -770,8 +768,7 @@
  \nocite{*}
  \bgroup
  \RaggedRight

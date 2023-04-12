@@ -18,13 +18,19 @@ jobs:
         id: texlive
         uses: zauguin/install-texlive@experiment
         with:
+          tlcontrib: "true"
           package_file: .github/tl_packages
           profile: .github/texlive.profile
   build-docs:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
+#         - path: generic/pstricks
+#           document: pst-user
+#           patch: pst-user.diff
+#           extra-command: tar xzf pst-user.tgz
           - path: generic/pstricks-add
             document: pstricks-add-doc
             patch: add_documentmetadata.diff
@@ -34,9 +40,80 @@ jobs:
 #         - path: generic/pst-3dplot
 #           document: pst-3dplot-doc
 #           patch: pst-3dplot.diff
+          - path: generic/pst-am
+            document: pst-am-doc
+            patch: pst-am.diff
+            extra-command: iconv -f ISO_8859-15 -t UTF-8 pst-am-doc.tex | sponge pst-am-doc.tex
+          - path: generic/pst-antiprism
+            document: pst-antiprism-doc
+            patch: add_documentmetadata.diff
+          - path: generic/pst-barcode
+            document: pst-barcode-doc
+            extension: ltx
+          - path: generic/pst-bezier
+            document: pst-bezier-doc
+            patch: add_documentmetadata.diff
+          - path: generic/pst-cie
+            document: pst-cie-doc
+          - path: generic/pst-circ
+            document: pst-circ-doc
+          - path: generic/pst-coil
+            document: pst-coil-doc
+            patch: pst-coil.diff
+          - path: generic/pst-dart
+            document: pst-dart-doc
+#
+          - path: generic/pst-eucl
+            document: pst-eucl-doc
+            patch: pst-eucl.diff
+          - path: generic/pst-func
+            document: pst-func-doc
+          - path: generic/pst-knot
+            document: pst-knot-doc
+            patch: pst-knot.diff
+            extra-command: cp ~/texlive/texmf-dist/doc/generic/pst-func/pst-func-doc.bib .
+          - path: generic/pst-node
+            document: pst-node-doc
+          - path: generic/pst-ovl
+            document: pst-ovl-doc
+            patch: add_documentmetadata.diff
+          - path: generic/pst-platon
+            document: pst-platon-doc
+            patch: pst-platon.diff
+          - path: generic/pst-plot
+            document: pst-plot-doc
+          - path: generic/pst-poly
+            document: pst-poly-doc
+            patch: pst-poly.diff
+          - path: generic/pst-solarsystem
+            document: pst-solarsystem-doc
+            patch: add_documentmetadata.diff
+          - path: generic/pst-soroban
+            document: pst-soroban-doc
+            patch: pst-soroban.diff
+          - path: generic/pst-spinner
+            document: pst-spinner-doc
+            patch: add_documentmetadata.diff
+          - path: generic/pst-stru
+            document: pst-stru-doc
+            patch: pst-stru.diff
+          - path: generic/pst-tools
+            document: pst-tools-doc
+          - path: generic/pst-tree
+            document: pst-tree-doc
+          - path: generic/pst-turtle
+            document: pst-turtle-doc
+            patch: add_documentmetadata.diff
+          - path: generic/pst-vehicle
+            document: pst-vehicle-doc
+            patch: pst-vehicle.diff
+          - path: generic/pst-venn
+            document: pst-venn-doc
+            patch: add_documentmetadata.diff
     name: "${{ matrix.document }}"
     needs: texlive-cache
     steps:
+      - run: sudo apt update && sudo apt -y install moreutils ghostscript
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
@@ -52,13 +129,17 @@ jobs:
         working-directory: luapstricks
       - run: cp -R "$HOME/texlive/texmf-dist/doc/${{ matrix.path }}" document_dir
       - run: cp -R "$HOME/texlive/texmf-dist/doc/generic/pstricks/pst-doc.pdf" document_dir
+      - name: Run extra command
+        if: matrix.extra-command
+        working-directory: document_dir
+        run: "${{ matrix.extra-command }}"
       - name: Patch documentation
         if: matrix.patch
         working-directory: document_dir
-        run: patch "${{ matrix.document }}.tex" "${{ github.workspace }}/luapstricks/.github/doc_patches/${{ matrix.patch }}"
+        run: patch "${{ matrix.document }}.${{ matrix.extension || 'tex' }}" "${{ github.workspace }}/luapstricks/.github/doc_patches/${{ matrix.patch }}"
       - name: Run latexmk
         working-directory: document_dir
-        run: "latexmk -pdflua ${{ matrix.document }}"
+        run: "latexmk -pdflua ${{ matrix.document }}.${{ matrix.extension || 'tex' }}"
       - name: Save resulting document 
         uses: actions/upload-artifact@v3
         with:

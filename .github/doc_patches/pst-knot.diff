@@ -1,0 +1,23 @@
+--- pst-knot-doc.tex	2009-11-16 20:53:23.000000000 +0100
++++ pst-knot-doc.tex	2023-04-13 17:49:38.145343421 +0200
+@@ -1,8 +1,10 @@
++\DocumentMetadata{}
+ %% $Id: pst-knot-doc.tex 137 2009-10-08 18:15:14Z herbert $
+ \documentclass[11pt,english,BCOR10mm,DIV12,bibliography=totoc,parskip=false,
+    smallheadings, headexclude,footexclude,oneside]{pst-doc}
+ \usepackage[utf8]{inputenc}
+ \usepackage{pst-knot}
++\addbibresource{pst-func-doc.bib}% (sic) TODO(MK): Get right bib file. Based on looking at the typeset output, pst-func-doc.bib seems to be identical though.
+ \let\pstKnotFV\fileversion
+ \renewcommand\bgImage{%
+ \begin{pspicture}(-2,-2)(2,2) 
+@@ -161,8 +163,7 @@
+ \bgroup
+ \raggedright
+ \nocite{*}
+-\bibliographystyle{plain}
+-\bibliography{\jobname}
++\printbibliography
+ \egroup
+ 
+ \printindex

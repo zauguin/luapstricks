@@ -1,0 +1,14 @@
+--- pst-vehicle-doc.tex	2021-12-29 22:33:34.000000000 +0100
++++ pst-vehicle-doc.tex	2023-04-13 17:41:38.542790308 +0200
+@@ -29,9 +29,9 @@
+ \documentclass[11pt,english,BCOR=10mm,DIV=12,bibliography=totoc,parskip=false,headings=small,
+     headinclude=false,footinclude=false,oneside]{pst-doc}
+ \listfiles
+-\usepackage{biblatex}
++% \usepackage{biblatex}
+ \usepackage[autostyle]{csquotes}
+-\addbibresource{pst-vehicle-doc.bib}
++% \addbibresource{pst-vehicle-doc.bib}
+ \let\pstvehicleFV\fileversion
+ \usepackage[e]{esvect} % für schönere Vektorpfeile
+ \usepackage{pst-vehicle,pst-eucl,pstricks-add,animate}
