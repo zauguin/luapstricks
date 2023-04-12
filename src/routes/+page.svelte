@@ -1,59 +1,33 @@
 <script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+  export let data
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+  <title>LuaPSTricks documentation overview</title>
 </svelte:head>
 
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
-		</span>
-
-		to your new<br />SvelteKit app
-	</h1>
-
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
-
-	<Counter />
-</section>
+<main>
+  <p>
+    This page collects documentation of multiple PSTricks packages compiled with LuaPSTricks do demonstrate which packages work correctly and which features might still be missing.
+  </p>
+  
+  <p>
+    Please select which version of LuaPSTricks you are interested in:
+  </p>
+  <ul>
+    {#each data.versions as version}
+      <li>
+        <a href={`/version/${version}`}>
+          {#if version === 'trunk'}
+            The current git version
+          {:else}
+            Version {version}
+          {/if}
+        </a>
+      </li>
+    {/each}
+  </ul>
+</main>
 
 <style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
-	}
 </style>
