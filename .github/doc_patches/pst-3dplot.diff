@@ -1,0 +1,18 @@
+--- pst-3dplot-doc.tex	2022-01-15 22:37:54.000000000 +0100
++++ pst-3dplot-doc.tex	2023-04-12 15:35:12.106371582 +0200
+@@ -1,3 +1,4 @@
++\DocumentMetadata{}
+ \input{pst-3dplot-doc.dat}
+ 
+ %% $Id: pst-3dplot-doc.tex 414 2022-01-14 20:43:27Z herbert $
+@@ -20,10 +21,6 @@
+ \usepackage{biblatex}
+ \addbibresource{\jobname.bib}
+ 
+-\makeatletter
+-\renewcommand*\l@subsection{\bprot@dottedtocline{2}{1.5em}{3.6em}}
+-\renewcommand*\l@subsubsection{\bprot@dottedtocline{3}{3.8em}{4.5em}}
+-\makeatother
+ \def\bgImage{%
+ \begin{pspicture}(0,-3)(7,5)
+ \pstThreeDCoor[xMax=2,yMax=13,zMin=0,zMax=6,IIIDticks]%

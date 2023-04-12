@@ -27,10 +27,13 @@ jobs:
         include:
           - path: generic/pstricks-add
             document: pstricks-add-doc
+            patch: add_documentmetadata.diff
           - path: generic/pst-3d
             document: pst-3d-doc
+            patch: pst-3d.diff
           - path: generic/pst-3dplot
             document: pst-3dplot-doc
+            patch: pst-3dplot.diff
     name: "${{ matrix.document }}"
     needs: texlive-cache
     steps:
@@ -49,6 +52,10 @@ jobs:
         working-directory: luapstricks
       - run: cp -R "$HOME/texlive/texmf-dist/doc/${{ matrix.path }}" document_dir
       - run: cp -R "$HOME/texlive/texmf-dist/doc/generic/pstricks/pst-doc.pdf" document_dir
+      - name: Patch documentation
+        if: matrix.patch
+        working-directory: document_dir
+        run: patch "${{ matrix.document }}.tex" "${{ github.workspace }}/luapstricks/.github/doc_patches/${{ matrix.patch }}"
       - name: Run latexmk
         working-directory: document_dir
         run: "latexmk -pdflua ${{ matrix.document }}"
