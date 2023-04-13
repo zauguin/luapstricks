@@ -3,6 +3,8 @@ name: Build PST package documentation
 on:
   push:
     branches:
+      - trunk
+    tags:
       - "*"
 
 jobs:
@@ -37,9 +39,9 @@ jobs:
           - path: generic/pst-3d
             document: pst-3d-doc
             patch: pst-3d.diff
-#         - path: generic/pst-3dplot
-#           document: pst-3dplot-doc
-#           patch: pst-3dplot.diff
+          - path: generic/pst-3dplot
+            document: pst-3dplot-doc
+            patch: pst-3dplot.diff
           - path: generic/pst-am
             document: pst-am-doc
             patch: pst-am.diff
@@ -62,7 +64,6 @@ jobs:
             patch: pst-coil.diff
           - path: generic/pst-dart
             document: pst-dart-doc
-#
           - path: generic/pst-eucl
             document: pst-eucl-doc
             patch: pst-eucl.diff
