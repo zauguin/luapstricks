@@ -1,5 +1,4 @@
 <script>
-  import {NativeSelect} from '@svelteuidev/core'
   import {page} from '$app/stores'
   import github from '$lib/images/github.svg'
 </script>
