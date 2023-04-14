@@ -30,34 +30,4 @@ Also many thanks to Herbert Voß for adapting PSTricks and related packages to w
 
 ## Demos
 
-Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`:
-
-<!-- - [pst-user](https://luapstricks.typesetting.eu/version/trunk/doc/pst-user.pdf) Main (historical) documentation without overlay stuff (is now in pst-ovl) -->
-- [pstricks-add](https://luapstricks.typesetting.eu/version/trunk/doc/pstricks-add-doc.pdf)
-- [pst-3d](https://luapstricks.typesetting.eu/version/trunk/doc/pst-3d-doc.pdf)
-- [pst-3dplot](https://luapstricks.typesetting.eu/version/trunk/doc/pst-3dplot-doc.pdf)
-- [pst-am](https://luapstricks.typesetting.eu/version/trunk/doc/pst-am-doc.pdf)
-- [pst-antiprism](https://luapstricks.typesetting.eu/version/trunk/doc/pst-antiprism-doc.pdf)
-- [pst-barcode](https://luapstricks.typesetting.eu/version/trunk/doc/pst-barcode-doc.pdf)
-- [pst-bezier](https://luapstricks.typesetting.eu/version/trunk/doc/pst-bezier-doc.pdf)
-- [pst-cie](https://luapstricks.typesetting.eu/version/trunk/doc/pst-cie-doc.pdf)
-- [pst-circ](https://luapstricks.typesetting.eu/version/trunk/doc/pst-circ-doc.pdf)
-- [pst-coil](https://luapstricks.typesetting.eu/version/trunk/doc/pst-coil-doc.pdf)
-- [pst-dart](https://luapstricks.typesetting.eu/version/trunk/doc/pst-dart-doc.pdf)
-- [pst-eucl](https://luapstricks.typesetting.eu/version/trunk/doc/pst-eucl-doc.pdf)
-- [pst-func](https://luapstricks.typesetting.eu/version/trunk/doc/pst-func-doc.pdf)
-- [pst-knot](https://luapstricks.typesetting.eu/version/trunk/doc/pst-knot-doc.pdf)
-- [pst-node](https://luapstricks.typesetting.eu/version/trunk/doc/pst-node-doc.pdf)
-- [pst-ovl](https://luapstricks.typesetting.eu/version/trunk/doc/pst-ovl-doc.pdf)
-- [pst-platon](https://luapstricks.typesetting.eu/version/trunk/doc/pst-platon-doc.pdf)
-- [pst-plot](https://luapstricks.typesetting.eu/version/trunk/doc/pst-plot-doc.pdf)
-- [pst-poly](https://luapstricks.typesetting.eu/version/trunk/doc/pst-poly-doc.pdf)
-- [pst-solarsystem](https://luapstricks.typesetting.eu/version/trunk/doc/pst-solarsystem-doc.pdf)
-- [pst-soroban](https://luapstricks.typesetting.eu/version/trunk/doc/pst-soroban-doc.pdf)
-- [pst-spinner](https://luapstricks.typesetting.eu/version/trunk/doc/pst-spinner-doc.pdf)
-- [pst-stru](https://luapstricks.typesetting.eu/version/trunk/doc/pst-stru-doc.pdf)
-- [pst-tools](https://luapstricks.typesetting.eu/version/trunk/doc/pst-tools-doc.pdf)
-- [pst-tree](https://luapstricks.typesetting.eu/version/trunk/doc/pst-tree-doc.pdf)
-- [pst-turtle](https://luapstricks.typesetting.eu/version/trunk/doc/pst-turtle-doc.pdf)
-- [pst-vehicle](https://luapstricks.typesetting.eu/version/trunk/doc/pst-vehicle-doc.pdf)
-- [pst-venn](https://luapstricks.typesetting.eu/version/trunk/doc/pst-venn-doc.pdf)
+Documentation of PSTricks packages, created by `lualatex` and `luapstricks.lua`, can be found at <https://luapstricks.typesetting.eu/>.
