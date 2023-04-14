@@ -151,6 +151,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy to Pages branch
     needs: build-docs
+    if: github.ref_type == 'branch'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -172,5 +173,27 @@ jobs:
           GIT_COMMITTER_EMAIL: "${{ github.event.head_commit.committer.email }}"
       - name: Trigger pusblishing workflow
         run: gh workflow run deploy-page.yaml --ref gh-pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+  # We could use the same workflow here as for branches and just push into the gh-pages branch,
+  # but then we would collect a huge number of files in there, wasting space.
+  release:
+    runs-on: ubuntu-latest
+    name: Create GitHub release
+    needs: build-docs
+    if: github.ref_type == 'tag'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: documentation
+      - name: Create GitHub release
+        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e
+        with:
+          artifacts: "*.pdf"
+          artifactContentType: application/pdf
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Trigger pusblishing workflow
+        run: gh workflow run deploy-page.yaml --repo "$GITHUB_REPOSITORY" --ref gh-pages
         env:
           GH_TOKEN: ${{ github.token }}
