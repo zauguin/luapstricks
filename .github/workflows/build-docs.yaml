@@ -33,30 +33,30 @@ jobs:
 #           document: pst-user
 #           patch: pst-user.diff
 #           extra-command: tar xzf pst-user.tgz
-          - path: generic/pstricks-add
-            document: pstricks-add-doc
-            patch: add_documentmetadata.diff
+#         - path: generic/pstricks-add
+#           document: pstricks-add-doc
+#           patch: add_documentmetadata.diff
           - path: generic/pst-3d
             document: pst-3d-doc
             patch: pst-3d.diff
-          - path: generic/pst-3dplot
-            document: pst-3dplot-doc
-            patch: pst-3dplot.diff
+#         - path: generic/pst-3dplot
+#           document: pst-3dplot-doc
+#           patch: pst-3dplot.diff
           - path: generic/pst-am
             document: pst-am-doc
             patch: pst-am.diff
             extra-command: iconv -f ISO_8859-15 -t UTF-8 pst-am-doc.tex | sponge pst-am-doc.tex
-          - path: generic/pst-antiprism
-            document: pst-antiprism-doc
-            patch: add_documentmetadata.diff
+#         - path: generic/pst-antiprism
+#           document: pst-antiprism-doc
+#           patch: add_documentmetadata.diff
           - path: generic/pst-barcode
             document: pst-barcode-doc
             extension: ltx
           - path: generic/pst-bezier
             document: pst-bezier-doc
             patch: add_documentmetadata.diff
-          - path: generic/pst-cie
-            document: pst-cie-doc
+#         - path: generic/pst-cie
+#           document: pst-cie-doc
           - path: generic/pst-circ
             document: pst-circ-doc
           - path: generic/pst-coil
@@ -67,8 +67,8 @@ jobs:
           - path: generic/pst-eucl
             document: pst-eucl-doc
             patch: pst-eucl.diff
-          - path: generic/pst-func
-            document: pst-func-doc
+#         - path: generic/pst-func
+#           document: pst-func-doc
           - path: generic/pst-knot
             document: pst-knot-doc
             patch: pst-knot.diff
@@ -193,6 +193,7 @@ jobs:
           artifacts: "*.pdf"
           artifactContentType: application/pdf
           token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: true
       - name: Trigger pusblishing workflow
         run: gh workflow run deploy-page.yaml --repo "$GITHUB_REPOSITORY" --ref gh-pages
         env:
