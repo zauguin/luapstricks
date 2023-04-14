@@ -12,7 +12,7 @@
   <ul>
     {#each data.docFiles as file}
       <li>
-        <a href={`/version/${data.version}/doc/${file.filename}`}>
+        <a href={file.filename}>
           {file.name}
         </a>
       </li>

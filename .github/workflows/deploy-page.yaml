@@ -33,6 +33,8 @@ jobs:
         run: npm ci
       - name: Static HTML export with SvelteKit
         run: npm run build
+        env:
+          GH_TOKEN: ${{ github.token }}
       - uses: actions/upload-artifact@v3
         with:
           name: my-pages
