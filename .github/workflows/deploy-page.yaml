@@ -33,13 +33,17 @@ jobs:
         run: npm ci
       - name: Static HTML export with SvelteKit
         run: npm run build
+      - uses: actions/upload-artifact@v3
+        with:
+          name: my-pages
+          path: build/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: ./build
 
   # Deployment job
-  deploy:
+  deploy-gh:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -49,3 +53,38 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
+
+  # Deployment job
+  deploy:
+    environment:
+      name: my-pages
+      url: https://luapstricks.typesetting.eu
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: my-pages
+      - name: Start SSH Agent
+        run: |
+          eval $(ssh-agent)
+          echo SSH_AGENT_PID="$SSH_AGENT_PID" >> $GITHUB_ENV
+          echo SSH_AUTH_SOCK="$SSH_AUTH_SOCK" >> $GITHUB_ENV
+      - name: Save upload key
+        run: printenv SSH_KEY | ssh-add -
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+      - name: Store known host key
+        run: mkdir ~/.ssh && printenv SSH_KNOWN_HOSTS > "$HOME/.ssh/known_hosts"
+        env:
+          SSH_KNOWN_HOSTS: ${{ vars.SSH_KNOWN_HOSTS }}
+      - name: Upload page
+        run: rsync -av --delete -e "ssh -l \"$SSH_USER\"" ./ "$SSH_SERVER"::luapstricks/
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_SERVER: ${{ vars.SSH_SERVER }}
+      - name: Stop SSH Agent
+        if: always()
+        run: |
+          ssh-agent -k
