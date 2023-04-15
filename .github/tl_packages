@@ -29,7 +29,6 @@ pst-coil
 pst-dart
 pst-eucl
 pst-func
-#
 pst-knot
 pst-node
 pst-ovl
@@ -62,12 +61,15 @@ animate
 bbold
 biber
 biblatex
+bibtex
 blindtext
 bookmark
 booktabs
 caption
 colortbl
+csquotes
 dantelogo
+dtk-bibliography
 ec
 epstopdf
 epstopdf-pkg
@@ -91,6 +93,7 @@ libertinus-fonts
 libertinus-otf
 listings
 ltablex
+luacode
 lualatex-math
 makeindex
 manfnt
@@ -98,6 +101,7 @@ marginnote
 media9
 multido
 multirow
+ntheorem
 numprint
 oberdiek
 ocgx2
@@ -121,10 +125,6 @@ xltabular
 xstring
 xurl
 zref
-ntheorem
-dtk-bibliography
-csquotes
-bibtex
 #
 # From tlcontrib
 luxi
