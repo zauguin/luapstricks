@@ -95,6 +95,7 @@ listings
 ltablex
 luacode
 lualatex-math
+luatexbase
 makeindex
 manfnt
 marginnote
