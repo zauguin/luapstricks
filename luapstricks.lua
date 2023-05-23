@@ -4191,7 +4191,7 @@ local fid = font.define{
           ps_pos_x, ps_pos_y = pdf.getpos()
           n.xoffset = -ps_pos_x
           n.yoffset = -ps_pos_y
-          n = node.hpack(n)
+          n = node.hpack(n, 0, 1, 0) -- Default width, TLT
           vf.node(node.direct.todirect(n))
           node.free(n)
         end}
