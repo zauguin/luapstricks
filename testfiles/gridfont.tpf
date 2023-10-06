@@ -343,7 +343,7 @@ endobj
 << /ExtGState 1 0 R /Font << /F78 8 0 R /F77 9 0 R /F79 10 0 R >> /ProcSet [ /PDF /Text ] >>
 endobj
 12 0 obj
-<< /Type /Metadata /Subtype /XML /Length 10339 >>      
+<< /Type /Metadata /Subtype /XML /Length 11034 >>      
 stream
 <?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/">
@@ -370,6 +370,21 @@ stream
     xmlns:pdfaField="http://www.aiim.org/pdfa/ns/field#">
    <pdfaExtension:schemas>
     <rdf:Bag>
+     <rdf:li rdf:parseType="Resource">
+      <pdfaSchema:schema>XMP Media Management Schema</pdfaSchema:schema>
+      <pdfaSchema:prefix>xmpMM</pdfaSchema:prefix>
+      <pdfaSchema:namespaceURI>http://ns.adobe.com/xap/1.0/mm/</pdfaSchema:namespaceURI>
+      <pdfaSchema:property>
+       <rdf:Seq>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>OriginalDocumentID</pdfaProperty:name>
+         <pdfaProperty:valueType>URI</pdfaProperty:valueType>
+         <pdfaProperty:category>internal</pdfaProperty:category>
+         <pdfaProperty:description>The common identifier for all versions and renditions of a document.</pdfaProperty:description>
+        </rdf:li>
+       </rdf:Seq>
+      </pdfaSchema:property>
+     </rdf:li>
      <rdf:li rdf:parseType="Resource">
       <pdfaSchema:schema>PDF/A Identification Schema</pdfaSchema:schema>
       <pdfaSchema:prefix>pdfaid</pdfaSchema:prefix>
@@ -516,21 +531,21 @@ stream
      </rdf:li>
     </rdf:Bag>
    </pdfaExtension:schemas>
-   <pdf:Producer>luahbtex-1.17.0</pdf:Producer>
+   <pdf:Producer>luahbtex-NN.NN.NN</pdf:Producer>
    <pdf:PDFVersion>1.5</pdf:PDFVersion>
    <dc:type>
     <rdf:Bag>
-     <rdf:li xml:lang="en-US">Text</rdf:li>
+     <rdf:li>Text</rdf:li>
     </rdf:Bag>
    </dc:type>
    <dc:language>
     <rdf:Bag>
-     <rdf:li xml:lang="en-US">en-US</rdf:li>
+     <rdf:li>en-US</rdf:li>
     </rdf:Bag>
    </dc:language>
    <dc:date>
     <rdf:Seq>
-     <rdf:li xml:lang="en-US">2001-01-01T20:59:59-00:00</rdf:li>
+     <rdf:li>2001-01-01T20:59:59-00:00</rdf:li>
     </rdf:Seq>
    </dc:date>
    <dc:format>application/pdf</dc:format>
@@ -929,57 +944,57 @@ endobj
 xref
 0 50
 0000000002 65535 f 
-0000018804 00000 n 
+0000019499 00000 n 
 0000000003 00000 f 
 0000000004 00000 f 
 0000000000 00000 f 
 0000005727 00000 n 
 0000005614 00000 n 
 0000000020 00000 n 
-0000037775 00000 n 
-0000035431 00000 n 
-0000033097 00000 n 
-0000038134 00000 n 
+0000038470 00000 n 
+0000036126 00000 n 
+0000033792 00000 n 
+0000038829 00000 n 
 0000005835 00000 n 
-0000018705 00000 n 
-0000018589 00000 n 
-0000016264 00000 n 
-0000030687 00000 n 
-0000026830 00000 n 
-0000018894 00000 n 
-0000025340 00000 n 
-0000019142 00000 n 
-0000019498 00000 n 
-0000025581 00000 n 
-0000026990 00000 n 
-0000027196 00000 n 
-0000029554 00000 n 
-0000027318 00000 n 
-0000027390 00000 n 
-0000029793 00000 n 
-0000030844 00000 n 
-0000031047 00000 n 
-0000032058 00000 n 
-0000031102 00000 n 
-0000031178 00000 n 
-0000032297 00000 n 
-0000033255 00000 n 
-0000033459 00000 n 
-0000034386 00000 n 
-0000033498 00000 n 
-0000033561 00000 n 
-0000034626 00000 n 
-0000035589 00000 n 
-0000035794 00000 n 
-0000036741 00000 n 
-0000035849 00000 n 
-0000035925 00000 n 
-0000036980 00000 n 
-0000037931 00000 n 
-0000038202 00000 n 
-0000038283 00000 n 
+0000019400 00000 n 
+0000019284 00000 n 
+0000016959 00000 n 
+0000031382 00000 n 
+0000027525 00000 n 
+0000019589 00000 n 
+0000026035 00000 n 
+0000019837 00000 n 
+0000020193 00000 n 
+0000026276 00000 n 
+0000027685 00000 n 
+0000027891 00000 n 
+0000030249 00000 n 
+0000028013 00000 n 
+0000028085 00000 n 
+0000030488 00000 n 
+0000031539 00000 n 
+0000031742 00000 n 
+0000032753 00000 n 
+0000031797 00000 n 
+0000031873 00000 n 
+0000032992 00000 n 
+0000033950 00000 n 
+0000034154 00000 n 
+0000035081 00000 n 
+0000034193 00000 n 
+0000034256 00000 n 
+0000035321 00000 n 
+0000036284 00000 n 
+0000036489 00000 n 
+0000037436 00000 n 
+0000036544 00000 n 
+0000036620 00000 n 
+0000037675 00000 n 
+0000038626 00000 n 
+0000038897 00000 n 
+0000038978 00000 n 
 trailer
 << /Size 50 /Root 48 0 R /Info 49 0 R /ID [ <2350CAD05F8A7AF0AA4058486855344F> <2350CAD05F8A7AF0AA4058486855344F> ] >>
 startxref
-38427
+39122
 %%EOF

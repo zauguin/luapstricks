@@ -2465,7 +2465,7 @@ endobj
 << /ExtGState 1 0 R /Font << /F19 8 0 R /F33 11 0 R /F27 13 0 R /F15 10 0 R /F35 19 0 R >> /ProcSet [ /PDF /Text ] >>
 endobj
 20 0 obj
-<< /Type /Metadata /Subtype /XML /Length 10336 >>      
+<< /Type /Metadata /Subtype /XML /Length 11031 >>      
 stream
 <?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/">
@@ -2492,6 +2492,21 @@ stream
     xmlns:pdfaField="http://www.aiim.org/pdfa/ns/field#">
    <pdfaExtension:schemas>
     <rdf:Bag>
+     <rdf:li rdf:parseType="Resource">
+      <pdfaSchema:schema>XMP Media Management Schema</pdfaSchema:schema>
+      <pdfaSchema:prefix>xmpMM</pdfaSchema:prefix>
+      <pdfaSchema:namespaceURI>http://ns.adobe.com/xap/1.0/mm/</pdfaSchema:namespaceURI>
+      <pdfaSchema:property>
+       <rdf:Seq>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>OriginalDocumentID</pdfaProperty:name>
+         <pdfaProperty:valueType>URI</pdfaProperty:valueType>
+         <pdfaProperty:category>internal</pdfaProperty:category>
+         <pdfaProperty:description>The common identifier for all versions and renditions of a document.</pdfaProperty:description>
+        </rdf:li>
+       </rdf:Seq>
+      </pdfaSchema:property>
+     </rdf:li>
      <rdf:li rdf:parseType="Resource">
       <pdfaSchema:schema>PDF/A Identification Schema</pdfaSchema:schema>
       <pdfaSchema:prefix>pdfaid</pdfaSchema:prefix>
@@ -2638,21 +2653,21 @@ stream
      </rdf:li>
     </rdf:Bag>
    </pdfaExtension:schemas>
-   <pdf:Producer>luahbtex-1.17.0</pdf:Producer>
+   <pdf:Producer>luahbtex-NN.NN.NN</pdf:Producer>
    <pdf:PDFVersion>1.5</pdf:PDFVersion>
    <dc:type>
     <rdf:Bag>
-     <rdf:li xml:lang="en-US">Text</rdf:li>
+     <rdf:li>Text</rdf:li>
     </rdf:Bag>
    </dc:type>
    <dc:language>
     <rdf:Bag>
-     <rdf:li xml:lang="en-US">en-US</rdf:li>
+     <rdf:li>en-US</rdf:li>
     </rdf:Bag>
    </dc:language>
    <dc:date>
     <rdf:Seq>
-     <rdf:li xml:lang="en-US">2001-01-01T20:59:59-00:00</rdf:li>
+     <rdf:li>2001-01-01T20:59:59-00:00</rdf:li>
     </rdf:Seq>
    </dc:date>
    <dc:format>application/pdf</dc:format>
@@ -3369,78 +3384,78 @@ endobj
 xref
 0 71
 0000000002 65535 f 
-0000065855 00000 n 
+0000066550 00000 n 
 0000000003 00000 f 
 0000000004 00000 f 
 0000000000 00000 f 
 0000031244 00000 n 
 0000031130 00000 n 
 0000000020 00000 n 
-0000095540 00000 n 
-0000090172 00000 n 
-0000087117 00000 n 
-0000077233 00000 n 
-0000074311 00000 n 
-0000103551 00000 n 
-0000072004 00000 n 
-0000103693 00000 n 
+0000096235 00000 n 
+0000090867 00000 n 
+0000087812 00000 n 
+0000077928 00000 n 
+0000075006 00000 n 
+0000104246 00000 n 
+0000072699 00000 n 
+0000104388 00000 n 
 0000051733 00000 n 
 0000051616 00000 n 
 0000031400 00000 n 
-0000068765 00000 n 
+0000069460 00000 n 
 0000051867 00000 n 
-0000065756 00000 n 
-0000065639 00000 n 
-0000062293 00000 n 
-0000065945 00000 n 
-0000067685 00000 n 
-0000066054 00000 n 
-0000066128 00000 n 
-0000067920 00000 n 
-0000068918 00000 n 
-0000069117 00000 n 
-0000070935 00000 n 
-0000069215 00000 n 
-0000069289 00000 n 
-0000071173 00000 n 
-0000072157 00000 n 
-0000072356 00000 n 
-0000072379 00000 n 
-0000073339 00000 n 
-0000072408 00000 n 
-0000072471 00000 n 
-0000073569 00000 n 
-0000074463 00000 n 
-0000074661 00000 n 
-0000076129 00000 n 
-0000074758 00000 n 
-0000074834 00000 n 
-0000076368 00000 n 
-0000077390 00000 n 
-0000077593 00000 n 
-0000085354 00000 n 
-0000077993 00000 n 
-0000078078 00000 n 
-0000085590 00000 n 
-0000087271 00000 n 
-0000087471 00000 n 
-0000089117 00000 n 
-0000087568 00000 n 
-0000087641 00000 n 
-0000089351 00000 n 
-0000090322 00000 n 
-0000090519 00000 n 
-0000094252 00000 n 
-0000090757 00000 n 
-0000090832 00000 n 
-0000094485 00000 n 
-0000095689 00000 n 
-0000103321 00000 n 
-0000095885 00000 n 
-0000103768 00000 n 
-0000103849 00000 n 
+0000066451 00000 n 
+0000066334 00000 n 
+0000062988 00000 n 
+0000066640 00000 n 
+0000068380 00000 n 
+0000066749 00000 n 
+0000066823 00000 n 
+0000068615 00000 n 
+0000069613 00000 n 
+0000069812 00000 n 
+0000071630 00000 n 
+0000069910 00000 n 
+0000069984 00000 n 
+0000071868 00000 n 
+0000072852 00000 n 
+0000073051 00000 n 
+0000073074 00000 n 
+0000074034 00000 n 
+0000073103 00000 n 
+0000073166 00000 n 
+0000074264 00000 n 
+0000075158 00000 n 
+0000075356 00000 n 
+0000076824 00000 n 
+0000075453 00000 n 
+0000075529 00000 n 
+0000077063 00000 n 
+0000078085 00000 n 
+0000078288 00000 n 
+0000086049 00000 n 
+0000078688 00000 n 
+0000078773 00000 n 
+0000086285 00000 n 
+0000087966 00000 n 
+0000088166 00000 n 
+0000089812 00000 n 
+0000088263 00000 n 
+0000088336 00000 n 
+0000090046 00000 n 
+0000091017 00000 n 
+0000091214 00000 n 
+0000094947 00000 n 
+0000091452 00000 n 
+0000091527 00000 n 
+0000095180 00000 n 
+0000096384 00000 n 
+0000104016 00000 n 
+0000096580 00000 n 
+0000104463 00000 n 
+0000104544 00000 n 
 trailer
 << /Size 71 /Root 69 0 R /Info 70 0 R /ID [ <2350CAD05F8A7AF0AA4058486855344F> <2350CAD05F8A7AF0AA4058486855344F> ] >>
 startxref
-103993
+104688
 %%EOF
