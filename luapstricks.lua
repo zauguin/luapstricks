@@ -53,6 +53,15 @@ local regular = 1 - l.S'\0\t\n\r\f %()<>[]{}/'
 local exitmarker = {}
 local lookup
 
+local issued_document_metadata_warning
+local function warn_document_metadata()
+  if issued_document_metadata_warning then return end
+  issued_document_metadata_warning = true
+
+  texio.write_nl"Extended graphic state modifications dropped since LaTeX support is not loaded."
+  texio.write_nl"Insert \\DocumentMetadata{} as first line of your document to solve this issue."
+end
+
 -- local integer = l.S'+-'^-1 * l.R'09'^1 / tonumber
 local real = l.S'+-'^-1 * (l.R'09'^1 * ('.' * l.R'09'^0)^-1 + '.' * l.R'09'^1) * (l.S'Ee' * l.S'+-'^-1 * l.R'09'^1)^-1 / tonumber
 local radix_scanner = setmetatable({}, {__index = function(t, b)
@@ -561,7 +570,7 @@ local ExtGState = setmetatable({}, {__index = pdfdict_gput and function(t, k)
   t[k] = name
   return name
 end or function()
-  texio.write_nl"Extended graphic state modifications dropped since `pdfmanagement-testphase' is not loaded."
+  warn_document_metadata()
   return ''
 end})
 
@@ -589,7 +598,7 @@ local write_shading do
     end
   else
     function write_shading()
-      texio.write_nl"Extended graphic state modifications dropped since `pdfmanagement-testphase' is not loaded."
+      warn_document_metadata()
       return ''
     end
   end
