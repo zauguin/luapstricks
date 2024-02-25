@@ -1,7 +1,7 @@
 %PDF-1.5
 %Ã’¡‘≈ÿ–ƒ∆
 5 0 obj
-<< /Type /Metadata /Subtype /XML /Length 11032 >>      
+<< /Type /Metadata /Subtype /XML /Length 11360 >>      
 stream
 <?xpacket begin="Ôªø" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/">
@@ -70,6 +70,12 @@ stream
          <pdfaProperty:category>internal</pdfaProperty:category>
          <pdfaProperty:description>Part of ISO 14289 standard</pdfaProperty:description>
         </rdf:li>
+        <rdf:li rdf:parseType="Resource">
+         <pdfaProperty:name>rev</pdfaProperty:name>
+         <pdfaProperty:valueType>Integer</pdfaProperty:valueType>
+         <pdfaProperty:category>internal</pdfaProperty:category>
+         <pdfaProperty:description>Revision of ISO 14289 standard</pdfaProperty:description>
+        </rdf:li>
        </rdf:Seq>
       </pdfaSchema:property>
      </rdf:li>
@@ -104,13 +110,13 @@ stream
          <pdfaProperty:name>publicationName</pdfaProperty:name>
          <pdfaProperty:valueType>Text</pdfaProperty:valueType>
          <pdfaProperty:category>external</pdfaProperty:category>
-         <pdfaProperty:description>Publicationname</pdfaProperty:description>
+         <pdfaProperty:description>Publication name</pdfaProperty:description>
         </rdf:li>
         <rdf:li rdf:parseType="Resource">
          <pdfaProperty:name>aggregationType</pdfaProperty:name>
          <pdfaProperty:valueType>Text</pdfaProperty:valueType>
          <pdfaProperty:category>external</pdfaProperty:category>
-         <pdfaProperty:description>Publicationtype</pdfaProperty:description>
+         <pdfaProperty:description>Publication type</pdfaProperty:description>
         </rdf:li>
         <rdf:li rdf:parseType="Resource">
          <pdfaProperty:name>bookEdition</pdfaProperty:name>
@@ -152,7 +158,7 @@ stream
          <pdfaProperty:name>isbn</pdfaProperty:name>
          <pdfaProperty:valueType>Text</pdfaProperty:valueType>
          <pdfaProperty:category>external</pdfaProperty:category>
-         <pdfaProperty:description>ISBNforthepublicationinwhichthedocumentwaspublished</pdfaProperty:description>
+         <pdfaProperty:description>ISBN for the publication in which the document was published</pdfaProperty:description>
         </rdf:li>
         <rdf:li rdf:parseType="Resource">
          <pdfaProperty:name>doi</pdfaProperty:name>
@@ -182,7 +188,7 @@ stream
          <pdfaProperty:name>subtitle</pdfaProperty:name>
          <pdfaProperty:valueType>Text</pdfaProperty:valueType>
          <pdfaProperty:category>external</pdfaProperty:category>
-         <pdfaProperty:description>Document'ssubtitle</pdfaProperty:description>
+         <pdfaProperty:description>Document's subtitle</pdfaProperty:description>
         </rdf:li>
        </rdf:Seq>
       </pdfaSchema:property>
@@ -203,15 +209,15 @@ stream
    </dc:language>
    <dc:date>
     <rdf:Seq>
-     <rdf:li>2001-01-01T20:59:59-00:00</rdf:li>
+     <rdf:li>2016-05-20T09:00:00Z</rdf:li>
     </rdf:Seq>
    </dc:date>
    <dc:format>application/pdf</dc:format>
    <dc:source>arrows.tex</dc:source>
    <xmp:CreatorTool>LaTeX</xmp:CreatorTool>
-   <xmp:CreateDate>2001-01-01T20:59:59-00:00</xmp:CreateDate>
-   <xmp:ModifyDate>2001-01-01T20:59:59-00:00</xmp:ModifyDate>
-   <xmp:MetadataDate>2001-01-01T20:59:59-00:00</xmp:MetadataDate>
+   <xmp:CreateDate>2016-05-20T09:00:00Z</xmp:CreateDate>
+   <xmp:ModifyDate>2016-05-20T09:00:00Z</xmp:ModifyDate>
+   <xmp:MetadataDate>2016-05-20T09:00:00Z</xmp:MetadataDate>
    <xmpMM:DocumentID>uuid:ea2d5ea2-8af3-4632-8bef-c6fb34db4e1d</xmpMM:DocumentID>
    <xmpMM:InstanceID>uuid:0a57c455-157a-4141-8c19-6237d832fc80</xmpMM:InstanceID>
    <prism:complianceProfile>three</prism:complianceProfile>
@@ -1845,52 +1851,52 @@ endobj
 << /Type /Catalog /Pages 13 0 R /Lang (en-US)/Metadata 5 0 R >>
 endobj
 39 0 obj
-<< /Producer (LuaTeX)/Creator (TeX)/CreationDate (D:20010101205959-00'00')/ModDate (D:20010101205959-00'00') /Trapped /False >>
+<< /Producer (LuaTeX)/Creator (TeX)/CreationDate (D:20160520090000Z)/ModDate (D:20160520090000Z) /Trapped /False >>
 endobj
 xref
 0 40
 0000000002 65535 f 
-0000039768 00000 n 
+0000040096 00000 n 
 0000000003 00000 f 
 0000000004 00000 f 
 0000000000 00000 f 
 0000000020 00000 n 
-0000039647 00000 n 
-0000039533 00000 n 
-0000011141 00000 n 
-0000063616 00000 n 
-0000059582 00000 n 
-0000050622 00000 n 
-0000042049 00000 n 
-0000063973 00000 n 
-0000039858 00000 n 
-0000040987 00000 n 
-0000039928 00000 n 
-0000040004 00000 n 
-0000041226 00000 n 
-0000042206 00000 n 
-0000042409 00000 n 
-0000048989 00000 n 
-0000042713 00000 n 
-0000042785 00000 n 
-0000049228 00000 n 
-0000050781 00000 n 
-0000050986 00000 n 
-0000058028 00000 n 
-0000051239 00000 n 
-0000051598 00000 n 
-0000058269 00000 n 
-0000059742 00000 n 
-0000059948 00000 n 
-0000062433 00000 n 
-0000060087 00000 n 
-0000060159 00000 n 
-0000062671 00000 n 
-0000063771 00000 n 
-0000064034 00000 n 
-0000064114 00000 n 
+0000039975 00000 n 
+0000039861 00000 n 
+0000011469 00000 n 
+0000063944 00000 n 
+0000059910 00000 n 
+0000050950 00000 n 
+0000042377 00000 n 
+0000064301 00000 n 
+0000040186 00000 n 
+0000041315 00000 n 
+0000040256 00000 n 
+0000040332 00000 n 
+0000041554 00000 n 
+0000042534 00000 n 
+0000042737 00000 n 
+0000049317 00000 n 
+0000043041 00000 n 
+0000043113 00000 n 
+0000049556 00000 n 
+0000051109 00000 n 
+0000051314 00000 n 
+0000058356 00000 n 
+0000051567 00000 n 
+0000051926 00000 n 
+0000058597 00000 n 
+0000060070 00000 n 
+0000060276 00000 n 
+0000062761 00000 n 
+0000060415 00000 n 
+0000060487 00000 n 
+0000062999 00000 n 
+0000064099 00000 n 
+0000064362 00000 n 
+0000064442 00000 n 
 trailer
 << /Size 40 /Root 38 0 R /Info 39 0 R /ID [ <2350CAD05F8A7AF0AA4058486855344F> <2350CAD05F8A7AF0AA4058486855344F> ] >>
 startxref
-64258
+64574
 %%EOF
