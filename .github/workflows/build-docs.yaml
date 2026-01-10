@@ -15,10 +15,10 @@ jobs:
       cache_key: ${{ steps.texlive.outputs.cache_key }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Install TeX Live
         id: texlive
-        uses: zauguin/install-texlive@experiment
+        uses: zauguin/install-texlive@v4
         with:
           tlcontrib: "true"
           package_file: .github/tl_packages
@@ -116,11 +116,11 @@ jobs:
     steps:
       - run: sudo apt update && sudo apt -y install moreutils ghostscript
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           path: luapstricks
       - name: Restore TeX Live from cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: ~/texlive
           key: ${{ needs.texlive-cache.outputs.cache_key }}
@@ -142,7 +142,7 @@ jobs:
         working-directory: document_dir
         run: "latexmk -pdflua ${{ matrix.document }}.${{ matrix.extension || 'tex' }}"
       - name: Save resulting document 
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: documentation
           retention-days: 1
@@ -154,13 +154,13 @@ jobs:
     if: github.ref_type == 'branch'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           ref: refs/heads/gh-pages
       - name: Delete old files in target directory
         run: rm -Rf "static/version/${{ github.ref_name }}"
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v7
         with:
           name: documentation
           path: static/version/${{ github.ref_name }}/doc
@@ -184,7 +184,7 @@ jobs:
     if: github.ref_type == 'tag'
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v7
         with:
           name: documentation
       - name: Create GitHub release
