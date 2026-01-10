@@ -1,8 +1,6 @@
-\RequirePackage{pdfmanagement-testphase}
-\DeclareDocumentMetadata{uncompress}
-
-\documentclass{standalone}
+\DocumentMetadata{uncompress}
 \input regression-test
+\documentclass{standalone}
 \usepackage{pstricks}
 \pagestyle{empty}
 \begin{document}

@@ -1,7 +1,6 @@
-\RequirePackage{pdfmanagement-testphase}
-\DeclareDocumentMetadata{uncompress}
-\documentclass{article}
+\DocumentMetadata{uncompress}
 \input regression-test
+\documentclass{article}
 \usepackage{pstricks}
 \usepackage{multido}
 \pagestyle{empty}
