@@ -17,7 +17,7 @@ tdslocations = {
 
 uploadconfig = {
   pkg = module,
-  version = "v0.10",
+  version = "v0.11",
   author = "Marcel Krüger",
   license = "lppl1.3",
   summary = "A PSTricks backend for LuaLaTeX",
