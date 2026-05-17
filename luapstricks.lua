@@ -1669,7 +1669,7 @@ systemdict = {kind = 'dict', value = {
   end,
 
   -- The following two are GhostScript extensions
-  max = function()
+  ['.max'] = function()
     local b, arg2 = pop()
     local a, arg1 = pop(arg2)
     local ta, tb = type(a), type(b)
@@ -1693,7 +1693,7 @@ systemdict = {kind = 'dict', value = {
     end
     push(a > b and a or b)
   end,
-  min = function()
+  ['.min'] = function()
     local b, arg2 = pop()
     local a, arg1 = pop(arg2)
     local ta, tb = type(a), type(b)
@@ -3913,6 +3913,24 @@ systemdict = {kind = 'dict', value = {
     end)
   end,
 }}
+
+-- max and min are Ghostscript extensions which are defined indirectly in terms of .max/.min
+-- to avoid compatibility issue if they were affected by `bind`.
+systemdict.value.max = {
+  kind = 'executable',
+  value = {
+    kind = 'array',
+    value = { systemdict.value['.max'] }
+  }
+}
+systemdict.value.min = {
+  kind = 'executable',
+  value = {
+    kind = 'array',
+    value = { systemdict.value['.min'] }
+  }
+}
+
 systemdict.value.systemdict = systemdict
 dictionary_stack = {systemdict, globaldict, userdict, userdict.value.TeXDict}
 -- local execution_stack = {} -- Currently not implemented
